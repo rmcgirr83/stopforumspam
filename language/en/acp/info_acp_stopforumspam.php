@@ -54,5 +54,3 @@ $lang = array_merge($lang, array(
 	'LOG_SFS_SUBMITTED'		=> '<strong>User added to the Stop Forum Spam database</strong>:<br />Username: %1$s<br /> IP: %2$s<br />Email: %3$s',
 	'LOG_SFS_DOWN'			=> '<strong>Stop Forum Spam is down</strong>',
 ));
-
-?>

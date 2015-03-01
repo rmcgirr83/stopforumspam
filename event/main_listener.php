@@ -74,7 +74,7 @@ class main_listener implements EventSubscriberInterface
 		*/
 		if (!empty($event['data']['username']) && !empty($event['data']['email']) && !sizeof($array))
 		{
-			$check = $this->stopforumspam_check($event['data']['username'], $event['data']['email'], $this->user->ip);
+			$check = $this->stopforumspam_check($event['data']['username'], $this->user->ip, $event['data']['email']);
 
 			if ($check)
 			{
@@ -90,9 +90,9 @@ class main_listener implements EventSubscriberInterface
 		 * only check when all errors have cleared
 		 * do not want the admin message area to fill up
 		*/
-		elseif (!empty($event['post_data']['username']) && !sizeof($array))
+		else if (!empty($event['post_data']['username']) && !sizeof($array))
 		{
-			$check = $this->stopforumspam_check($event['post_data']['username'], false, $this->user->ip);
+			$check = $this->stopforumspam_check($event['post_data']['username'], $this->user->ip, false);
 
 			if ($check)
 			{
@@ -130,7 +130,7 @@ class main_listener implements EventSubscriberInterface
 	 * @param	$ip			the users ip
 	 * @return 	bool		true if found, false if not
 	*/
-	private function stopforumspam_check($username, $email = false, $ip)
+	private function stopforumspam_check($username, $ip, $email = false)
 	{
 		// we need to urlencode for spaces
 		$username = urlencode($username);
@@ -195,14 +195,14 @@ class main_listener implements EventSubscriberInterface
 					if ($response === false && $sfs_log_message)
 					{
 						$message = 'LOG_SFS_ERROR_MESSAGE_ADMIN_REG';
-						$this->log_message('admin', $username, $email, $ip, $message);
+						$this->log_message('admin', $username, $ip, $message, $email);
 					}
 					else
 					{
 						if ($sfs_log_message)
 						{
 							$message = 'LOG_SFS_SUBMITTED';
-							$this->log_message('user', $username, $email, $ip, $message);
+							$this->log_message('user', $username, $ip, $message, $email);
 						}
 					}
 				}
@@ -211,7 +211,7 @@ class main_listener implements EventSubscriberInterface
 					if ($sfs_log_message)
 					{
 						$message = 'LOG_SFS_MESSAGE';
-						$this->log_message('user', $username, $email, $ip, $message);
+						$this->log_message('user', $username, $ip, $message, $email);
 					}
 				}
 				//user is a spammer
@@ -224,14 +224,14 @@ class main_listener implements EventSubscriberInterface
 		}
 		else
 		{
-			$this->log_message('admin', $username, $email, $ip, 'LOG_SFS_DOWN');
+			$this->log_message('admin', $username, $ip, 'LOG_SFS_DOWN', $email);
 
 			return 'sfs_down';
 		}
 	}
 
 	// log admin message
-	private function log_message($mode, $username, $email = false, $ip, $message)
+	private function log_message($mode, $username, $ip, $message, $email = false)
 	{
 		$sfs_ip_check = sprintf($this->user->lang['SFS_IP_STOPPED'], $ip);
 		$sfs_username_check = sprintf($this->user->lang['SFS_USERNAME_STOPPED'], $username);
