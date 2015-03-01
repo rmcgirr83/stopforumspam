@@ -87,10 +87,10 @@ class main_listener implements EventSubscriberInterface
 			}
 		}
 		/* when posting..there is no $event['data'], it is $event['post_data']
-		 * only check when all errors have cleared
+		 * only check when all errors have cleared and only for guests
 		 * do not want the admin message area to fill up
 		*/
-		else if (!empty($event['post_data']['username']) && !sizeof($array))
+		else if (!empty($event['post_data']['username']) && $this->user->data['user_id'] == ANONYMOUS && !sizeof($array))
 		{
 			$check = $this->stopforumspam_check($event['post_data']['username'], $this->user->ip, false);
 
