@@ -23,7 +23,7 @@ class version_100 extends \phpbb\db\migration\migration
 
 	static public function depends_on()
 	{
-		return array('\phpbb\db\migration\data\v31x\v313');
+		return array('\phpbb\db\migration\data\v31x\v314rc1');
 	}
 
 	public function update_data()
