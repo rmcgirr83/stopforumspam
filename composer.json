@@ -1,0 +1,24 @@
+{
+	"name": "rmcgirr83/stopforumspam",
+	"type": "phpbb-extension",
+	"description": "Queries the stop forum spam database on registration and posting.  Extension settings are found under the user registration settings of the forum.",
+	"homepage": "https://github.com/rmcgirr83/phpbb-3.1-stopforumspam",
+	"version": "1.0.0",
+	"time": "2015-02-28",
+	"license": "GPL-2.0",
+	"authors": [
+		{
+			"name": "Rich McGirr",
+			"role": "Lead Developer"
+		}
+	],
+	"require": {
+		"php": ">=5.3"
+	},
+	"extra": {
+		"display-name": "Stop Forum Spam",
+		"soft-require": {
+			"phpbb/phpbb": ">=3.1.4-RC1,<3.2.*@dev"
+		}
+	}
+}
