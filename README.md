@@ -18,6 +18,4 @@ git clone https://github.com/RMcGirr83/phpBB-3.1-stopforumspam.git ext/rmcgirr83
 ```
 
 ### 2. activate
-Go to admin panel -> tab customise -> Manage extensions -> enable Stop Forum Spam
-
-Within the Admin panel visit the User Registration settings and within Extensions tab and choose the settings for the extension.
+Within the Admin panel visit the User Registration settings and choose the settings for the extension.
