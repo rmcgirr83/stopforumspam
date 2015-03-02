@@ -83,7 +83,6 @@ class main_listener implements EventSubscriberInterface
 					return;
 				}
 				$array[] = $this->get_message($check);
-				$event['error'] = $array;
 			}
 		}
 		/* when posting..there is no $event['data'], it is $event['post_data']
@@ -101,9 +100,9 @@ class main_listener implements EventSubscriberInterface
 					return;
 				}
 				$array[] = $this->get_message($check);
-				$event['error'] = $array;
 			}
 		}
+		$event['error'] = $array;
 	}
 
 	/*
@@ -197,22 +196,16 @@ class main_listener implements EventSubscriberInterface
 						$message = 'LOG_SFS_ERROR_MESSAGE_ADMIN_REG';
 						$this->log_message('admin', $username, $ip, $message, $email);
 					}
-					else
+					else if ($sfs_log_message)
 					{
-						if ($sfs_log_message)
-						{
-							$message = 'LOG_SFS_SUBMITTED';
-							$this->log_message('user', $username, $ip, $message, $email);
-						}
-					}
-				}
-				else
-				{
-					if ($sfs_log_message)
-					{
-						$message = 'LOG_SFS_MESSAGE';
+						$message = 'LOG_SFS_SUBMITTED';
 						$this->log_message('user', $username, $ip, $message, $email);
 					}
+				}
+				else if ($sfs_log_message)
+				{
+					$message = 'LOG_SFS_MESSAGE';
+					$this->log_message('user', $username, $ip, $message, $email);
 				}
 				//user is a spammer
 				return true;
@@ -230,7 +223,7 @@ class main_listener implements EventSubscriberInterface
 		}
 	}
 
-	// log admin message
+	// log messages
 	private function log_message($mode, $username, $ip, $message, $email = false)
 	{
 		$sfs_ip_check = sprintf($this->user->lang['SFS_IP_STOPPED'], $ip);
