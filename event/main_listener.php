@@ -78,7 +78,7 @@ class main_listener implements EventSubscriberInterface
 
 			if ($check)
 			{
-				if ($this->config['sfs_down'] && $check != 'sfs_down')
+				if ($this->config['sfs_down'] && $check === 'sfs_down')
 				{
 					return;
 				}
@@ -95,7 +95,7 @@ class main_listener implements EventSubscriberInterface
 
 			if ($check)
 			{
-				if ($this->config['sfs_down'] && $check == 'sfs_down')
+				if ($this->config['sfs_down'] && $check === 'sfs_down')
 				{
 					return;
 				}
@@ -219,7 +219,14 @@ class main_listener implements EventSubscriberInterface
 		{
 			if ($sfs_log_message)
 			{
-				$this->log_message('admin', $username, $ip, 'LOG_SFS_DOWN', $email);
+				if ($this->config['sfs_down'])
+				{
+					$this->log_message('admin', $username, $ip, 'LOG_SFS_DOWN_USER_ALLOWED', $email);
+				}
+				else
+				{
+					$this->log_message('admin', $username, $ip, 'LOG_SFS_DOWN', $email);
+				}
 			}
 			return 'sfs_down';
 		}
