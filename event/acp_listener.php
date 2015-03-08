@@ -34,10 +34,11 @@ class acp_listener implements EventSubscriberInterface
 			$display_vars = $event['display_vars'];
 
 			// include our custom function
-			include($phpbb_root_path . '/ext/rmcgirr83/stopforumspam/core/functions_stopforumspam.' . $phpEx);
+			include($phpbb_root_path . 'ext/rmcgirr83/stopforumspam/core/functions_stopforumspam.' . $phpEx);
 
 			// Define config vars
 			$config_vars = array(
+			'legend'	=> 'SFS_CONTROL',
 				'allow_sfs' 	=> array('lang' => 'SFS_ENABLED', 'validate' => 'bool', 'type' => 'custom', 'function' => 'allow_sfs', 'explain' => true),
 				'sfs_threshold' => array('lang' => 'SFS_THRESHOLD_SCORE', 'validate' => 'int:1:99', 'type' => 'number:1:99', 'explain' => true),
 				'sfs_down'		=> array('lang' => 'SFS_DOWN', 'validate' => 'bool', 'type' => 'radio:yes_no', 'explain' => true),

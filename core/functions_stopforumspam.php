@@ -6,7 +6,6 @@
 * @license http://opensource.org/licenses/gpl-license.php GNU Public License
 *
 */
-
 /**
 * @ignore
 */
@@ -20,7 +19,7 @@ function allow_sfs($key, $value)
 	global $user, $config;
 
 	$radio_ary = array(1 => 'YES', 0 => 'NO');
-	
+
 	// Determine if cURL is enabled on the server
 	$curl = false;
 	if (function_exists('curl_init'))

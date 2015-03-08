@@ -35,12 +35,13 @@ if (empty($lang) || !is_array($lang))
 $lang = array_merge($lang, array(
 
 	// ACP entries
+	'SFS_CONTROL'			=> 'Stop Forum Spam',
 	'SFS_ENABLED'			=> 'Enable Stop forum Spam',
-	'SFS_ENABLED_EXPLAIN'	=> 'Enable or disable the extension.',
+	'SFS_ENABLED_EXPLAIN'	=> 'Enable or disable the extension.  This applies to both user registration and guest posts.',
 	'SFS_THRESHOLD_SCORE'	=> 'Stop Forum Spam Threshold',
 	'SFS_THRESHOLD_SCORE_EXPLAIN'	=> 'The extension will check against a threshold (eg, the number of times a user name, email or IP address is found within the stop forum database). You can input any number between 1 and 99.  The lower the number the greater the possibility of a false positive.',
 	'SFS_LOG_MESSAGE'			=> 'Log a message',
-	'SFS_LOG_MESSAGE_EXPLAIN'	=> 'If set as yes messages will be logged in the ACP in either the admin or user logs stating who has been blocked.',
+	'SFS_LOG_MESSAGE_EXPLAIN'	=> 'If set as yes messages will be logged in the ACP in either the admin or user logs stating the action done.',
 	'SFS_DOWN'				=> 'Allow if Stop Forum Spam is Down',
 	'SFS_DOWN_EXPLAIN'		=> 'Should registration/posting go through if the stop forum spam website is down',
 	'SFS_API_KEY'			=> 'Stop Forum Spam API Key',
