@@ -272,5 +272,10 @@ class main_listener implements EventSubscriberInterface
 
 			return $contents;
 		}
+
+		$this->log->add('admin', $this->user->data['user_id'], $ip, 'LOG_SFS_NEED_CURL', time());
+
+		return false;
+
 	}
 }

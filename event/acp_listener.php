@@ -26,14 +26,19 @@ class acp_listener implements EventSubscriberInterface
 
 	public function add_options($event)
 	{
+		global $phpbb_root_path, $phpEx;
+
 		if ($event['mode'] == 'registration')
 		{
 			// Store display_vars event in a local variable
 			$display_vars = $event['display_vars'];
 
+			// include our custom function
+			include($phpbb_root_path . '/ext/rmcgirr83/stopforumspam/core/functions_stopforumspam.' . $phpEx);
+
 			// Define config vars
 			$config_vars = array(
-				'allow_sfs' 	=> array('lang' => 'SFS_ENABLED', 'validate' => 'bool', 'type' => 'radio:yes_no', 'explain' => true),
+				'allow_sfs' 	=> array('lang' => 'SFS_ENABLED', 'validate' => 'bool', 'type' => 'custom', 'function' => 'allow_sfs', 'explain' => true),
 				'sfs_threshold' => array('lang' => 'SFS_THRESHOLD_SCORE', 'validate' => 'int:1:99', 'type' => 'number:1:99', 'explain' => true),
 				'sfs_down'		=> array('lang' => 'SFS_DOWN', 'validate' => 'bool', 'type' => 'radio:yes_no', 'explain' => true),
 				'sfs_log_message' => array('lang' => 'SFS_LOG_MESSAGE', 'validate' => 'bool', 'type' => 'radio:yes_no', 'explain' => true),
