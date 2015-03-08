@@ -26,20 +26,15 @@ class acp_listener implements EventSubscriberInterface
 
 	public function add_options($event)
 	{
-		global $phpbb_root_path, $phpEx;
-
 		if ($event['mode'] == 'registration')
 		{
 			// Store display_vars event in a local variable
 			$display_vars = $event['display_vars'];
 
-			// include our custom function
-			include($phpbb_root_path . 'ext/rmcgirr83/stopforumspam/core/functions_stopforumspam.' . $phpEx);
-
 			// Define config vars
 			$config_vars = array(
 			'legend'	=> 'SFS_CONTROL',
-				'allow_sfs' 	=> array('lang' => 'SFS_ENABLED', 'validate' => 'bool', 'type' => 'custom', 'function' => 'allow_sfs', 'explain' => true),
+				'allow_sfs' 	=> array('lang' => 'SFS_ENABLED', 'validate' => 'bool', 'type' => 'custom', 'function' => array($this, 'allow_sfs'), 'explain' => true),
 				'sfs_threshold' => array('lang' => 'SFS_THRESHOLD_SCORE', 'validate' => 'int:1:99', 'type' => 'number:1:99', 'explain' => true),
 				'sfs_down'		=> array('lang' => 'SFS_DOWN', 'validate' => 'bool', 'type' => 'radio:yes_no', 'explain' => true),
 				'sfs_log_message' => array('lang' => 'SFS_LOG_MESSAGE', 'validate' => 'bool', 'type' => 'radio:yes_no', 'explain' => true),
@@ -51,5 +46,33 @@ class acp_listener implements EventSubscriberInterface
 			// Update the display_vars  event with the new array
 			$event['display_vars'] = array('title' => $display_vars['title'], 'vars' => $display_vars['vars']);
 		}
+	}
+
+	public function allow_sfs($key, $value)
+	{
+		global $user, $config;
+
+		$radio_ary = array(1 => 'YES', 0 => 'NO');
+		// Determine if cURL is enabled on the server
+		$curl = false;
+		if (function_exists('curl_init'))
+		{
+			$curl = true;
+		}
+		// if false...turn the extension off
+		if (!$curl)
+		{
+			$config->set('allow_sfs', 0);
+		}
+		$key = ($curl === false) ? 0 : $key;
+		$message = ($curl === false) ? 'LOG_SFS_NEED_CURL' : false;
+
+		// Let's do some friendly HTML injection if we want to disable the
+		// form field because h_radio() has no pretty way of doing so
+
+		$field_name = 'config[allow_sfs]' . ($message === 'LOG_SFS_NEED_CURL' ? '" disabled="disabled' : '');
+
+		return h_radio($field_name, $radio_ary, $key) .
+		($message !== false ? '<br /><span>' . $user->lang($message) . '</span>' : '');
 	}
 }
