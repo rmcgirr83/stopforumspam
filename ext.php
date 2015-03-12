@@ -12,7 +12,7 @@
 namespace rmcgirr83\stopforumspam;
 
 /**
-* Extension class for board announcements
+* Extension class for stop forum spam
 */
 
 class ext extends \phpbb\extension\base
