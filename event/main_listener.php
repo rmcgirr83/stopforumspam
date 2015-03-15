@@ -27,25 +27,25 @@ class main_listener implements EventSubscriberInterface
 	/** @var \phpbb\log\log */
 	protected $log;
 
+	/** @var \phpbb\request\request */
+	protected $request;
+
+	/** @var \phpbb\template\template */
+	protected $template;
+
 	/** @var string phpBB root path */
 	protected $phpbb_root_path;
 
 	/** @var string phpEx */
 	protected $php_ext;
-	/**
-	* Constructor
-	* NOTE: The parameters of this method must match in order and type with
-	* the dependencies defined in the services.yml file for this service.
-	*
-	* @param \phpbb\config	$config		Config object
-	* @param \phpbb\user		$user		User object
-	* @param \phpbb\controller\helper		$helper				Controller helper object
-	*/
-	public function __construct(\phpbb\config\config $config, \phpbb\user $user, \phpbb\log\log $log, $phpbb_root_path, $php_ext)
+
+	public function __construct(\phpbb\config\config $config, \phpbb\user $user, \phpbb\log\log $log, \phpbb\request\request $request, \phpbb\template\template $template, $phpbb_root_path, $php_ext)
 	{
 		$this->config = $config;
 		$this->user = $user;
 		$this->log = $log;
+		$this->request = $request;
+		$this->template = $template;
 		$this->root_path = $phpbb_root_path;
 		$this->php_ext = $php_ext;
 	}
@@ -53,12 +53,14 @@ class main_listener implements EventSubscriberInterface
 	static public function getSubscribedEvents()
 	{
 		return array(
-			'core.ucp_register_data_after'			=> 'user_sfs_validate',
-			'core.posting_modify_submission_errors'	=> 'user_sfs_validate',
+			'core.ucp_register_data_after'			=> 'user_sfs_validate_registration',
+			'core.posting_modify_template_vars'		=> 'poster_data_email',
+			'core.posting_modify_message_text'		=> 'poster_modify_message_text',
+			'core.posting_modify_submission_errors'	=> 'user_sfs_validate_posting',
 		);
 	}
 
-	public function user_sfs_validate($event)
+	public function user_sfs_validate_registration($event)
 	{
 		if (empty($this->config['allow_sfs']))
 		{
@@ -72,7 +74,7 @@ class main_listener implements EventSubscriberInterface
 		/* On registration and only when all errors have cleared
 		 * do not want the admin message area to fill up
 		*/
-		if (!empty($event['data']['username']) && !empty($event['data']['email']) && !sizeof($array))
+		if (!sizeof($array))
 		{
 			$check = $this->stopforumspam_check($event['data']['username'], $this->user->ip, $event['data']['email']);
 
@@ -85,13 +87,64 @@ class main_listener implements EventSubscriberInterface
 				$array[] = $this->get_message($check);
 			}
 		}
-		/* when posting..there is no $event['data'], it is $event['post_data']
-		 * only check when all errors have cleared and only for guests
-		 * do not want the admin message area to fill up
+		$event['error'] = $array;
+	}
+
+	/*
+	* inject email for anonymous postings
+	* it is strictly used as a check against SFS
 		*/
-		else if (!empty($event['post_data']['username']) && $this->user->data['user_id'] == ANONYMOUS && !sizeof($array))
+	public function poster_data_email($event)
 		{
-			$check = $this->stopforumspam_check($event['post_data']['username'], $this->user->ip, false);
+		if ($this->user->data['user_id'] != ANONYMOUS || empty($this->config['allow_sfs']))
+		{
+			return;
+		}
+
+		// Output the data vars to the template
+		$this->template->assign_vars(array(
+				'SFS'	=> true,
+				'EMAIL'	=> $this->request->variable('email', ''),
+		));
+	}
+
+	public function poster_modify_message_text($event)
+	{
+		$event['post_data'] = array_merge($event['post_data'], array(
+			'email'	=> strtolower($this->request->variable('email', '')),
+		));
+	}
+
+	public function user_sfs_validate_posting($event)
+	{
+		if (empty($this->config['allow_sfs']))
+		{
+			return;
+		}
+
+		$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
+		$this->user->add_lang('ucp');
+
+		$array = $event['error'];
+
+		if ($this->user->data['user_id'] == ANONYMOUS)
+		{
+			// ensure email is populated on posting
+			$error = $this->validate_email($event['post_data']['email']);
+			if ($error)
+			{
+				$array[] = $this->user->lang[$error . '_EMAIL'];
+			}
+			// I just hate empty usernames for guest posting
+			$error = $this->validate_username($event['post_data']['username']);
+			if (sizeof($error))
+			{
+				$array = $error;
+			}
+
+			if (!sizeof($array))
+			{
+				$check = $this->stopforumspam_check($event['post_data']['username'], $this->user->ip, $event['post_data']['email']);
 
 			if ($check)
 			{
@@ -101,6 +154,7 @@ class main_listener implements EventSubscriberInterface
 				}
 				$array[] = $this->get_message($check);
 			}
+		}
 		}
 		$event['error'] = $array;
 	}
@@ -125,11 +179,11 @@ class main_listener implements EventSubscriberInterface
 	/*
 	 * stopforumspam_check
 	 * @param 	$username 	username from the forum inputs
-	 * @param	$email		email from the forum inputs
 	 * @param	$ip			the users ip
+	 * @param	$email		email from the forum inputs
 	 * @return 	bool		true if found, false if not
 	*/
-	private function stopforumspam_check($username, $ip, $email = false)
+	private function stopforumspam_check($username, $ip, $email)
 	{
 		// we need to urlencode for spaces
 		$username = urlencode($username);
@@ -144,15 +198,8 @@ class main_listener implements EventSubscriberInterface
 		$sfs_threshold = !empty($this->config['sfs_threshold']) ? $this->config['sfs_threshold'] : 0;
 
 		// Query the SFS database and pull the data into script
-		// email is only used during registration..posting username and ip
-		if ($email)
-		{
 			$xmlUrl = 'http://www.stopforumspam.com/api?username='.$username.'&ip='.$ip.'&email='.$email.'&f=xmldom';
-		}
-		else
-		{
-			$xmlUrl = 'http://www.stopforumspam.com/api?username='.$username.'&ip='.$ip.'&f=xmldom';
-		}
+
 		$xmlStr = $this->get_file($xmlUrl);
 
 		// Check if user is a spammer, but only if we successfully got the SFS data
@@ -165,7 +212,8 @@ class main_listener implements EventSubscriberInterface
 			$ck_email = $xmlObj->email->frequency;
 			$ck_ip = $xmlObj->ip->frequency;
 
-			// Let's not ban a registrant with a common IP address, who is otherwise clean
+			// Let's not ban a registrant/poster with a common IP address, who is otherwise clean
+			// not sure of keeping this or not...we'll see
 			if ($ck_username + $ck_email == 0)
 			{
 				$ck_ip = 0;
@@ -237,7 +285,7 @@ class main_listener implements EventSubscriberInterface
 	{
 		$sfs_ip_check = sprintf($this->user->lang['SFS_IP_STOPPED'], $ip);
 		$sfs_username_check = sprintf($this->user->lang['SFS_USERNAME_STOPPED'], $username);
-		$sfs_email_check = !empty($email) ? sprintf($this->user->lang['SFS_EMAIL_STOPPED'], $email) : $this->user->lang['SFS_POSTING'];
+		$sfs_email_check = sprintf($this->user->lang['SFS_EMAIL_STOPPED'], $email);
 
 		if ($mode === 'admin')
 		{
@@ -276,6 +324,40 @@ class main_listener implements EventSubscriberInterface
 		$this->log->add('admin', $this->user->data['user_id'], $ip, 'LOG_SFS_NEED_CURL', time());
 
 		return false;
+	}
 
+	// validate email on posting
+	private function validate_email($email)
+	{
+		$error = array();
+		if (!function_exists('phpbb_validate_email'))
+		{
+			include($this->root_path . 'includes/functions_user.' . $this->php_ext);
+		}
+		$error = phpbb_validate_email($email);
+
+		return $error;
+	}
+
+	// validate username on posting
+	private function validate_username($username)
+	{
+		$error = array();
+		if (!function_exists('validate_string'))
+		{
+			include($this->root_path . 'includes/functions_user.' . $this->php_ext);
+		}
+		if (($result = validate_username($username)) !== false)
+		{
+			$error[] = $this->user->lang[$result . '_USERNAME'];
+		}
+
+		if (($result = validate_string($username, false, $this->config['min_name_chars'], $this->config['max_name_chars'])) !== false)
+		{
+			$min_max_amount = ($result == 'TOO_SHORT') ? $this->config['min_name_chars'] : $this->config['max_name_chars'];
+			$error[] = $this->user->lang('FIELD_' . $result, $min_max_amount, $this->user->lang['USERNAME']);
+		}
+
+		return $error;
 	}
 }
