@@ -62,6 +62,10 @@ class main_listener implements EventSubscriberInterface
 
 	public function user_sfs_validate_registration($event)
 	{
+		if (!$this->config['allow_sfs'])
+		{
+			return;
+		}
 		$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
 
 		$array = $event['error'];
@@ -71,7 +75,7 @@ class main_listener implements EventSubscriberInterface
 		*/
 		if (!sizeof($array))
 		{
-			
+
 			$check = $this->stopforumspam_check($event['data']['username'], $this->user->ip, $event['data']['email']);
 
 			if ($check)
@@ -92,16 +96,14 @@ class main_listener implements EventSubscriberInterface
 	*/
 	public function poster_data_email($event)
 	{
-		if ($this->user->data['user_id'] != ANONYMOUS)
+		if ($this->user->data['user_id'] == ANONYMOUS && $this->config['allow_sfs'])
 		{
-			return;
+			// Output the data vars to the template
+			$this->template->assign_vars(array(
+					'SFS'	=> true,
+					'EMAIL'	=> $this->request->variable('email', ''),
+			));
 		}
-
-		// Output the data vars to the template
-		$this->template->assign_vars(array(
-				'SFS'	=> true,
-				'EMAIL'	=> $this->request->variable('email', ''),
-		));
 	}
 
 	public function poster_modify_message_text($event)
@@ -113,14 +115,13 @@ class main_listener implements EventSubscriberInterface
 
 	public function user_sfs_validate_posting($event)
 	{
-
-		$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
-		$this->user->add_lang('ucp');
-
 		$array = $event['error'];
 
-		if ($this->user->data['user_id'] == ANONYMOUS)
+		if ($this->user->data['user_id'] == ANONYMOUS && $this->config['allow_sfs'])
 		{
+			$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
+			$this->user->add_lang('ucp');
+
 			// ensure email is populated on posting
 			$error = $this->validate_email($event['post_data']['email']);
 			if ($error)
@@ -187,7 +188,7 @@ class main_listener implements EventSubscriberInterface
 		$sfs_log_message = !empty($this->config['sfs_log_message']) ? $this->config['sfs_log_message'] : false;
 
 		/* Threshold score to reject registration and/or guest posting */
-		$sfs_threshold = !empty($this->config['sfs_threshold']) ? $this->config['sfs_threshold'] : 0;
+		$sfs_threshold = !empty($this->config['sfs_threshold']) ? $this->config['sfs_threshold'] : 1;
 
 		// Query the SFS database and pull the data into script
 		$xmlUrl = 'http://www.stopforumspam.com/api?username='.$username.'&ip='.$ip.'&email='.$email.'&f=xmldom';
