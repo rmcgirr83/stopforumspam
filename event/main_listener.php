@@ -62,11 +62,6 @@ class main_listener implements EventSubscriberInterface
 
 	public function user_sfs_validate_registration($event)
 	{
-		if (empty($this->config['allow_sfs']))
-		{
-			return;
-		}
-
 		$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
 
 		$array = $event['error'];
@@ -76,6 +71,7 @@ class main_listener implements EventSubscriberInterface
 		*/
 		if (!sizeof($array))
 		{
+			
 			$check = $this->stopforumspam_check($event['data']['username'], $this->user->ip, $event['data']['email']);
 
 			if ($check)
@@ -93,10 +89,10 @@ class main_listener implements EventSubscriberInterface
 	/*
 	* inject email for anonymous postings
 	* it is strictly used as a check against SFS
-		*/
+	*/
 	public function poster_data_email($event)
-		{
-		if ($this->user->data['user_id'] != ANONYMOUS || empty($this->config['allow_sfs']))
+	{
+		if ($this->user->data['user_id'] != ANONYMOUS)
 		{
 			return;
 		}
@@ -117,10 +113,6 @@ class main_listener implements EventSubscriberInterface
 
 	public function user_sfs_validate_posting($event)
 	{
-		if (empty($this->config['allow_sfs']))
-		{
-			return;
-		}
 
 		$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
 		$this->user->add_lang('ucp');
@@ -146,15 +138,15 @@ class main_listener implements EventSubscriberInterface
 			{
 				$check = $this->stopforumspam_check($event['post_data']['username'], $this->user->ip, $event['post_data']['email']);
 
-			if ($check)
-			{
-				if ($this->config['sfs_down'] && $check === 'sfs_down')
+				if ($check)
 				{
-					return;
+					if ($this->config['sfs_down'] && $check === 'sfs_down')
+					{
+						return;
+					}
+					$array[] = $this->get_message($check);
 				}
-				$array[] = $this->get_message($check);
 			}
-		}
 		}
 		$event['error'] = $array;
 	}
@@ -198,7 +190,7 @@ class main_listener implements EventSubscriberInterface
 		$sfs_threshold = !empty($this->config['sfs_threshold']) ? $this->config['sfs_threshold'] : 0;
 
 		// Query the SFS database and pull the data into script
-			$xmlUrl = 'http://www.stopforumspam.com/api?username='.$username.'&ip='.$ip.'&email='.$email.'&f=xmldom';
+		$xmlUrl = 'http://www.stopforumspam.com/api?username='.$username.'&ip='.$ip.'&email='.$email.'&f=xmldom';
 
 		$xmlStr = $this->get_file($xmlUrl);
 
@@ -281,7 +273,7 @@ class main_listener implements EventSubscriberInterface
 	}
 
 	// log messages
-	private function log_message($mode, $username, $ip, $message, $email = false)
+	private function log_message($mode, $username, $ip, $message, $email)
 	{
 		$sfs_ip_check = sprintf($this->user->lang['SFS_IP_STOPPED'], $ip);
 		$sfs_username_check = sprintf($this->user->lang['SFS_USERNAME_STOPPED'], $username);
@@ -321,7 +313,7 @@ class main_listener implements EventSubscriberInterface
 			return $contents;
 		}
 
-		$this->log->add('admin', $this->user->data['user_id'], $ip, 'LOG_SFS_NEED_CURL', time());
+		$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_NEED_CURL', time());
 
 		return false;
 	}

@@ -51,6 +51,6 @@ $lang = array_merge($lang, array(
 	'LOG_SFS_ERROR_MESSAGE_ADMIN_REG'	=> '<strong>Stop Forum Spam no response</strong><br />The registration of:<br />Username: %1$s<br />IP: %2$s<br />Email: %3$s<br />was stopped but the extension was not able to add the user to the stop forum spam database',
 	'LOG_SFS_SUBMITTED'		=> '<strong>User added to the Stop Forum Spam database</strong>:<br />Username: %1$s<br />IP: %2$s<br />Email: %3$s',
 	'LOG_SFS_DOWN'			=> '<strong>Stop Forum Spam was down during a registration or a forum post</strong>',
-	'LOG_SFS_DOWN_USER_ALLOWED' => '<strong>Stop Forum Spam was down.</strong>Following user was allowed on the forum:<br />Username: %1$s<br />IP:%2$s<br />Email: %3$s',
+	'LOG_SFS_DOWN_USER_ALLOWED' => '<strong>Stop Forum Spam was down.</strong> Following user was allowed on the forum:<br />Username: %1$s<br />IP:%2$s<br />Email: %3$s',
 	'LOG_SFS_NEED_CURL'		=> 'The stop forum spam extension needs <strong>cURL</strong> to work correctly.  Please speak to your server host to get cURL installed and active.',
 ));

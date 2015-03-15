@@ -38,6 +38,6 @@ $lang = array_merge($lang, array(
 	'SFS_IP_STOPPED'	=> '<a target="_new" title="Check IP at StopForumSpam.com (opens in a new window)" href="http://www.stopforumspam.com/ipcheck/%1$s">%1$s</a>',
 	'SFS_USERNAME_STOPPED'	=> '<a target="_new" title="Check Username at StopForumSpam.com (opens in a new window)" href="http://www.stopforumspam.com/search/?q=%1$s">%1$s</a>',
 	'SFS_EMAIL_STOPPED'	=> '<a target="_new" title="Check Email at StopForumSpam.com (opens in a new window)" href="http://www.stopforumspam.com/search/?q=%1$s">%1$s</a>',
-	'SFS_ERROR_MESSAGE'	=> 'Unfortunately we can not process your registration now due to problems with an external party. You can try again later.',
+	'SFS_ERROR_MESSAGE'	=> 'Unfortunately we can not process your request now due to problems with an external party. You can try again later.',
 	'SFS_POSTING'	=> 'No email, tried making a post',
 ));
