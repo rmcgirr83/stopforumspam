@@ -85,6 +85,8 @@ class main_listener implements EventSubscriberInterface
 					return;
 				}
 				$array[] = $this->get_message($check);
+				// now ban the spammer by IP
+				$this->ban_by_ip($this->user->ip);
 			}
 		}
 		$event['error'] = $array;
@@ -146,6 +148,9 @@ class main_listener implements EventSubscriberInterface
 						return;
 					}
 					$array[] = $this->get_message($check);
+
+					// now ban the spammer by IP
+					$this->ban_by_ip($this->user->ip);
 				}
 			}
 		}
@@ -360,5 +365,17 @@ class main_listener implements EventSubscriberInterface
 		}
 
 		return $error;
+	}
+
+	// ban a nub
+	private function ban_by_ip($ip)
+	{
+		if (!function_exists('user_ban'))
+		{
+			include($this->root_path . 'includes/functions_user.' . $this->php_ext);
+		}
+		user_ban('ip', $ip, 60, 0, false, '', '');
+
+		return;
 	}
 }
