@@ -165,7 +165,15 @@ class main_listener implements EventSubscriberInterface
 		}
 		else
 		{
-			return $this->user->lang('NO_SOUP_FOR_YOU', '<a href="' . append_sid("{$this->root_path}memberlist.$this->php_ext", 'mode=contactadmin') . '">', '</a>');
+			if ($this->config['contact_admin_form_enable'])
+			{
+				$message = $this->user->lang('NO_SOUP_FOR_YOU', '<a href="' . append_sid("{$this->root_path}memberlist.$this->php_ext", 'mode=contactadmin') . '">', '</a>');
+			}
+			else
+			{
+				$message = $this->user->lang('NO_SOUP_FOR_YOU_NO_CONTACT');
+			}
+			return $message;
 		}
 	}
 
