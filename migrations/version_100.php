@@ -32,6 +32,7 @@ class version_100 extends \phpbb\db\migration\migration
 			array('config.add', array('sfs_version', '1.0.0')),
 			array('config.add', array('allow_sfs', 1)),
 			array('config.add', array('sfs_threshold', 5)),
+			array('config.add', array('sfs_ban_ip', 0)),
 			array('config.add', array('sfs_log_message', 0)),
 			array('config.add', array('sfs_down', 0)),
 			array('config.add', array('sfs_api_key', '')),

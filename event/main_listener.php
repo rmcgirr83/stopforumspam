@@ -86,7 +86,10 @@ class main_listener implements EventSubscriberInterface
 				}
 				$array[] = $this->get_message($check);
 				// now ban the spammer by IP
+				if ($this->config['sfs_ban_ip'])
+				{
 				$this->ban_by_ip($this->user->ip);
+				}
 			}
 		}
 		$event['error'] = $array;
@@ -150,7 +153,10 @@ class main_listener implements EventSubscriberInterface
 					$array[] = $this->get_message($check);
 
 					// now ban the spammer by IP
+					if ($this->config['sfs_ban_ip'])
+					{
 					$this->ban_by_ip($this->user->ip);
+					}
 				}
 			}
 		}
@@ -374,7 +380,7 @@ class main_listener implements EventSubscriberInterface
 		{
 			include($this->root_path . 'includes/functions_user.' . $this->php_ext);
 		}
-		user_ban('ip', $ip, 60, 0, false, '', '');
+		user_ban('ip', $ip, 60, 0, false, $this->user->lang['SFS_BANNED'], $this->user->lang['SFS_BANNED']);
 
 		return;
 	}
