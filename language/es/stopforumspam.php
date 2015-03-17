@@ -41,4 +41,5 @@ $lang = array_merge($lang, array(
 	'SFS_EMAIL_STOPPED'	=> '<a target="_new" title="Comprobar correo electrónico en StopForumSpam.com (se abre en una nueva ventana)" href="http://www.stopforumspam.com/search/?q=%1$s">%1$s</a>',
 	'SFS_ERROR_MESSAGE'	=> 'Desafortunadamente, no podemos procesar su solicitud ahora debido a problemas con una parte externa. Puede intentarlo de nuevo más tarde.',
 	'SFS_POSTING'	=> 'Sin correo electrónico, ha intentado incluir un mensaje',
+	'SFS_BANNED'	=> 'Se encuentra en la base de datos de Forum Spam',
 ));
