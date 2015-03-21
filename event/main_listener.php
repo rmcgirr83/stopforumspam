@@ -240,7 +240,7 @@ class main_listener implements EventSubscriberInterface
 				//deencode the stuffs
 				$username = urldecode($username);
 
-				if (!empty($sfs_api_key) && !empty($email))
+				if (!empty($sfs_api_key))
 				{
 					// add the spammer to the SFS database
 					$http_request = 'http://www.stopforumspam.com/add.php';
