@@ -168,7 +168,7 @@ class main_listener implements EventSubscriberInterface
 	 * @param 	$check 	the type of check we are, uhmmm, checking
 	 * @return string
 	*/
-	private function get_message($check)
+	private function get_message($check = '')
 	{
 		if ($check === 'sfs_down')
 		{
@@ -206,7 +206,7 @@ class main_listener implements EventSubscriberInterface
 
 		$sfs_log_message = !empty($this->config['sfs_log_message']) ? $this->config['sfs_log_message'] : false;
 
-		/* Threshold score to reject registration and/or guest posting */
+		// Threshold score to reject registration and/or guest posting
 		$sfs_threshold = !empty($this->config['sfs_threshold']) ? $this->config['sfs_threshold'] : 1;
 
 		// Query the SFS database and pull the data into script
@@ -253,19 +253,16 @@ class main_listener implements EventSubscriberInterface
 
 					if ($response === false && $sfs_log_message)
 					{
-						$message = 'LOG_SFS_ERROR_MESSAGE_ADMIN_REG';
-						$this->log_message('admin', $username, $ip, $message, $email);
+						$this->log_message('admin', $username, $ip, 'LOG_SFS_ERROR_MESSAGE_ADMIN_REG', $email);
 					}
 					else if ($sfs_log_message)
 					{
-						$message = 'LOG_SFS_SUBMITTED';
-						$this->log_message('user', $username, $ip, $message, $email);
+						$this->log_message('user', $username, $ip, 'LOG_SFS_SUBMITTED', $email);
 					}
 				}
 				else if ($sfs_log_message)
 				{
-					$message = 'LOG_SFS_MESSAGE';
-					$this->log_message('user', $username, $ip, $message, $email);
+					$this->log_message('user', $username, $ip, 'LOG_SFS_MESSAGE', $email);
 				}
 				//user is a spammer
 				return true;
