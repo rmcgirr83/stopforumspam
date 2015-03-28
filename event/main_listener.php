@@ -88,7 +88,7 @@ class main_listener implements EventSubscriberInterface
 				// now ban the spammer by IP
 				if ($this->config['sfs_ban_ip'])
 				{
-				$this->ban_by_ip($this->user->ip);
+					$this->ban_by_ip($this->user->ip);
 				}
 			}
 		}
@@ -155,7 +155,7 @@ class main_listener implements EventSubscriberInterface
 					// now ban the spammer by IP
 					if ($this->config['sfs_ban_ip'])
 					{
-					$this->ban_by_ip($this->user->ip);
+						$this->ban_by_ip($this->user->ip);
 					}
 				}
 			}
@@ -377,6 +377,7 @@ class main_listener implements EventSubscriberInterface
 		{
 			include($this->root_path . 'includes/functions_user.' . $this->php_ext);
 		}
+		// ban the nub for one hour
 		user_ban('ip', $ip, 60, 0, false, $this->user->lang['SFS_BANNED'], $this->user->lang['SFS_BANNED']);
 
 		return;

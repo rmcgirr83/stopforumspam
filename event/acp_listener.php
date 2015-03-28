@@ -60,7 +60,7 @@ class acp_listener implements EventSubscriberInterface
 		{
 			$curl = true;
 		}
-		// if false...turn the extension off
+		// if false...display a message
 		$message = ($curl === false) ? 'LOG_SFS_NEED_CURL' : false;
 
 		return h_radio('config[allow_sfs]', $radio_ary, $key) .
