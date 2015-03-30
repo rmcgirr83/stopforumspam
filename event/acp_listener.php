@@ -26,14 +26,14 @@ class acp_listener implements EventSubscriberInterface
 
 	public function add_options($event)
 	{
-		if ($event['mode'] == 'registration')
+		if ($event['mode'] == 'registration' && isset($event['display_vars']['vars']['legend2']))
 		{
 			// Store display_vars event in a local variable
 			$display_vars = $event['display_vars'];
 
 			// Define config vars
 			$config_vars = array(
-			'legend'	=> 'SFS_CONTROL',
+				'legend_sfs'	=> 'SFS_CONTROL',
 				'allow_sfs' 	=> array('lang' => 'SFS_ENABLED', 'validate' => 'bool', 'type' => 'custom', 'function' => array($this, 'allow_sfs'), 'explain' => true),
 				'sfs_threshold' => array('lang' => 'SFS_THRESHOLD_SCORE', 'validate' => 'int:1:99', 'type' => 'number:1:99', 'explain' => true),
 				'sfs_ban_ip'	=> array('lang' => 'SFS_BAN_IP', 'valdate' => 'bool', 'type' => 'radio:yes_no', 'explain' => true),
@@ -42,7 +42,7 @@ class acp_listener implements EventSubscriberInterface
 				'sfs_api_key' 	=> array('lang' => 'SFS_API_KEY', 'validate' => 'string:0:14', 'type' => 'text:14:14', 'explain' => true),
 			);
 
-			$display_vars['vars'] = phpbb_insert_config_array($display_vars['vars'], $config_vars, array('after' =>'chg_passforce'));
+			$display_vars['vars'] = phpbb_insert_config_array($display_vars['vars'], $config_vars, array('before' => 'legend2'));
 
 			// Update the display_vars  event with the new array
 			$event['display_vars'] = array('title' => $display_vars['title'], 'vars' => $display_vars['vars']);
