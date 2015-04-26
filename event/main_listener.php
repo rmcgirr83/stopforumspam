@@ -4,12 +4,13 @@
 *
 * Stop forum Spam extension for the phpBB Forum Software package.
 *
-* @copyright (c) 2015 Rich McGirr (RMcGirr83)
+* @copyright (c) Stop Forum Spam
+* @author 2015 Rich McGirr (RMcGirr83)
 * @license GNU General Public License, version 2 (GPL-2.0)
 *
 */
 
-namespace rmcgirr83\stopforumspam\event;
+namespace stopforumspam\stopforumspam\event;
 
 /**
 * Event listener
@@ -66,7 +67,7 @@ class main_listener implements EventSubscriberInterface
 		{
 			return;
 		}
-		$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
+		$this->user->add_lang_ext('stopforumspam/stopforumspam', 'stopforumspam');
 
 		$array = $event['error'];
 
@@ -124,7 +125,7 @@ class main_listener implements EventSubscriberInterface
 
 		if ($this->user->data['user_id'] == ANONYMOUS && $this->config['allow_sfs'])
 		{
-			$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
+			$this->user->add_lang_ext('stopforumspam/stopforumspam', 'stopforumspam');
 			$this->user->add_lang('ucp');
 
 			// ensure email is populated on posting
