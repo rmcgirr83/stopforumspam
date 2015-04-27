@@ -203,7 +203,6 @@ class main_listener implements EventSubscriberInterface
 
 		// Default value
 		$spam_score = 0;
-		$sfs_api_key = !empty($this->config['sfs_api_key']) ? $this->config['sfs_api_key'] : false;
 
 		$sfs_log_message = !empty($this->config['sfs_log_message']) ? $this->config['sfs_log_message'] : false;
 
