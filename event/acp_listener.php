@@ -40,7 +40,6 @@ class acp_listener implements EventSubscriberInterface
 				'sfs_ban_ip'	=> array('lang' => 'SFS_BAN_IP', 'valdate' => 'bool', 'type' => 'radio:yes_no', 'explain' => true),
 				'sfs_down'		=> array('lang' => 'SFS_DOWN', 'validate' => 'bool', 'type' => 'radio:yes_no', 'explain' => true),
 				'sfs_log_message' => array('lang' => 'SFS_LOG_MESSAGE', 'validate' => 'bool', 'type' => 'radio:yes_no', 'explain' => true),
-				'sfs_api_key' 	=> array('lang' => 'SFS_API_KEY', 'validate' => 'string:0:14', 'type' => 'text:14:14', 'explain' => true),
 			);
 
 			$display_vars['vars'] = phpbb_insert_config_array($display_vars['vars'], $config_vars, array('before' => 'legend2'));

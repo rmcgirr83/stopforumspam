@@ -51,8 +51,6 @@ $lang = array_merge($lang, array(
 	'SFS_API_KEY_EXPLAIN'	=> 'If you want to submit spammers to the Stop Forum Spam database, input your API key from <a target="_new" href="http://www.stopforumspam.com/keys">stop forum spam</a> here.  You must be registered on the SFS website to get an API key',
 	// ACP message logs
 	'LOG_SFS_MESSAGE'			=> '<strong>Stop Forum Spam triggered</strong>:<br />Username: %1$s<br />IP: %2$s<br />Email: %3$s',
-	'LOG_SFS_ERROR_MESSAGE_ADMIN_REG'	=> '<strong>Stop Forum Spam no response</strong><br />The registration of:<br />Username: %1$s<br />IP: %2$s<br />Email: %3$s<br />was stopped but the extension was not able to add the user to the stop forum spam database',
-	'LOG_SFS_SUBMITTED'		=> '<strong>User added to the Stop Forum Spam database</strong>:<br />Username: %1$s<br />IP: %2$s<br />Email: %3$s',
 	'LOG_SFS_DOWN'			=> '<strong>Stop Forum Spam was down during a registration or a forum post</strong>',
 	'LOG_SFS_DOWN_USER_ALLOWED' => '<strong>Stop Forum Spam was down.</strong> Following user was allowed on the forum:<br />Username: %1$s<br />IP:%2$s<br />Email: %3$s',
 	'LOG_SFS_NEED_CURL'		=> 'The stop forum spam extension needs <strong>cURL</strong> to work correctly.  Please speak to your server host to get cURL installed and active.',

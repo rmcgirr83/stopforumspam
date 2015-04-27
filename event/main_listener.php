@@ -85,7 +85,7 @@ class main_listener implements EventSubscriberInterface
 				{
 					return;
 				}
-				$array[] = $this->get_message($check);
+				$array[] = $this->show_message($check);
 				// now ban the spammer by IP
 				if ($this->config['sfs_ban_ip'])
 				{
@@ -151,7 +151,7 @@ class main_listener implements EventSubscriberInterface
 					{
 						return;
 					}
-					$array[] = $this->get_message($check);
+					$array[] = $this->show_message($check);
 
 					// now ban the spammer by IP
 					if ($this->config['sfs_ban_ip'])
@@ -165,11 +165,11 @@ class main_listener implements EventSubscriberInterface
 	}
 
 	/*
-	 * get_message
+	 * show_message
 	 * @param 	$check 	the type of check we are, uhmmm, checking
 	 * @return string
 	*/
-	private function get_message($check = '')
+	private function show_message($check = '')
 	{
 		if ($check === 'sfs_down')
 		{
@@ -238,30 +238,7 @@ class main_listener implements EventSubscriberInterface
 			// If we've got a spammer we'll take away their soup!
 			if ($spam_score >= $sfs_threshold)
 			{
-				//deencode the stuffs
-				$username = urldecode($username);
-
-				if (!empty($sfs_api_key))
-				{
-					// add the spammer to the SFS database
-					$http_request = 'http://www.stopforumspam.com/add.php';
-					$http_request .= '?username=' . $username;
-					$http_request .= '&ip_addr=' . $ip;
-					$http_request .= '&email=' . $email;
-					$http_request .= '&api_key=' . $sfs_api_key;
-
-					$response = $this->get_file($http_request);
-
-					if ($response === false && $sfs_log_message)
-					{
-						$this->log_message('admin', $username, $ip, 'LOG_SFS_ERROR_MESSAGE_ADMIN_REG', $email);
-					}
-					else if ($sfs_log_message)
-					{
-						$this->log_message('user', $username, $ip, 'LOG_SFS_SUBMITTED', $email);
-					}
-				}
-				else if ($sfs_log_message)
+				if ($sfs_log_message)
 				{
 					$this->log_message('user', $username, $ip, 'LOG_SFS_MESSAGE', $email);
 				}
