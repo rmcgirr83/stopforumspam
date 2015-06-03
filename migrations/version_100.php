@@ -3,13 +3,12 @@
 *
 * Stop forum Spam extension for the phpBB Forum Software package.
 *
-* @copyright (c) Stop Forum Spam
-* @author 2015 Rich McGirr (RMcGirr83)
+* @copyright (c) 2015 Rich McGirr (RMcGirr83)
 * @license GNU General Public License, version 2 (GPL-2.0)
 *
 */
 
-namespace stopforumspam\stopforumspam\migrations;
+namespace rmcgirr83\stopforumspam\migrations;
 
 /**
 * Primary migration

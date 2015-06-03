@@ -1,11 +1,11 @@
 services:
-    stopforumspam.stopforumspam.acplistener:
-        class: stopforumspam\stopforumspam\event\acp_listener
+    rmcgirr83.stopforumspam.acplistener:
+        class: rmcgirr83\stopforumspam\event\acp_listener
         tags:
             - { name: event.listener }
 
-    stopforumspam.stopforumspam.mainlistener:
-        class: stopforumspam\stopforumspam\event\main_listener
+    rmcgirr83.stopforumspam.mainlistener:
+        class: rmcgirr83\stopforumspam\event\main_listener
         arguments:
             - @config
             - @user

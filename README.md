@@ -10,11 +10,11 @@ Extension will query the stop forum spam database on registration and posting (f
 ## Installation
 
 ### 1. clone
-Clone (or download and move) the repository into the folder ext/stopforumspam/stopforumspam:
+Clone (or download and move) the repository into the folder ext/rmcgirr83/stopforumspam:
 
 ```
 cd phpBB3
-git clone https://github.com/RMcGirr83/phpBB-3.1-stopforumspam.git ext/stopforumspam/stopforumspam/
+git clone https://github.com/RMcGirr83/phpBB-3.1-stopforumspam.git ext/rmcgirr83/stopforumspam/
 ```
 
 ### 2. activate
@@ -24,7 +24,7 @@ Within the Admin panel visit the User Registration settings and within choose th
 
 ## Update instructions:
 1. Go to your phpBB-Board > Admin Control Panel > Customise > Manage extensions > Stop Forum Spam: disable
-2. Delete all files of the extension from ext/stopforumspam/stopforumspam
+2. Delete all files of the extension from ext/rmcgirr83/stopforumspam
 3. Upload all the new files to the same location
 4. Go to your phpBB-Board > Admin Control Panel > Customise > Manage extensions > Stop Forum Spam: enable
 5. Purge the board cache

@@ -1,5 +1,5 @@
 {
-	"name": "stopforumspam/stopforumspam",
+	"name": "rmcgirr83/stopforumspam",
 	"type": "phpbb-extension",
 	"description": "Queries the stop forum spam database on registration and posting.  Extension settings are found under the user registration settings of the forum. This extension requires at least phpBB version 3.1.4-RC1.",
 	"homepage": "https://github.com/rmcgirr83/phpbb-3.1-stopforumspam",
