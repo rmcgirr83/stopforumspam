@@ -9,7 +9,7 @@
 *
 */
 
-namespace stopforumspam\stopforumspam\migrations;
+namespace rmcgirr83\stopforumspam\migrations;
 
 /**
 * Primary migration
@@ -24,7 +24,7 @@ class version_101 extends \phpbb\db\migration\migration
 
 	static public function depends_on()
 	{
-		return array('\stopforumspam\stopforumspam\migrations\version_100');
+		return array('\rmcgirr83\stopforumspam\migrations\version_100');
 	}
 
 	public function update_data()
