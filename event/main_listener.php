@@ -229,7 +229,12 @@ class main_listener implements EventSubscriberInterface
 			{
 				$ck_ip = 0;
 			}
-
+			// Let's not score the username if ip and email are clear
+			if ($ck_ip + $ck_email == 0)
+			{
+				$ck_username = 0;
+			}
+         
 			// Return the total score
 			$spam_score = ($ck_username + $ck_email + $ck_ip);
 
