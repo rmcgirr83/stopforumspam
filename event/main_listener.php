@@ -234,7 +234,6 @@ class main_listener implements EventSubscriberInterface
 			{
 				$ck_username = 0;
 			}
-         
 			// Return the total score
 			$spam_score = ($ck_username + $ck_email + $ck_ip);
 
