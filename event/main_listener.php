@@ -79,7 +79,8 @@ class main_listener implements EventSubscriberInterface
 
 	public function user_sfs_validate_registration($event)
 	{
-		if (!$this->config['allow_sfs'])
+		$settings = $this->get_settings();
+		if ($settings['allow_sfs'] == false)
 		{
 			return;
 		}
@@ -393,20 +394,16 @@ class main_listener implements EventSubscriberInterface
 	// retrieve config text entries
 	private function get_settings()
 	{
-		if (($settings = $this->cache->get('_sfs_settings')) === false)
-		{	
-			// Get SFS settings
-			$sql = 'SELECT * FROM ' . CONFIG_TEXT_TABLE . "
-					WHERE config_name = 'sfs_settings'";
-			$result = $this->db->sql_query($sql);
-			$settings = $this->db->sql_fetchfield('config_value');
-			$this->db->sql_freeresult($result);
-			
-			// cache this data for ever, this improves performance
-			$this->cache->put('_sfs_settings', $settings);
-		}
+
+		// Get SFS settings
+		$sql = 'SELECT * FROM ' . CONFIG_TEXT_TABLE . "
+				WHERE config_name = 'sfs_settings'";
+		$result = $this->db->sql_query($sql);
+		$settings = $this->db->sql_fetchfield('config_value');
+		$this->db->sql_freeresult($result);
+
 		$settings = unserialize($settings);
-		
+
 		return $settings;
 	}
 }
