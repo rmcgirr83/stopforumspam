@@ -1,15 +1,12 @@
 services:
-    rmcgirr83.stopforumspam.acplistener:
-        class: rmcgirr83\stopforumspam\event\acp_listener
-        tags:
-            - { name: event.listener }
-
-    rmcgirr83.stopforumspam.mainlistener:
+     rmcgirr83.stopforumspam.mainlistener:
         class: rmcgirr83\stopforumspam\event\main_listener
         arguments:
             - @config
             - @user
-            - @log
+            - @dbal.conn
+            - @cache
+            - @log			
             - @request
             - @template
             - %core.root_path%
