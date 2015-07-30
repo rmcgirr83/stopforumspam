@@ -105,9 +105,12 @@ class stopforumspam_module
 			}
 		}
 
+		$allow_sfs = $this->allow_sfs();
+		
 		$template->assign_vars(array(
 			'ERROR'			=> isset($error) ? ((sizeof($error)) ? implode('<br />', $error) : '') : '',
 			'ALLOW_SFS'		=> (!empty($settings['allow_sfs'])) ? true : false,
+			'CURL_ACTIVE'	=> (!empty($allow_sfs)) ? '' : '<br /><span class="error">' . $user->lang['LOG_SFS_NEED_CURL'] .'</span>',
 			'SFS_THRESHOLD'	=> (!empty($settings['sfs_threshold'])) ? $settings['sfs_threshold'] : 1,
 			'SFS_BAN_IP'	=> (!empty($settings['sfs_ban_ip'])) ? true : false,
 			'SFS_LOG_MESSAGE'	=> (!empty($settings['sfs_log_message'])) ? true : false,
@@ -121,4 +124,16 @@ class stopforumspam_module
 			'U_ACTION'			=> $this->u_action,			
 		));
 	}
+	
+	function allow_sfs()
+	{
+		// Determine if cURL is enabled on the server
+		$curl = false;
+		if (function_exists('curl_init'))
+		{
+			$curl = true;
+		}
+		
+		return $curl;
+	}	
 }
