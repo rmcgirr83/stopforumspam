@@ -18,7 +18,7 @@ class stopforumspam_module
 	function main($id, $mode)
 	{
 		global $db, $cache, $config, $request, $template, $user;
-		global $phpbb_root_path, $phpbb_admin_path, $phpEx;		
+		global $phpbb_root_path, $phpbb_admin_path, $phpEx;
 
 		$this->page_title = $user->lang['SFS_CONTROL'];
 		$this->tpl_name = 'stopforumspam_body';
@@ -65,14 +65,14 @@ class stopforumspam_module
 			}
 
 			$check_row = array('sfs_threshold' => $request->variable('sfs_threshold', 0));
-			$validate_row = array('sfs_threshold' => array('num', false, 1, 100));
+			$validate_row = array('sfs_threshold' => array('num', false, 1, 99));
 			$error = validate_data($check_row, $validate_row);
 
 			// Replace "error" strings with their real, localised form
 			$error = array_map(array($user, 'lang'), $error);
 
 			if (!sizeof($error))
-			{			
+			{
 				$settings = array(
 					'allow_sfs'		=> $request->variable('allow_sfs', 0),
 					'sfs_threshold'		=> $request->variable('sfs_threshold', 0),
@@ -99,14 +99,13 @@ class stopforumspam_module
 				}
 				else
 				{
-					$cache->destroy('_sfs_settings');				
 					trigger_error($user->lang['SFS_SETTINGS_SUCCESS'] . adm_back_link($this->u_action));
 				}
 			}
 		}
 
 		$allow_sfs = $this->allow_sfs();
-		
+
 		$template->assign_vars(array(
 			'ERROR'			=> isset($error) ? ((sizeof($error)) ? implode('<br />', $error) : '') : '',
 			'ALLOW_SFS'		=> (!empty($settings['allow_sfs'])) ? true : false,
@@ -121,10 +120,10 @@ class stopforumspam_module
 			'SFS_BAN_REASON'	=> (!empty($settings['sfs_ban_reason'])) ? true : false,
 			'SFS_VERSION'		=> $config['sfs_version'],
 
-			'U_ACTION'			=> $this->u_action,			
+			'U_ACTION'			=> $this->u_action,
 		));
 	}
-	
+
 	function allow_sfs()
 	{
 		// Determine if cURL is enabled on the server
@@ -133,7 +132,7 @@ class stopforumspam_module
 		{
 			$curl = true;
 		}
-		
+
 		return $curl;
-	}	
+	}
 }

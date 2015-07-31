@@ -27,9 +27,6 @@ class main_listener implements EventSubscriberInterface
 	/** @var phpbb\db\driver\driver_interface */
 	protected $db;
 
-	/** @var \phpbb\cache\driver\driver_interface */
-	protected $cache;
-	
 	/** @var \phpbb\log\log */
 	protected $log;
 
@@ -46,10 +43,9 @@ class main_listener implements EventSubscriberInterface
 	protected $php_ext;
 
 	public function __construct(
-		\phpbb\config\config $config, 
+		\phpbb\config\config $config,
 		\phpbb\user $user,
 		\phpbb\db\driver\driver_interface $db,
-		\phpbb\cache\service $cache,
 		\phpbb\log\log $log,
 		\phpbb\request\request $request,
 		\phpbb\template\template $template,
@@ -59,7 +55,6 @@ class main_listener implements EventSubscriberInterface
 		$this->config = $config;
 		$this->user = $user;
 		$this->db = $db;
-		$this->cache = $cache;		
 		$this->log = $log;
 		$this->request = $request;
 		$this->template = $template;
@@ -254,7 +249,7 @@ class main_listener implements EventSubscriberInterface
 			{
 				$ck_email = 0;
 			}
-			
+
 			if ($settings['sfs_by_ip'] == false)
 			{
 				$ck_ip = 0;
@@ -383,14 +378,14 @@ class main_listener implements EventSubscriberInterface
 			include($this->root_path . 'includes/functions_user.' . $this->php_ext);
 		}
 		$settings = $this->get_settings();
-		
+
 		$ban_reason = !empty($settings['sfs_ban_reason']) ? $this->user->lang['SFS_BANNED'] : '';
 		// ban the nub for one hour
 		user_ban('ip', $ip, 60, 0, false, $this->user->lang['SFS_BANNED'], $ban_reason);
 
 		return;
 	}
-	
+
 	// retrieve config text entries
 	private function get_settings()
 	{
