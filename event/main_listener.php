@@ -93,7 +93,6 @@ class main_listener implements EventSubscriberInterface
 
 			if ($check)
 			{
-				$settings = $this->get_settings();
 				if ($settings['sfs_down'] && $check === 'sfs_down')
 				{
 					return;
@@ -115,7 +114,8 @@ class main_listener implements EventSubscriberInterface
 	*/
 	public function poster_data_email($event)
 	{
-		if ($this->user->data['user_id'] == ANONYMOUS && $this->config['allow_sfs'])
+		$settings = $this->get_settings();
+		if ($this->user->data['user_id'] == ANONYMOUS && $settings['allow_sfs'])
 		{
 			// Output the data vars to the template
 			$this->template->assign_vars(array(
