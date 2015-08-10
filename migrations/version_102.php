@@ -29,7 +29,7 @@ class version_102 extends \phpbb\db\migration\migration
 
 	public function update_data()
 	{
-	
+
 		$settings_ary = array(
 			'allow_sfs'		=> $this->config['allow_sfs'],
 			'sfs_threshold'		=> $this->config['sfs_threshold'],
@@ -44,7 +44,7 @@ class version_102 extends \phpbb\db\migration\migration
 		$settings = serialize($settings_ary);
 
 		return(array(
-			array('config_text.add', array('sfs_settings', $settings)),		
+			array('config_text.add', array('sfs_settings', $settings)),
 			array('config.remove', array('allow_sfs')),
 			array('config.remove', array('sfs_threshold')),
 			array('config.remove', array('sfs_ban_ip')),
@@ -64,7 +64,7 @@ class version_102 extends \phpbb\db\migration\migration
 					'module_basename'	=> '\rmcgirr83\stopforumspam\acp\stopforumspam_module',
 					'modes'				=> array('settings'),
 				),
-			)),			
+			)),
 		));
 	}
 }

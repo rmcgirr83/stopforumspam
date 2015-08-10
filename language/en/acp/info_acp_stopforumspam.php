@@ -38,7 +38,7 @@ $lang = array_merge($lang, array(
 	'ACP_SFS_TITLE'			=> 'Stop Forum Spam',
 	'SFS_CONTROL'			=> 'Stop Forum Spam Settings',
 	'SFS_VERSION'			=> 'SFS Version',
-	'SFS_SETTINGS'			=> 'Settings',	
+	'SFS_SETTINGS'			=> 'Settings',
 	'SFS_ENABLED'			=> 'Enable Stop Forum Spam',
 	'SFS_ENABLED_EXPLAIN'	=> 'Enable or disable the extension.  This applies to both user registration and guest posts.',
 	'SFS_THRESHOLD_SCORE'	=> 'Stop Forum Spam threshold',
@@ -64,5 +64,5 @@ $lang = array_merge($lang, array(
 	'TOO_SMALL_SFS_THRESHOLD'	=> 'The threshold value is too small.',
 	'TOO_LARGE_SFS_THRESHOLD'	=> 'The threshold value is too large.',
 	'SFS_SETTINGS_ERROR'		=> 'There was an error saving your settings. Please submit the back trace with your error report.',
-	'SFS_SETTINGS_SUCCESS'		=> 'The settings were successfully saved.',	
+	'SFS_SETTINGS_SUCCESS'		=> 'The settings were successfully saved.',
 ));
