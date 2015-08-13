@@ -17,14 +17,14 @@ class stopforumspam_module
 
 	function main($id, $mode)
 	{
-		global $db, $cache, $config, $request, $template, $user;
+		global $db, $config, $request, $template, $user;
 		global $phpbb_root_path, $phpbb_admin_path, $phpEx;
 
 		$this->page_title = $user->lang['SFS_CONTROL'];
 		$this->tpl_name = 'stopforumspam_body';
 
 		add_form_key('sfs');
-
+		$allow_sfs = $this->allow_sfs();
 		// Get saved settings.
 		$sql = 'SELECT * FROM ' . CONFIG_TEXT_TABLE . "
 				WHERE config_name = 'sfs_settings'";
@@ -40,7 +40,7 @@ class stopforumspam_module
 		{
 			// Default settings in case something went wrong with the install.
 			$settings = array(
-				'allow_sfs'		=> 1,
+				'allow_sfs'		=> $allow_sfs,
 				'sfs_threshold'	=> 5,
 				'sfs_ban_ip'	=> 0,
 				'sfs_log_message'	=> 0,
@@ -65,7 +65,7 @@ class stopforumspam_module
 			}
 
 			$check_row = array('sfs_threshold' => $request->variable('sfs_threshold', 0));
-			$validate_row = array('sfs_threshold' => array('num', false, 1, 99));
+			$validate_row = array('sfs_threshold' => array('num', false, 1, 100));
 			$error = validate_data($check_row, $validate_row);
 
 			// Replace "error" strings with their real, localised form
@@ -74,7 +74,7 @@ class stopforumspam_module
 			if (!sizeof($error))
 			{
 				$settings = array(
-					'allow_sfs'		=> $request->variable('allow_sfs', 0),
+					'allow_sfs'		=> !empty($allow_sfs) ? $request->variable('allow_sfs', 0) : false,
 					'sfs_threshold'		=> $request->variable('sfs_threshold', 0),
 					'sfs_ban_ip'	=> $request->variable('sfs_ban_ip', 0),
 					'sfs_log_message'	=> $request->variable('sfs_log_message', 0),
@@ -103,8 +103,6 @@ class stopforumspam_module
 				}
 			}
 		}
-
-		$allow_sfs = $this->allow_sfs();
 
 		$template->assign_vars(array(
 			'ERROR'			=> isset($error) ? ((sizeof($error)) ? implode('<br />', $error) : '') : '',

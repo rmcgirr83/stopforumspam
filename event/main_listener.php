@@ -21,6 +21,9 @@ class main_listener implements EventSubscriberInterface
 	/** @var \phpbb\config\config */
 	protected $config;
 
+	/** @var \phpbb\config\db_text */
+	protected $config_text;	
+
 	/** @var \phpbb\user */
 	protected $user;
 
@@ -44,6 +47,7 @@ class main_listener implements EventSubscriberInterface
 
 	public function __construct(
 		\phpbb\config\config $config,
+		\phpbb\config\db_text $config_text,
 		\phpbb\user $user,
 		\phpbb\db\driver\driver_interface $db,
 		\phpbb\log\log $log,
@@ -53,6 +57,7 @@ class main_listener implements EventSubscriberInterface
 		$php_ext)
 	{
 		$this->config = $config;
+		$this->config_text = $config_text;
 		$this->user = $user;
 		$this->db = $db;
 		$this->log = $log;
@@ -75,6 +80,7 @@ class main_listener implements EventSubscriberInterface
 	public function user_sfs_validate_registration($event)
 	{
 		$settings = $this->get_settings();
+
 		if ($settings['allow_sfs'] == false)
 		{
 			return;
@@ -114,8 +120,7 @@ class main_listener implements EventSubscriberInterface
 	*/
 	public function poster_data_email($event)
 	{
-		$settings = $this->get_settings();
-		if ($this->user->data['user_id'] == ANONYMOUS && $settings['allow_sfs'])
+		if ($this->user->data['user_id'] == ANONYMOUS && $this->config['allow_sfs'])
 		{
 			// Output the data vars to the template
 			$this->template->assign_vars(array(
@@ -389,13 +394,7 @@ class main_listener implements EventSubscriberInterface
 	// retrieve config text entries
 	private function get_settings()
 	{
-
-		// Get SFS settings
-		$sql = 'SELECT * FROM ' . CONFIG_TEXT_TABLE . "
-				WHERE config_name = 'sfs_settings'";
-		$result = $this->db->sql_query($sql);
-		$settings = $this->db->sql_fetchfield('config_value');
-		$this->db->sql_freeresult($result);
+		$settings = $this->config_text->get('sfs_settings');
 
 		$settings = unserialize($settings);
 
