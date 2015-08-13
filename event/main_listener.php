@@ -22,7 +22,7 @@ class main_listener implements EventSubscriberInterface
 	protected $config;
 
 	/** @var \phpbb\config\db_text */
-	protected $config_text;	
+	protected $config_text;
 
 	/** @var \phpbb\user */
 	protected $user;
