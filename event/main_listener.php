@@ -297,9 +297,9 @@ class main_listener implements EventSubscriberInterface
 	// log messages
 	private function log_message($mode, $username, $ip, $message, $email)
 	{
-		$sfs_ip_check = sprintf($this->user->lang['SFS_IP_STOPPED'], $ip);
-		$sfs_username_check = sprintf($this->user->lang['SFS_USERNAME_STOPPED'], $username);
-		$sfs_email_check = sprintf($this->user->lang['SFS_EMAIL_STOPPED'], $email);
+		$sfs_ip_check = $this->user->lang('SFS_IP_STOPPED', $ip);
+		$sfs_username_check = $this->user->lang('SFS_USERNAME_STOPPED', $username);
+		$sfs_email_check = $this->user->lang('SFS_EMAIL_STOPPED', $email);
 
 		if ($mode === 'admin')
 		{
