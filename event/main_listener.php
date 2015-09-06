@@ -87,7 +87,7 @@ class main_listener implements EventSubscriberInterface
 		}
 		$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
 
-		$array = $event['error'];
+		$error_array = $event['error'];
 
 		/* On registration and only when all errors have cleared
 		 * do not want the admin message area to fill up
@@ -103,7 +103,7 @@ class main_listener implements EventSubscriberInterface
 				{
 					return;
 				}
-				$array[] = $this->show_message($check);
+				$error_array[] = $this->show_message($check);
 				// now ban the spammer by IP
 				if ($settings['sfs_ban_ip'])
 				{
@@ -111,7 +111,7 @@ class main_listener implements EventSubscriberInterface
 				}
 			}
 		}
-		$event['error'] = $array;
+		$event['error'] = $error_array;
 	}
 
 	/*
@@ -139,7 +139,7 @@ class main_listener implements EventSubscriberInterface
 
 	public function user_sfs_validate_posting($event)
 	{
-		$array = $event['error'];
+		$error_array = $event['error'];
 
 		$settings = $this->get_settings();
 		if ($this->user->data['user_id'] == ANONYMOUS && $settings['allow_sfs'])
@@ -151,16 +151,16 @@ class main_listener implements EventSubscriberInterface
 			$error = $this->validate_email($event['post_data']['email']);
 			if ($error)
 			{
-				$array[] = $this->user->lang[$error . '_EMAIL'];
+				$error_array[] = $this->user->lang[$error . '_EMAIL'];
 			}
 			// I just hate empty usernames for guest posting
 			$error = $this->validate_username($event['post_data']['username']);
 			if (sizeof($error))
 			{
-				$array = $error;
+				$error_array = $error;
 			}
 
-			if (!sizeof($array))
+			if (!sizeof($error_array))
 			{
 				$check = $this->stopforumspam_check($event['post_data']['username'], $this->user->ip, $event['post_data']['email']);
 
@@ -170,7 +170,7 @@ class main_listener implements EventSubscriberInterface
 					{
 						return;
 					}
-					$array[] = $this->show_message($check);
+					$error_array[] = $this->show_message($check);
 
 					// now ban the spammer by IP
 					if ($settings['sfs_ban_ip'])
@@ -180,7 +180,7 @@ class main_listener implements EventSubscriberInterface
 				}
 			}
 		}
-		$event['error'] = $array;
+		$event['error'] = $error_array;
 	}
 
 	/*
