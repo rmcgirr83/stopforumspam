@@ -65,7 +65,7 @@ class stopforumspam_module
 			}
 
 			$check_row = array('sfs_threshold' => $request->variable('sfs_threshold', 0));
-			$validate_row = array('sfs_threshold' => array('num', false, 1, 100));
+			$validate_row = array('sfs_threshold' => array('num', false, 1, 99));
 			$error = validate_data($check_row, $validate_row);
 
 			// Replace "error" strings with their real, localised form

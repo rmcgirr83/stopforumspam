@@ -92,13 +92,14 @@ class main_listener implements EventSubscriberInterface
 		/* On registration and only when all errors have cleared
 		 * do not want the admin message area to fill up
 		*/
-		if (!sizeof($array))
+		if (!sizeof($error_array))
 		{
 
 			$check = $this->stopforumspam_check($event['data']['username'], $this->user->ip, $event['data']['email']);
 
 			if ($check)
 			{
+				$settings = $this->get_settings();
 				if ($settings['sfs_down'] && $check === 'sfs_down')
 				{
 					return;
@@ -120,7 +121,8 @@ class main_listener implements EventSubscriberInterface
 	*/
 	public function poster_data_email($event)
 	{
-		if ($this->user->data['user_id'] == ANONYMOUS && $this->config['allow_sfs'])
+		$settings = $this->get_settings();
+		if ($this->user->data['user_id'] == ANONYMOUS && $settings['allow_sfs'])
 		{
 			// Output the data vars to the template
 			$this->template->assign_vars(array(
@@ -154,10 +156,10 @@ class main_listener implements EventSubscriberInterface
 				$error_array[] = $this->user->lang[$error . '_EMAIL'];
 			}
 			// I just hate empty usernames for guest posting
-			$error = $this->validate_username($event['post_data']['username']);
-			if (sizeof($error))
+			$username_error = $this->validate_username($event['post_data']['username']);
+			if (sizeof($username_error))
 			{
-				$error_array = $error;
+				$error_array = $username_error;
 			}
 
 			if (!sizeof($error_array))
