@@ -156,10 +156,13 @@ class main_listener implements EventSubscriberInterface
 				$error_array[] = $this->user->lang[$error . '_EMAIL'];
 			}
 			// I just hate empty usernames for guest posting
-			$username_error = $this->validate_username($event['post_data']['username']);
-			if (sizeof($username_error))
+			if (empty($event['post_data']['username']))
 			{
-				$error_array = $username_error;
+				$username_error = $this->validate_username($event['post_data']['username']);
+				if ($username_error)
+				{
+					$error_array = array_merge($username_error, $error_array);
+				}
 			}
 
 			if (!sizeof($error_array))
