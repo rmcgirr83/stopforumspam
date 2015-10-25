@@ -65,4 +65,7 @@ $lang = array_merge($lang, array(
 	'TOO_LARGE_SFS_THRESHOLD'	=> 'The threshold value is too large.',
 	'SFS_SETTINGS_ERROR'		=> 'There was an error saving your settings. Please submit the back trace with your error report.',
 	'SFS_SETTINGS_SUCCESS'		=> 'The settings were successfully saved.',
+	'USER_ADMIN_REPORT_AS_A_SPAMMER'	=> 'Report as a spammer',
+	'REPORT_SUCCESSFULLY_SUBMITTED'		=> 'Report successfully submitted',
+	'REPORT_NOT_SUBMITTED'		=> 'Report could not be submitted',
 ));

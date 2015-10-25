@@ -70,11 +70,67 @@ class main_listener implements EventSubscriberInterface
 	static public function getSubscribedEvents()
 	{
 		return array(
+			'core.acp_users_display_overview'		=> 'acp_users_display_overview',
+			'core.acp_users_overview_run_quicktool'	=> 'acp_users_overview_run_quicktool',
 			'core.ucp_register_data_after'			=> 'user_sfs_validate_registration',
 			'core.posting_modify_template_vars'		=> 'poster_data_email',
 			'core.posting_modify_message_text'		=> 'poster_modify_message_text',
 			'core.posting_modify_submission_errors'	=> 'user_sfs_validate_posting',
 		);
+	}
+
+	/**
+	* Add additional quick tool options and overwrite user data
+	*
+	* @param object $event The event object
+	* @return null
+	* @access public
+	*/
+	public function acp_users_display_overview($event)
+	{
+		$quick_tool_ary = $event['quick_tool_ary'];
+		$quick_tool_ary = array_merge(
+			array_slice($quick_tool_ary, 0, 3, true),
+			array('reportasaspammer' => 'REPORT_AS_A_SPAMMER'),
+			array_slice($quick_tool_ary, 3, null, true)
+		);
+		$event['quick_tool_ary'] = $quick_tool_ary;
+	}
+
+	/**
+	* Run custom quicktool code
+	*
+	* @param object $event The event object
+	* @return null
+	* @access public
+	*/
+	public function acp_users_overview_run_quicktool($event)
+	{
+		if ($event['action'] == 'reportasaspammer') {
+			$settings = $this->get_settings();
+
+			$result = $this->get_file('http://www.stopforumspam.com/add.php' .
+				'?username=' . $event['user_row']['username'] .
+				'&ip_addr=' . $event['user_row']['user_ip'] .
+				'&email=' . $event['user_row']['user_email'] .
+				'&api_key=' . $settings['sfs_api_key']
+			);
+
+			if ($result !== false) {
+				$log_message = 'LOG_SPAMMER_REPORTED';
+				$display_message = 'REPORT_SUCCESSFULLY_SUBMITTED';
+			}
+			else {
+				$log_message = 'LOG_SFS_DOWN';
+				$display_message = 'REPORT_NOT_SUBMITTED';
+			}
+
+			if ($settings['sfs_log_message']) {
+				$this->log_message('admin', $event['user_row']['username'], $event['user_row']['user_ip'], $log_message, $event['user_row']['user_email']);
+			}
+
+			trigger_error($this->user->lang($display_message) . adm_back_link($this->request->variable('REQUEST_URI', '', false, \phpbb\request\request_interface::SERVER)));
+		}
 	}
 
 	public function user_sfs_validate_registration($event)
