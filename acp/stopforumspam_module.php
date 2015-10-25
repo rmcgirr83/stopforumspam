@@ -49,6 +49,7 @@ class stopforumspam_module
 				'sfs_by_email'	=> 1,
 				'sfs_by_ip'		=> 1,
 				'sfs_ban_reason'	=> 1,
+				'sfs_api_key'	=> '',
 			);
 		}
 
@@ -83,6 +84,7 @@ class stopforumspam_module
 					'sfs_by_email'	=> $request->variable('sfs_by_email', 0),
 					'sfs_by_ip'		=> $request->variable('sfs_by_ip', 0),
 					'sfs_ban_reason'	=> $request->variable('sfs_ban_reason', 0),
+					'sfs_api_key'	=> $request->variable('sfs_api_key', ''),
 				);
 
 				$sql_settings	= serialize($settings);
@@ -116,6 +118,7 @@ class stopforumspam_module
 			'SFS_BY_EMAIL'	=> (!empty($settings['sfs_by_email'])) ? true : false,
 			'SFS_BY_IP'		=> (!empty($settings['sfs_by_ip'])) ? true : false,
 			'SFS_BAN_REASON'	=> (!empty($settings['sfs_ban_reason'])) ? true : false,
+			'SFS_API_KEY'	=> (!empty($settings['sfs_api_key'])) ? $settings['sfs_api_key'] : '',
 			'SFS_VERSION'		=> $config['sfs_version'],
 
 			'U_ACTION'			=> $this->u_action,
