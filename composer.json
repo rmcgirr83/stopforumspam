@@ -15,6 +15,9 @@
 	"require": {
 		"php": ">=5.3"
 	},
+	"require-dev": {
+		"phpbb/epv": "dev-master"
+	},
 	"extra": {
 		"display-name": "Stop Forum Spam",
 		"soft-require": {
