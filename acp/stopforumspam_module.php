@@ -26,7 +26,6 @@ class stopforumspam_module
 		add_form_key('sfs');
 		$allow_sfs = $this->allow_sfs();
 
-
 		if ($request->is_set_post('submit'))
 		{
 			// Test if form key is valid
