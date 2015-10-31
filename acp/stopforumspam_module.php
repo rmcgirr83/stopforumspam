@@ -25,32 +25,7 @@ class stopforumspam_module
 
 		add_form_key('sfs');
 		$allow_sfs = $this->allow_sfs();
-		// Get saved settings.
-		$sql = 'SELECT * FROM ' . CONFIG_TEXT_TABLE . "
-				WHERE config_name = 'sfs_settings'";
-		$result = $db->sql_query($sql);
-		$settings = $db->sql_fetchfield('config_value');
-		$db->sql_freeresult($result);
 
-		if (!empty($settings))
-		{
-			$settings = unserialize($settings);
-		}
-		else
-		{
-			// Default settings in case something went wrong with the install.
-			$settings = array(
-				'allow_sfs'		=> $allow_sfs,
-				'sfs_threshold'	=> 5,
-				'sfs_ban_ip'	=> 0,
-				'sfs_log_message'	=> 0,
-				'sfs_down'		=> 0,
-				'sfs_by_name'	=> 1,
-				'sfs_by_email'	=> 1,
-				'sfs_by_ip'		=> 1,
-				'sfs_ban_reason'	=> 1,
-			);
-		}
 
 		if ($request->is_set_post('submit'))
 		{
@@ -73,49 +48,25 @@ class stopforumspam_module
 
 			if (!sizeof($error))
 			{
-				$settings = array(
-					'allow_sfs'		=> !empty($allow_sfs) ? $request->variable('allow_sfs', 0) : false,
-					'sfs_threshold'		=> $request->variable('sfs_threshold', 0),
-					'sfs_ban_ip'	=> $request->variable('sfs_ban_ip', 0),
-					'sfs_log_message'	=> $request->variable('sfs_log_message', 0),
-					'sfs_down'		=> $request->variable('sfs_down', 0),
-					'sfs_by_name'	=> $request->variable('sfs_by_name', 0),
-					'sfs_by_email'	=> $request->variable('sfs_by_email', 0),
-					'sfs_by_ip'		=> $request->variable('sfs_by_ip', 0),
-					'sfs_ban_reason'	=> $request->variable('sfs_ban_reason', 0),
-				);
+				// Set the options the user configured
+				$this->set_options();
 
-				$sql_settings	= serialize($settings);
-				$sql_settings	= $db->sql_escape($sql_settings);
-
-				$sql = 'UPDATE ' . CONFIG_TEXT_TABLE . "
-						SET config_value = '$sql_settings'
-						WHERE config_name = 'sfs_settings'";
-				$success = $db->sql_query($sql);
-
-				if ($success === false)
-				{
-					trigger_error($user->lang['SFS_SETTINGS_ERROR'] . adm_back_link($this->u_action), E_USER_ERROR);
-				}
-				else
-				{
-					trigger_error($user->lang['SFS_SETTINGS_SUCCESS'] . adm_back_link($this->u_action));
-				}
+				trigger_error($user->lang['SFS_SETTINGS_SUCCESS'] . adm_back_link($this->u_action));
 			}
 		}
 
 		$template->assign_vars(array(
 			'ERROR'			=> isset($error) ? ((sizeof($error)) ? implode('<br />', $error) : '') : '',
-			'ALLOW_SFS'		=> (!empty($settings['allow_sfs'])) ? true : false,
+			'ALLOW_SFS'		=> ($config['allow_sfs']) ? true : false,
 			'CURL_ACTIVE'	=> (!empty($allow_sfs)) ? '' : '<br /><span class="error">' . $user->lang['LOG_SFS_NEED_CURL'] .'</span>',
-			'SFS_THRESHOLD'	=> (!empty($settings['sfs_threshold'])) ? $settings['sfs_threshold'] : 1,
-			'SFS_BAN_IP'	=> (!empty($settings['sfs_ban_ip'])) ? true : false,
-			'SFS_LOG_MESSAGE'	=> (!empty($settings['sfs_log_message'])) ? true : false,
-			'SFS_DOWN'		=> (!empty($settings['sfs_down'])) ? true : false,
-			'SFS_BY_NAME'	=> (!empty($settings['sfs_by_name'])) ? true : false,
-			'SFS_BY_EMAIL'	=> (!empty($settings['sfs_by_email'])) ? true : false,
-			'SFS_BY_IP'		=> (!empty($settings['sfs_by_ip'])) ? true : false,
-			'SFS_BAN_REASON'	=> (!empty($settings['sfs_ban_reason'])) ? true : false,
+			'SFS_THRESHOLD'	=> (int) $config['sfs_threshold'],
+			'SFS_BAN_IP'	=> ($config['sfs_ban_ip']) ? true : false,
+			'SFS_LOG_MESSAGE'	=> ($config['sfs_log_message']) ? true : false,
+			'SFS_DOWN'		=> ($config['sfs_down']) ? true : false,
+			'SFS_BY_NAME'	=> ($config['sfs_by_name']) ? true : false,
+			'SFS_BY_EMAIL'	=> ($config['sfs_by_email']) ? true : false,
+			'SFS_BY_IP'		=> ($config['sfs_by_ip']) ? true : false,
+			'SFS_BAN_REASON'	=> ($config['sfs_ban_reason']) ? true : false,
 			'SFS_VERSION'		=> $config['sfs_version'],
 
 			'U_ACTION'			=> $this->u_action,
@@ -132,5 +83,24 @@ class stopforumspam_module
 		}
 
 		return $curl;
+	}
+
+	/**
+	 * Set the options a user can configure
+	 *
+	 * @return null
+	 * @access protected
+	 */
+	protected function set_options()
+	{
+		$config->set('sfs_threshold', $request->variable('sfs_threshold', 0));
+		$config->set('allow_sfs', $request->variable('allow_sfs', 0));
+		$config->set('sfs_ban_ip', $request->variable('sfs_ban_ip', 0));
+		$config->set('sfs_log_message', $request->variable('sfs_log_message', 0));
+		$config->set('sfs_down', $request->variable('sfs_down', 0));
+		$config->set('sfs_by_name', $request->variable('sfs_by_name', 0));
+		$config->set('sfs_by_email', $request->variable('sfs_by_email', 0));
+		$config->set('sfs_by_ip', $request->variable('sfs_by_ip', 0));
+		$config->set('sfs_ban_reason', $request->variable('sfs_ban_reason', 0));
 	}
 }

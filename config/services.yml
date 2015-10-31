@@ -3,7 +3,6 @@ services:
         class: rmcgirr83\stopforumspam\event\main_listener
         arguments:
             - @config
-            - @config_text
             - @user
             - @dbal.conn
             - @log			

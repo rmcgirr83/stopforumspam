@@ -21,9 +21,6 @@ class main_listener implements EventSubscriberInterface
 	/** @var \phpbb\config\config */
 	protected $config;
 
-	/** @var \phpbb\config\db_text */
-	protected $config_text;
-
 	/** @var \phpbb\user */
 	protected $user;
 
@@ -47,7 +44,6 @@ class main_listener implements EventSubscriberInterface
 
 	public function __construct(
 		\phpbb\config\config $config,
-		\phpbb\config\db_text $config_text,
 		\phpbb\user $user,
 		\phpbb\db\driver\driver_interface $db,
 		\phpbb\log\log $log,
@@ -57,7 +53,6 @@ class main_listener implements EventSubscriberInterface
 		$php_ext)
 	{
 		$this->config = $config;
-		$this->config_text = $config_text;
 		$this->user = $user;
 		$this->db = $db;
 		$this->log = $log;
@@ -79,9 +74,7 @@ class main_listener implements EventSubscriberInterface
 
 	public function user_sfs_validate_registration($event)
 	{
-		$settings = $this->get_settings();
-
-		if ($settings['allow_sfs'] == false)
+		if ($this->config['allow_sfs'] == false)
 		{
 			return;
 		}
@@ -99,14 +92,13 @@ class main_listener implements EventSubscriberInterface
 
 			if ($check)
 			{
-				$settings = $this->get_settings();
-				if ($settings['sfs_down'] && $check === 'sfs_down')
+				if ($this->config['sfs_down'] && $check === 'sfs_down')
 				{
 					return;
 				}
 				$error_array[] = $this->show_message($check);
 				// now ban the spammer by IP
-				if ($settings['sfs_ban_ip'])
+				if ($this->config['sfs_ban_ip'])
 				{
 					$this->ban_by_ip($this->user->ip);
 				}
@@ -121,8 +113,7 @@ class main_listener implements EventSubscriberInterface
 	*/
 	public function poster_data_email($event)
 	{
-		$settings = $this->get_settings();
-		if ($this->user->data['user_id'] == ANONYMOUS && $settings['allow_sfs'])
+		if ($this->user->data['user_id'] == ANONYMOUS && $this->config['allow_sfs'])
 		{
 			// Output the data vars to the template
 			$this->template->assign_vars(array(
@@ -143,8 +134,7 @@ class main_listener implements EventSubscriberInterface
 	{
 		$error_array = $event['error'];
 
-		$settings = $this->get_settings();
-		if ($this->user->data['user_id'] == ANONYMOUS && $settings['allow_sfs'])
+		if ($this->user->data['user_id'] == ANONYMOUS && $this->config['allow_sfs'])
 		{
 			$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
 			$this->user->add_lang('ucp');
@@ -171,14 +161,14 @@ class main_listener implements EventSubscriberInterface
 
 				if ($check)
 				{
-					if ($settings['sfs_down'] && $check === 'sfs_down')
+					if ($this->config['sfs_down'] && $check === 'sfs_down')
 					{
 						return;
 					}
 					$error_array[] = $this->show_message($check);
 
 					// now ban the spammer by IP
-					if ($settings['sfs_ban_ip'])
+					if ($this->config['sfs_ban_ip'])
 					{
 						$this->ban_by_ip($this->user->ip);
 					}
@@ -225,14 +215,13 @@ class main_listener implements EventSubscriberInterface
 		// we need to urlencode for spaces
 		$username = urlencode($username);
 
-		$settings = $this->get_settings();
 		// Default value
 		$spam_score = 0;
 
-		$sfs_log_message = !empty($settings['sfs_log_message']) ? $settings['sfs_log_message'] : false;
+		$sfs_log_message = !empty($this->config['sfs_log_message']) ? $this->config['sfs_log_message'] : false;
 
 		// Threshold score to reject registration and/or guest posting
-		$sfs_threshold = !empty($settings['sfs_threshold']) ? $settings['sfs_threshold'] : 1;
+		$sfs_threshold = !empty($this->config['sfs_threshold']) ? $this->config['sfs_threshold'] : 1;
 
 		// Query the SFS database and pull the data into script
 		$xmlUrl = 'http://www.stopforumspam.com/api?username='.$username.'&ip='.$ip.'&email='.$email.'&f=xmldom';
@@ -250,17 +239,17 @@ class main_listener implements EventSubscriberInterface
 			$ck_ip = $xmlObj->ip->frequency;
 
 			// ACP settings in effect
-			if ($settings['sfs_by_name'] == false)
+			if ($this->config['sfs_by_name'] == false)
 			{
 				$ck_username = 0;
 			}
 
-			if ($settings['sfs_by_email'] == false)
+			if ($this->config['sfs_by_email'] == false)
 			{
 				$ck_email = 0;
 			}
 
-			if ($settings['sfs_by_ip'] == false)
+			if ($this->config['sfs_by_ip'] == false)
 			{
 				$ck_ip = 0;
 			}
@@ -286,7 +275,7 @@ class main_listener implements EventSubscriberInterface
 		{
 			if ($sfs_log_message)
 			{
-				if ($settings['sfs_down'])
+				if ($this->config['sfs_down'])
 				{
 					$this->log_message('admin', $username, $ip, 'LOG_SFS_DOWN_USER_ALLOWED', $email);
 				}
@@ -387,22 +376,11 @@ class main_listener implements EventSubscriberInterface
 		{
 			include($this->root_path . 'includes/functions_user.' . $this->php_ext);
 		}
-		$settings = $this->get_settings();
 
-		$ban_reason = !empty($settings['sfs_ban_reason']) ? $this->user->lang['SFS_BANNED'] : '';
+		$ban_reason = (!empty($this->config['sfs_ban_reason'])) ? $this->user->lang['SFS_BANNED'] : '';
 		// ban the nub for one hour
 		user_ban('ip', $ip, 60, 0, false, $this->user->lang['SFS_BANNED'], $ban_reason);
 
 		return;
-	}
-
-	// retrieve config text entries
-	private function get_settings()
-	{
-		$settings = $this->config_text->get('sfs_settings');
-
-		$settings = unserialize($settings);
-
-		return $settings;
 	}
 }
