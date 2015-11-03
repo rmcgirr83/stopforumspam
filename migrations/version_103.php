@@ -29,7 +29,7 @@ class version_103 extends \phpbb\db\migration\migration
 
 	public function update_data()
 	{
-		$settings = $this->config_text->get(sfs_settings);
+		$settings = $this->config_text->get('sfs_settings');
 		$settings_array = unserialize($settings);
 		return(array(
 			array('config.add', array('sfs_settings', $settings['sfs_settings'])),
@@ -40,5 +40,6 @@ class version_103 extends \phpbb\db\migration\migration
 			array('config.add', array('sfs_down'), $settings['sfs_down']),
 			array('config.update', array('sfs_version', '1.0.3')),
 		));
+		$this->config_text->remove(array('sfs_settings'));
 	}
 }
