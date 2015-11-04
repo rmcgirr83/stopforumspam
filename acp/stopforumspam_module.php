@@ -92,6 +92,8 @@ class stopforumspam_module
 	 */
 	protected function set_options()
 	{
+		global $config, $request;
+
 		$config->set('sfs_threshold', $request->variable('sfs_threshold', 0));
 		$config->set('allow_sfs', $request->variable('allow_sfs', 0));
 		$config->set('sfs_ban_ip', $request->variable('sfs_ban_ip', 0));

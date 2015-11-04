@@ -29,15 +29,21 @@ class version_103 extends \phpbb\db\migration\migration
 
 	public function update_data()
 	{
+		$this->config_text = new \phpbb\config\db_text($this->db, $this->table_prefix . 'config_text');
+
 		$settings = $this->config_text->get('sfs_settings');
-		$settings_array = unserialize($settings);
+		$settings = unserialize($settings);
+
 		return(array(
-			array('config.add', array('sfs_settings', $settings['sfs_settings'])),
-			array('config.add', array('allow_sfs'), $settings['allow_sfs']),
-			array('config.add', array('sfs_threshold'), $settings['sfs_threshold']),
-			array('config.add', array('sfs_ban_ip'), $settings['sfs_ban_ip']),
-			array('config.add', array('sfs_log_message'), $settings['sfs_log_message']),
-			array('config.add', array('sfs_down'), $settings['sfs_down']),
+			array('config.add', array('allow_sfs', $settings['allow_sfs'])),
+			array('config.add', array('sfs_threshold', $settings['sfs_threshold'])),
+			array('config.add', array('sfs_ban_ip', $settings['sfs_ban_ip'])),
+			array('config.add', array('sfs_log_message', $settings['sfs_log_message'])),
+			array('config.add', array('sfs_down', $settings['sfs_down'])),
+			array('config.add', array('sfs_by_name', $settings['sfs_by_name'])),
+			array('config.add', array('sfs_by_email', $settings['sfs_by_email'])),
+			array('config.add', array('sfs_by_ip', $settings['sfs_by_ip'])),
+			array('config.add', array('sfs_ban_reason', $settings['sfs_ban_reason'])),
 			array('config.update', array('sfs_version', '1.0.3')),
 		));
 		$this->config_text->remove(array('sfs_settings'));
