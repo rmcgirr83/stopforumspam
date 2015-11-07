@@ -37,7 +37,6 @@ $lang = array_merge($lang, array(
 	// ACP entries
 	'ACP_SFS_TITLE'			=> 'Stop Forum Spam',
 	'SFS_CONTROL'			=> 'Stop Forum Spam Settings',
-	'SFS_VERSION'			=> 'SFS Version',
 	'SFS_SETTINGS'			=> 'Settings',
 	'SFS_ENABLED'			=> 'Enable Stop Forum Spam',
 	'SFS_ENABLED_EXPLAIN'	=> 'Enable or disable the extension.  This applies to both user registration and guest posts.',

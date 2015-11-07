@@ -66,7 +66,6 @@ class stopforumspam_module
 			'SFS_BY_EMAIL'	=> ($config['sfs_by_email']) ? true : false,
 			'SFS_BY_IP'		=> ($config['sfs_by_ip']) ? true : false,
 			'SFS_BAN_REASON'	=> ($config['sfs_ban_reason']) ? true : false,
-			'SFS_VERSION'		=> $config['sfs_version'],
 
 			'U_ACTION'			=> $this->u_action,
 		));
