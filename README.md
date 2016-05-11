@@ -5,7 +5,7 @@ phpBB 3.1 Stop Forum Spam extension
 
 Extension will query the stop forum spam database on registration and posting (for guests only) and deny the post and or registration to go through if found. Will log an entry in the ACP if so set.
 
-[![Build Status](https://travis-ci.org/RMcGirr83/phpBB-3.1-stopforumspam.svg?branch=master)](https://travis-ci.org/RMcGirr83/phpBB-3.1-stopforumspam)
+[![Build Status](https://travis-ci.org/rmcgirr83/phpBB-3.1-stopforumspam.svg?branch=master)](https://travis-ci.org/rmcgirr83/phpBB-3.1-stopforumspam)
 
 ## Installation
 
@@ -14,7 +14,7 @@ Clone (or download and move) the repository into the folder ext/rmcgirr83/stopfo
 
 ```
 cd phpBB3
-git clone https://github.com/RMcGirr83/phpBB-3.1-stopforumspam.git ext/rmcgirr83/stopforumspam/
+git clone https://github.com/rmcgirr83/phpBB-3.1-stopforumspam.git ext/rmcgirr83/stopforumspam/
 ```
 
 ### 2. activate
