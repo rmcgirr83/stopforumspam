@@ -69,6 +69,8 @@ class main_listener implements EventSubscriberInterface
 			'core.posting_modify_template_vars'		=> 'poster_data_email',
 			'core.posting_modify_message_text'		=> 'poster_modify_message_text',
 			'core.posting_modify_submission_errors'	=> 'user_sfs_validate_posting',
+			// Custom events for integration with Contact Admin Extension
+			'rmcgirr83.contactadmin.modify_data_and_error'	=> 'user_sfs_validate_registration',			
 		);
 	}
 
