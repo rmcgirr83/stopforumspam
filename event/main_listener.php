@@ -86,10 +86,10 @@ class main_listener implements EventSubscriberInterface
 
 		/* On registration and only when all errors have cleared
 		 * do not want the admin message area to fill up
+		 * stopforumspam only works with IPv4 not IPv6
 		*/
-		if (!sizeof($error_array))
+		if (!sizeof($error_array) && strpos($this->user->ip, ':') == false)
 		{
-
 			$check = $this->stopforumspam_check($event['data']['username'], $this->user->ip, $event['data']['email']);
 
 			if ($check)
@@ -156,8 +156,8 @@ class main_listener implements EventSubscriberInterface
 					$error_array = array_merge($username_error, $error_array);
 				}
 			}
-
-			if (!sizeof($error_array))
+			// stopforumspam only works with IPv4 not IPv6
+			if (!sizeof($error_array) && strpos($this->user->ip, ':') == false)
 			{
 				$check = $this->stopforumspam_check($event['post_data']['username'], $this->user->ip, $event['post_data']['email']);
 
