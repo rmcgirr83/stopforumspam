@@ -197,9 +197,10 @@ class main_listener implements EventSubscriberInterface
 		}
 		else
 		{
-			if ($this->config['contact_admin_form_enable'] && $this->config['email_enable'])
+			if ($this->config['contact_admin_form_enable'] || !empty($this->config['contactadmin_enable']))
 			{
-				$message = $this->user->lang('NO_SOUP_FOR_YOU', '<a href="' . append_sid("{$this->root_path}memberlist.$this->php_ext", 'mode=contactadmin') . '">', '</a>');
+				$link = $this->config['contact_admin_form_enable'] ? '<a href="' . append_sid("{$this->root_path}memberlist.$this->php_ext", 'mode=contactadmin') . '">' : '<a href="mailto:' . htmlspecialchars($this->config['board_contact']) . '">';
+				$message = $this->user->lang('NO_SOUP_FOR_YOU', $link, '</a>');
 			}
 			else
 			{
