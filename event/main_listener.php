@@ -60,6 +60,10 @@ class main_listener implements EventSubscriberInterface
 		$this->template = $template;
 		$this->root_path = $phpbb_root_path;
 		$this->php_ext = $php_ext;
+		if (!function_exists('phpbb_validate_email'))
+		{
+			include($this->root_path . 'includes/functions_user.' . $this->php_ext);
+		}		
 	}
 
 	static public function getSubscribedEvents()
@@ -340,10 +344,7 @@ class main_listener implements EventSubscriberInterface
 	private function validate_email($email)
 	{
 		$error = array();
-		if (!function_exists('phpbb_validate_email'))
-		{
-			include($this->root_path . 'includes/functions_user.' . $this->php_ext);
-		}
+
 		$error = phpbb_validate_email($email);
 
 		return $error;
@@ -353,10 +354,6 @@ class main_listener implements EventSubscriberInterface
 	private function validate_username($username)
 	{
 		$error = array();
-		if (!function_exists('validate_string'))
-		{
-			include($this->root_path . 'includes/functions_user.' . $this->php_ext);
-		}
 		if (($result = validate_username($username)) !== false)
 		{
 			$error[] = $this->user->lang[$result . '_USERNAME'];
@@ -374,11 +371,6 @@ class main_listener implements EventSubscriberInterface
 	// ban a nub
 	private function ban_by_ip($ip)
 	{
-		if (!function_exists('user_ban'))
-		{
-			include($this->root_path . 'includes/functions_user.' . $this->php_ext);
-		}
-
 		$ban_reason = (!empty($this->config['sfs_ban_reason'])) ? $this->user->lang['SFS_BANNED'] : '';
 		// ban the nub for one hour
 		user_ban('ip', $ip, 60, 0, false, $this->user->lang['SFS_BANNED'], $ban_reason);
