@@ -63,7 +63,7 @@ class main_listener implements EventSubscriberInterface
 		if (!function_exists('phpbb_validate_email'))
 		{
 			include($this->root_path . 'includes/functions_user.' . $this->php_ext);
-		}		
+		}
 	}
 
 	static public function getSubscribedEvents()
