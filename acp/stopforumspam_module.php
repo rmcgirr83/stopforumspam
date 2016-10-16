@@ -17,11 +17,14 @@ class stopforumspam_module
 
 	function main($id, $mode)
 	{
-		global $db, $config, $request, $template, $user;
-		global $phpbb_root_path, $phpbb_admin_path, $phpEx;
+		global $config, $request, $template, $user;
+		global $phpbb_container, $phpbb_root_path, $phpEx;
+		
 
 		$this->page_title = $user->lang['SFS_CONTROL'];
 		$this->tpl_name = 'stopforumspam_body';
+		
+		$log = $phpbb_container->get('log');
 
 		add_form_key('sfs');
 		$allow_sfs = $this->allow_sfs();
@@ -49,6 +52,8 @@ class stopforumspam_module
 			{
 				// Set the options the user configured
 				$this->set_options();
+				
+				$log->add('admin', $user->data['user_id'], $user->ip, 'LOG_SFS_CONFIG_SAVED');
 
 				trigger_error($user->lang['SFS_SETTINGS_SUCCESS'] . adm_back_link($this->u_action));
 			}

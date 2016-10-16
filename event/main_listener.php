@@ -27,6 +27,9 @@ class main_listener implements EventSubscriberInterface
 	/** @var phpbb\db\driver\driver_interface */
 	protected $db;
 
+	/** @var \phpbb\controller\helper */
+	protected $helper;
+
 	/** @var \phpbb\log\log */
 	protected $log;
 
@@ -46,15 +49,18 @@ class main_listener implements EventSubscriberInterface
 		\phpbb\config\config $config,
 		\phpbb\user $user,
 		\phpbb\db\driver\driver_interface $db,
+		\phpbb\controller\helper $helper,
 		\phpbb\log\log $log,
 		\phpbb\request\request $request,
 		\phpbb\template\template $template,
 		$phpbb_root_path,
-		$php_ext)
+		$php_ext,
+		\rmcgirr83\contactadmin\controller\main_controller $contactadmin = null)
 	{
 		$this->config = $config;
 		$this->user = $user;
 		$this->db = $db;
+		$this->helper = $helper;
 		$this->log = $log;
 		$this->request = $request;
 		$this->template = $template;
@@ -197,7 +203,11 @@ class main_listener implements EventSubscriberInterface
 		}
 		else
 		{
-			if ($this->config['contact_admin_form_enable'] || !empty($this->config['contactadmin_enable']))
+			if ($this->contactadmin !== null)
+			{
+				$message = $this->user->lang('NO_SOUP_FOR_YOU', '<a href="' . $this->helper->route('rmcgirr83_contactadmin_displayform') . '">', '</a>');
+			}
+			else if ($this->config['contact_admin_form_enable'] && $this->config['email_enable'])
 			{
 				$link = $this->config['contact_admin_form_enable'] ? '<a href="' . append_sid("{$this->root_path}memberlist.$this->php_ext", 'mode=contactadmin') . '">' : '<a href="mailto:' . htmlspecialchars($this->config['board_contact']) . '">';
 				$message = $this->user->lang('NO_SOUP_FOR_YOU', $link, '</a>');
