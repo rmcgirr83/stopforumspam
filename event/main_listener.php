@@ -203,7 +203,7 @@ class main_listener implements EventSubscriberInterface
 		}
 		else
 		{
-			if ($this->contactadmin !== null)
+			if ($this->contactadmin !== null && !empty($this->config['contactadmin_enable']))
 			{
 				$message = $this->user->lang('NO_SOUP_FOR_YOU', '<a href="' . $this->helper->route('rmcgirr83_contactadmin_displayform') . '">', '</a>');
 			}
