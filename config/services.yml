@@ -2,13 +2,15 @@ services:
      rmcgirr83.stopforumspam.mainlistener:
         class: rmcgirr83\stopforumspam\event\main_listener
         arguments:
-            - @config
-            - @user
-            - @dbal.conn
-            - @log			
-            - @request
-            - @template
-            - %core.root_path%
-            - %core.php_ext% 
+            - '@config'
+            - '@user'
+            - '@dbal.conn'
+            - '@controller.helper'
+            - '@log'
+            - '@request'
+            - '@template'
+            - '%core.root_path%'
+            - '%core.php_ext%'
+            - '@?rmcgirr83.contactadmin.main.controller'            
         tags:
             - { name: event.listener }

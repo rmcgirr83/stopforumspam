@@ -66,6 +66,7 @@ class main_listener implements EventSubscriberInterface
 		$this->template = $template;
 		$this->root_path = $phpbb_root_path;
 		$this->php_ext = $php_ext;
+		$this->contactadmin = $contactadmin;
 		if (!function_exists('phpbb_validate_email'))
 		{
 			include($this->root_path . 'includes/functions_user.' . $this->php_ext);
@@ -207,7 +208,7 @@ class main_listener implements EventSubscriberInterface
 			{
 				$message = $this->user->lang('NO_SOUP_FOR_YOU', '<a href="' . $this->helper->route('rmcgirr83_contactadmin_displayform') . '">', '</a>');
 			}
-			else if ($this->config['contact_admin_form_enable'] && $this->config['email_enable'])
+			else if ($this->config['contact_admin_form_enable'] || $this->config['email_enable'])
 			{
 				$link = $this->config['contact_admin_form_enable'] ? '<a href="' . append_sid("{$this->root_path}memberlist.$this->php_ext", 'mode=contactadmin') . '">' : '<a href="mailto:' . htmlspecialchars($this->config['board_contact']) . '">';
 				$message = $this->user->lang('NO_SOUP_FOR_YOU', $link, '</a>');
