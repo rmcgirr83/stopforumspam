@@ -31,19 +31,19 @@ class version_102 extends \phpbb\db\migration\migration
 	{
 
 		$settings_ary = array(
-			'allow_sfs'		=> $this->config['allow_sfs'],
-			'sfs_threshold'		=> $this->config['sfs_threshold'],
-			'sfs_ban_ip'	=> $this->config['sfs_ban_ip'],
-			'sfs_log_message'	=> $this->config['sfs_log_message'],
-			'sfs_down'		=> $this->config['sfs_down'],
-			'sfs_by_name'	=> 1,
-			'sfs_by_email'	=> 1,
-			'sfs_by_ip'		=> 1,
+			'allow_sfs'			=> $this->config->offsetGet('allow_sfs'),
+			'sfs_threshold'		=> $this->config->offsetGet('sfs_threshold'),
+			'sfs_ban_ip'		=> $this->config->offsetGet('sfs_ban_ip'),
+			'sfs_log_message'	=> $this->config->offsetGet('sfs_log_message'),
+			'sfs_down'			=> $this->config->offsetGet('sfs_down'),
+			'sfs_by_name'		=> 1,
+			'sfs_by_email'		=> 1,
+			'sfs_by_ip'			=> 1,
 			'sfs_ban_reason'	=> 1,
 		);
 		$settings = serialize($settings_ary);
 
-		return(array(
+		return array(
 			array('config_text.add', array('sfs_settings', $settings)),
 			array('config.remove', array('allow_sfs')),
 			array('config.remove', array('sfs_threshold')),
@@ -65,6 +65,6 @@ class version_102 extends \phpbb\db\migration\migration
 					'modes'				=> array('settings'),
 				),
 			)),
-		));
+		);
 	}
 }
