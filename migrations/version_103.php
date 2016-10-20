@@ -47,6 +47,6 @@ class version_103 extends \phpbb\db\migration\container_aware_migration
 
 	protected function get($name, $default)
 	{
-		return isset($this->settings[$name]) ? $this->settings[$name] : $default;
+		return isset($this->settings[$name]) ? (int) $this->settings[$name] : $default;
 	}
 }
