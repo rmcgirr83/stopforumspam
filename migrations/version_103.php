@@ -15,7 +15,7 @@ namespace rmcgirr83\stopforumspam\migrations;
 * Primary migration
 */
 
-class version_103 extends \phpbb\db\migration\migration
+class version_103 extends \phpbb\db\migration\container_aware_migration
 {
 	static public function depends_on()
 	{
@@ -24,22 +24,28 @@ class version_103 extends \phpbb\db\migration\migration
 
 	public function update_data()
 	{
-		$this->config_text = new \phpbb\config\db_text($this->db, $this->table_prefix . 'config_text');
+		$config_text = $this->container->get('config_text');
 
-		$settings = $this->config_text->get('sfs_settings');
+		$settings = $config_text->get('sfs_settings');
 		$settings = unserialize($settings);
-		$this->config_text->delete('sfs_settings');
-		return(array(
-			array('config.add', array('allow_sfs', $settings['allow_sfs'])),
-			array('config.add', array('sfs_threshold', $settings['sfs_threshold'])),
-			array('config.add', array('sfs_ban_ip', $settings['sfs_ban_ip'])),
-			array('config.add', array('sfs_log_message', $settings['sfs_log_message'])),
-			array('config.add', array('sfs_down', $settings['sfs_down'])),
-			array('config.add', array('sfs_by_name', $settings['sfs_by_name'])),
-			array('config.add', array('sfs_by_email', $settings['sfs_by_email'])),
-			array('config.add', array('sfs_by_ip', $settings['sfs_by_ip'])),
-			array('config.add', array('sfs_ban_reason', $settings['sfs_ban_reason'])),
+
+		return array(
+			array('config.add', array('allow_sfs', $this->get($settings['allow_sfs']))),
+			array('config.add', array('sfs_threshold', $this->get($settings['sfs_threshold']))),
+			array('config.add', array('sfs_ban_ip', $this->get($settings['sfs_ban_ip']))),
+			array('config.add', array('sfs_log_message', $this->get($settings['sfs_log_message']))),
+			array('config.add', array('sfs_down', $this->get($settings['sfs_down']))),
+			array('config.add', array('sfs_by_name', $this->get($settings['sfs_by_name']))),
+			array('config.add', array('sfs_by_email', $this->get($settings['sfs_by_email']))),
+			array('config.add', array('sfs_by_ip', $this->get($settings['sfs_by_ip']))),
+			array('config.add', array('sfs_ban_reason', $this->get($settings['sfs_ban_reason']))),
 			array('config.remove', array('sfs_version')),
-		));
+			array('config_text.remove', array('sfs_settings')),
+		);
+	}
+
+	protected function get($setting)
+	{
+		return isset($setting) ? $setting : '';
 	}
 }
