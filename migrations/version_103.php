@@ -22,30 +22,31 @@ class version_103 extends \phpbb\db\migration\container_aware_migration
 		return array('\rmcgirr83\stopforumspam\migrations\version_102');
 	}
 
+	protected $settings;
+
 	public function update_data()
 	{
 		$config_text = $this->container->get('config_text');
 
-		$settings = $config_text->get('sfs_settings');
-		$settings = unserialize($settings);
+		$this->settings = unserialize($config_text->get('sfs_settings'));
 
 		return array(
-			array('config.add', array('allow_sfs', $this->get($settings['allow_sfs']))),
-			array('config.add', array('sfs_threshold', $this->get($settings['sfs_threshold']))),
-			array('config.add', array('sfs_ban_ip', $this->get($settings['sfs_ban_ip']))),
-			array('config.add', array('sfs_log_message', $this->get($settings['sfs_log_message']))),
-			array('config.add', array('sfs_down', $this->get($settings['sfs_down']))),
-			array('config.add', array('sfs_by_name', $this->get($settings['sfs_by_name']))),
-			array('config.add', array('sfs_by_email', $this->get($settings['sfs_by_email']))),
-			array('config.add', array('sfs_by_ip', $this->get($settings['sfs_by_ip']))),
-			array('config.add', array('sfs_ban_reason', $this->get($settings['sfs_ban_reason']))),
+			array('config.add', array('allow_sfs', $this->get('allow_sfs', 1))),
+			array('config.add', array('sfs_threshold', $this->get('sfs_threshold', 5))),
+			array('config.add', array('sfs_ban_ip', $this->get('sfs_ban_ip', 0))),
+			array('config.add', array('sfs_log_message', $this->get('sfs_log_message', 0))),
+			array('config.add', array('sfs_down', $this->get('sfs_down', 0))),
+			array('config.add', array('sfs_by_name', $this->get('sfs_by_name', 1))),
+			array('config.add', array('sfs_by_email', $this->get('sfs_by_email', 1))),
+			array('config.add', array('sfs_by_ip', $this->get('sfs_by_ip', 1))),
+			array('config.add', array('sfs_ban_reason', $this->get('sfs_ban_reason', 1))),
 			array('config.remove', array('sfs_version')),
 			array('config_text.remove', array('sfs_settings')),
 		);
 	}
 
-	protected function get($setting)
+	protected function get($name, $default)
 	{
-		return isset($setting) ? $setting : '';
+		return isset($this->settings[$name]) ? $this->settings[$name] : $default;
 	}
 }
