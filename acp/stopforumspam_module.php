@@ -20,6 +20,8 @@ class stopforumspam_module
 		global $config, $request, $template, $user;
 		global $phpbb_container, $phpbb_root_path, $phpEx;
 
+		$user->add_lang_ext('rmcgirr83/stopforumspam', 'acp_stopforumspam');
+
 		$this->page_title = $user->lang['SFS_CONTROL'];
 		$this->tpl_name = 'stopforumspam_body';
 
@@ -60,6 +62,7 @@ class stopforumspam_module
 
 		$template->assign_vars(array(
 			'ERROR'			=> isset($error) ? ((sizeof($error)) ? implode('<br />', $error) : '') : '',
+			'SFS_API_KEY'	=> $config['sfs_api_key'],
 			'ALLOW_SFS'		=> ($config['allow_sfs']) ? true : false,
 			'CURL_ACTIVE'	=> (!empty($allow_sfs)) ? '' : '<br /><span class="error">' . $user->lang['LOG_SFS_NEED_CURL'] .'</span>',
 			'SFS_THRESHOLD'	=> (int) $config['sfs_threshold'],
@@ -106,5 +109,6 @@ class stopforumspam_module
 		$config->set('sfs_by_email', $request->variable('sfs_by_email', 0));
 		$config->set('sfs_by_ip', $request->variable('sfs_by_ip', 0));
 		$config->set('sfs_ban_reason', $request->variable('sfs_ban_reason', 0));
+		$config->set('sfs_api_key', $request->variable('sfs_api_key', ''));
 	}
 }
