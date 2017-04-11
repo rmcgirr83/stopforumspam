@@ -54,7 +54,7 @@ class reporttosfs
 		$this->php_ext = $php_ext;
 	}
 
-	public function whoposted($username, $userip, $useremail, $usertext)
+	public function whoposted($username, $userip, $useremail)
 	{
 		// only allow this via ajax calls
 		if (!$this->request->is_ajax() || !$this->auth->acl_gets('a_', 'm_') || empty($this->config['allow_sfs']) || empty($this->config['sfs_api_key']))
@@ -74,14 +74,14 @@ class reporttosfs
 			$http_request .= '?username=' . $username_encode;
 			$http_request .= '&ip_addr=' . $userip;
 			$http_request .= '&email=' . $useremail;
-			$http_request .= '&evidence=' . $usertext;
 			$http_request .= '&api_key=' . $settings['sfs_api_key'];
 
-			$response = $this->get_file($http_request);
-
+			$json_response = new \phpbb\json_response();
 			if (!$response)
 			{
-				return false;
+				$json_response->send(array(
+					'success'	=> false,
+				));
 			}
 
 			$sfs_ip_check = $this->user->lang('SFS_IP_STOPPED', $userip);
@@ -90,7 +90,9 @@ class reporttosfs
 
 			$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_MESSAGE', time(), array($sfs_username_check, $sfs_ip_check, $sfs_email_check));
 
-			return true;
+			$json_response->send(array(
+				'success'	=> true,
+			));
 		}
 
 		return false;

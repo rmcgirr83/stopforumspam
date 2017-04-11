@@ -220,13 +220,12 @@ class main_listener implements EventSubscriberInterface
 	public function viewtopic_modify_post_row($event)
 	{
 		$poster_ip = $event['row']['poster_ip'];
-		$poster_text = $event['post_row']['MESSAGE'];
 		$poster_email = $event['row']['user_email'];
 		$poster_username = $event['row']['username'];
 
 		if ($this->auth->acl_gets('a_', 'm_') && !empty($this->config['allow_sfs'] && !empty($this->config['sfs_api_key'])))
 		{
-			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_reporttosfs', array('username' => $poster_username, 'userip' => $poster_ip, 'useremail' => $poster_email, 'usertext' => $poster_text));
+			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_reporttosfs', array('username' => $poster_username, 'userip' => $poster_ip, 'useremail' => $poster_email));
 			$event['post_row'] = array_merge($event['post_row'], array(
 				'REPORT_TO_SFS' => true,
 				'SFS_LINK'			=> '<a href="' . $reporttosfs_url . '" data-ajax="reporttosfs.report" >' . $this->user->lang['REPORT_TO_SFS'] . '</a>';,
