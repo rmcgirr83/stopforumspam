@@ -13,7 +13,7 @@
 		<dl>
 			<dt><label for="sfs_api_key">{L_SFS_API_KEY}{L_COLON}</label><br />{L_SFS_API_KEY_EXPLAIN}</dt>
 			<dd><input type="text" name="sfs_api_key" id="sfs_api_key" size="10" value="{SFS_THRESHOLD}" /></dd>
-		</dl>		
+		</dl>
 		<dl>
 			<dt>{L_SFS_ENABLED}{L_COLON}</dt>
 			<dd><input type="radio" class="radio" name="allow_sfs" value="1" <!-- IF ALLOW_SFS -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
@@ -33,7 +33,7 @@
 			<dt>{L_SFS_BY_IP}{L_COLON}</dt>
 			<dd><input type="radio" class="radio" name="sfs_by_ip" value="1" <!-- IF SFS_BY_IP -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
 				<input type="radio" class="radio" name="sfs_by_ip" value="0" <!-- IF not SFS_BY_IP -->checked="checked"<!-- ENDIF --> /> {L_NO}</dd>
-		</dl>		
+		</dl>
 		<dl>
 			<dt><label for="sfs_threshold">{L_SFS_THRESHOLD_SCORE}{L_COLON}</label><br />{L_SFS_THRESHOLD_SCORE_EXPLAIN}</dt>
 			<dd><input type="text" name="sfs_threshold" id="sfs_threshold" size="10" value="{SFS_THRESHOLD}" /></dd>
@@ -44,10 +44,14 @@
 				<input type="radio" class="radio" name="sfs_ban_ip" value="0" <!-- IF not SFS_BAN_IP -->checked="checked"<!-- ENDIF --> /> {L_NO}</dd>
 		</dl>
 		<dl>
+			<dt><label for="sfs_ban_time">{L_BAN_LENGTH}{L_COLON}</label></dt>
+			<dd><label for="sfs_ban_time"><select name="sfs_ban_time" id="sfs_ban_time">{S_BAN_END_OPTIONS}</select></label></dd>
+		</dl>
+		<dl>
 			<dt>{L_SFS_BAN_REASON}{L_COLON}<br>{L_SFS_BAN_REASON_EXPLAIN}</dt>
 			<dd><input type="radio" class="radio" name="sfs_ban_reason" value="1" <!-- IF SFS_BAN_REASON -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
 				<input type="radio" class="radio" name="sfs_ban_reason" value="0" <!-- IF not SFS_BAN_REASON -->checked="checked"<!-- ENDIF --> /> {L_NO}</dd>
-		</dl>		
+		</dl>
 		<dl>
 			<dt>{L_SFS_LOG_MESSAGE}{L_COLON}<br>{L_SFS_LOG_MESSAGE_EXPLAIN}</dt>
 			<dd><input type="radio" class="radio" name="sfs_log_message" value="1" <!-- IF SFS_LOG_MESSAGE -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
@@ -57,7 +61,7 @@
 			<dt>{L_SFS_DOWN}{L_COLON}<br>{L_SFS_DOWN_EXPLAIN}</dt>
 			<dd><input type="radio" class="radio" name="sfs_down" value="1" <!-- IF SFS_DOWN -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
 				<input type="radio" class="radio" name="sfs_down" value="0" <!-- IF not SFS_DOWN -->checked="checked"<!-- ENDIF --> /> {L_NO}</dd>
-		</dl>		
+		</dl>
 		<p class="submit-buttons">
 			<input class="button1" type="submit" id="submit" name="submit" value="{L_SUBMIT}" />&nbsp;
 			<input class="button2" type="reset" id="reset" name="reset" value="{L_RESET}" />

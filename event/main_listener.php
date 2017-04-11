@@ -385,7 +385,7 @@ class main_listener implements EventSubscriberInterface
 	{
 		$ban_reason = (!empty($this->config['sfs_ban_reason'])) ? $this->user->lang['SFS_BANNED'] : '';
 		// ban the nub for one hour
-		user_ban('ip', $ip, 60, 0, false, $this->user->lang['SFS_BANNED'], $ban_reason);
+		user_ban('ip', $ip, (int) $this->config['sfs_ban_time'], 0, false, $this->user->lang['SFS_BANNED'], $ban_reason);
 
 		return;
 	}
