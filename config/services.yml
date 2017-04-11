@@ -2,6 +2,7 @@ services:
      rmcgirr83.stopforumspam.mainlistener:
         class: rmcgirr83\stopforumspam\event\main_listener
         arguments:
+            - '@auth'
             - '@config'
             - '@user'
             - '@dbal.conn'
@@ -14,3 +15,13 @@ services:
             - '@?rmcgirr83.contactadmin.main.controller'            
         tags:
             - { name: event.listener }
+    rmcgirr83.stopforumspam.core.reporttosfs:
+        class: rmcgirr83\whoposted\core\reporttosfs
+        arguments:
+            - '@auth'
+            - '@dbal.conn'
+            - '@request'
+            - '@template'
+            - '@user'
+            - '%core.root_path%'
+            - '%core.php_ext%'

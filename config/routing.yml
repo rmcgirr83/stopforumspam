@@ -1,0 +1,3 @@
+rmcgirr83_stopforumspam_core_reporttosfs:
+    path: /reporttosfs/{username}/{userip}/{useremail}/{usertext}
+    defaults: { _controller: rmcgirr83.stopforumspam.core.stopforumspam:stopforumspam }

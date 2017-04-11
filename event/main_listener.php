@@ -46,6 +46,7 @@ class main_listener implements EventSubscriberInterface
 	protected $php_ext;
 
 	public function __construct(
+		\phpbb\auth\auth $auth,
 		\phpbb\config\config $config,
 		\phpbb\user $user,
 		\phpbb\db\driver\driver_interface $db,
@@ -57,6 +58,7 @@ class main_listener implements EventSubscriberInterface
 		$php_ext,
 		\rmcgirr83\contactadmin\controller\main_controller $contactadmin = null)
 	{
+		$this->auth = $auth;
 		$this->config = $config;
 		$this->user = $user;
 		$this->db = $db;
@@ -80,6 +82,9 @@ class main_listener implements EventSubscriberInterface
 			'core.posting_modify_template_vars'		=> 'poster_data_email',
 			'core.posting_modify_message_text'		=> 'poster_modify_message_text',
 			'core.posting_modify_submission_errors'	=> 'user_sfs_validate_posting',
+			// report to sfs?
+			'core.viewtopic_post_rowset_data'		=> 'viewtopic_post_rowset_data',
+			'core.viewtopic_modify_post_row'		=> 'viewtopic_modify_post_row',
 			// Custom events for integration with Contact Admin Extension
 			'rmcgirr83.contactadmin.modify_data_and_error'	=> 'user_sfs_validate_registration',
 		);
@@ -189,6 +194,44 @@ class main_listener implements EventSubscriberInterface
 			}
 		}
 		$event['error'] = $error_array;
+	}
+
+	/*
+	 * viewtopic_post_rowset_data	add the posters ip into the rowset
+	 * @param 	$event	\phpbb\event
+	 * @return string
+	*/	
+	public function viewtopic_post_rowset_data($event)
+	{
+		$rowset = $event['rowset_data'];
+		$row = $event['row'];
+
+		$rowset['poster_ip'] = $row['poster_ip'];
+		$rowset['user_email'] = $row['user_email'];
+
+		$event['rowset_data'] = $rowset;
+	}
+
+	/*
+	 * viewtopic_modify_post_row		show a link to admins and mods to report the spammer
+	 * @param 	$event	\phpbb\event
+	 * @return string
+	*/	
+	public function viewtopic_modify_post_row($event)
+	{
+		$poster_ip = $event['row']['poster_ip'];
+		$poster_text = $event['row']['post_text'];
+		$poster_email = $event['row']['user_email'];
+		$poster_username = $event['row']['username'];
+
+		if ($this->auth->acl_gets('a_', 'm_') && !empty($poster_ip))
+		{
+			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_reporttosfs', array('username' => $poster_username, 'userip' => $poster_ip, 'useremail' => $poster_email, 'usertext' => $poster_text));
+			$event['post_row'] = array_merge($event['post_row'], array(
+				'REPORT_TO_SFS' => true,
+				'SFS_LINK'			=> '<a href="' . $reporttosfs_url . '" data-ajax="reporttosfs.report" >' . $this->user->lang['REPORT_TO_SFS'] . '</a>';,
+			));
+		}
 	}
 
 	/*
@@ -384,8 +427,8 @@ class main_listener implements EventSubscriberInterface
 	private function ban_by_ip($ip)
 	{
 		$ban_reason = (!empty($this->config['sfs_ban_reason'])) ? $this->user->lang['SFS_BANNED'] : '';
-		// ban the nub for one hour
-		user_ban('ip', $ip, 60, 0, false, $this->user->lang['SFS_BANNED'], $ban_reason);
+		// ban the nub
+		user_ban('ip', $ip, (int) $this->config['sfs_ban_time'], 0, false, $this->user->lang['SFS_BANNED'], $ban_reason);
 
 		return;
 	}
