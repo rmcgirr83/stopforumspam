@@ -104,7 +104,7 @@ class main_listener implements EventSubscriberInterface
 		 * do not want the admin message area to fill up
 		 * stopforumspam only works with IPv4 not IPv6
 		*/
-		if (!sizeof($error_array) && strpos($this->user->ip, ':') == false)
+		if (!sizeof($error_array))
 		{
 			$check = $this->stopforumspam_check($event['data']['username'], $this->user->ip, $event['data']['email']);
 
@@ -220,11 +220,11 @@ class main_listener implements EventSubscriberInterface
 	public function viewtopic_modify_post_row($event)
 	{
 		$poster_ip = $event['row']['poster_ip'];
-		$poster_text = $event['row']['post_text'];
+		$poster_text = $event['post_row']['MESSAGE'];
 		$poster_email = $event['row']['user_email'];
 		$poster_username = $event['row']['username'];
 
-		if ($this->auth->acl_gets('a_', 'm_') && !empty($poster_ip))
+		if ($this->auth->acl_gets('a_', 'm_') && !empty($this->config['allow_sfs'] && !empty($this->config['sfs_api_key'])))
 		{
 			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_reporttosfs', array('username' => $poster_username, 'userip' => $poster_ip, 'useremail' => $poster_email, 'usertext' => $poster_text));
 			$event['post_row'] = array_merge($event['post_row'], array(
