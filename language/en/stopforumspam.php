@@ -42,4 +42,5 @@ $lang = array_merge($lang, array(
 	'SFS_ERROR_MESSAGE'	=> 'Unfortunately we can not process your request now due to problems with an external party. You can try again later.',
 	'SFS_POSTING'	=> 'No email, tried making a post',
 	'SFS_BANNED'	=> 'Found in the Stop Forum Spam database',
+	'SFS_REPORTED'	=> 'Post has already been reported',
 ));

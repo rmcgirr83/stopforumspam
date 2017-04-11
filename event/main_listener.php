@@ -200,7 +200,7 @@ class main_listener implements EventSubscriberInterface
 	 * viewtopic_post_rowset_data	add the posters ip into the rowset
 	 * @param 	$event	\phpbb\event
 	 * @return string
-	*/	
+	*/
 	public function viewtopic_post_rowset_data($event)
 	{
 		$rowset = $event['rowset_data'];
@@ -216,18 +216,20 @@ class main_listener implements EventSubscriberInterface
 	 * viewtopic_modify_post_row		show a link to admins and mods to report the spammer
 	 * @param 	$event	\phpbb\event
 	 * @return string
-	*/	
+	*/
 	public function viewtopic_modify_post_row($event)
 	{
 		$poster_ip = $event['row']['poster_ip'];
 		$poster_email = $event['row']['user_email'];
 		$poster_username = $event['row']['username'];
+		$post_id = $event['row']['post_id'];
+		$sfs_reported = $event['row']['sfs_reported']:
 
 		if ($this->auth->acl_gets('a_', 'm_') && !empty($this->config['allow_sfs'] && !empty($this->config['sfs_api_key'])))
 		{
-			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_reporttosfs', array('username' => $poster_username, 'userip' => $poster_ip, 'useremail' => $poster_email));
+			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_reporttosfs', array('username' => $poster_username, 'userip' => $poster_ip, 'useremail' => $poster_email, 'postid' => $post_id));
 			$event['post_row'] = array_merge($event['post_row'], array(
-				'REPORT_TO_SFS' => true,
+				'REPORT_TO_SFS' => empty($sfs_reported) ? true : false,
 				'SFS_LINK'			=> '<a href="' . $reporttosfs_url . '" data-ajax="reporttosfs.report" >' . $this->user->lang['REPORT_TO_SFS'] . '</a>';,
 			));
 		}

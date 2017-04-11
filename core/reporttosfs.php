@@ -54,7 +54,7 @@ class reporttosfs
 		$this->php_ext = $php_ext;
 	}
 
-	public function whoposted($username, $userip, $useremail)
+	public function whoposted($username, $userip, $useremail, $postid)
 	{
 		// only allow this via ajax calls
 		if (!$this->request->is_ajax() || !$this->auth->acl_gets('a_', 'm_') || empty($this->config['allow_sfs']) || empty($this->config['sfs_api_key']))
@@ -62,13 +62,24 @@ class reporttosfs
 			throw new http_exception(403, 'NOT_AUTHORISED');
 		}
 
+		$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
+
+		$sql = 'SELECT sfs_reported
+			FROM ' . POSTS_TABLE . '
+			WHERE ' . $this->db->sql_in_set('post_id', array( (int) $postid));
+		$result = $this->db->sql_query($sql);
+		$sfs_done = (int) $this->db->sql_fetchfield('sfs_reported');
+
+		if ($sfs_done)
+		{
+			throw new http_exception(403, 'SFS_REPORTED');
+		}
+
 		$username_encode = urlencode($username);
 
 		// We'll use curl..most servers have it installed as default
 		if (function_exists('curl_init'))
 		{
-			$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
-
 			// add the spammer to the SFS database
 			$http_request = 'http://www.stopforumspam.com/add.php';
 			$http_request .= '?username=' . $username_encode;
@@ -89,6 +100,11 @@ class reporttosfs
 			$sfs_email_check = $this->user->lang('SFS_EMAIL_STOPPED', $useremail);
 
 			$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_MESSAGE', time(), array($sfs_username_check, $sfs_ip_check, $sfs_email_check));
+
+			// Now set the new user to have the total amount of posts.  ;)
+			$this->db->sql_query('UPDATE ' . POSTS_TABLE . ' SET ' . $this->db->sql_build_array('UPDATE', array(
+				'sfs_reported' => true,
+			)) . ' WHERE post_id = ' . (int) $postid);
 
 			$json_response->send(array(
 				'success'	=> true,

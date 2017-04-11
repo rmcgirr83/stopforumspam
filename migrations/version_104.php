@@ -28,4 +28,15 @@ class version_104 extends \phpbb\db\migration\migration
 			array('config.add', array('sfs_api_key', '')),
 		));
 	}
+
+	public function update_schema()
+	{
+		return array(
+			'add_columns'	=> array(
+				$this->table_prefix . 'posts'        => array(
+					'sfs_reported'	=> array('BOOL', 0),
+				),
+			),
+		);
+	}	
 }
