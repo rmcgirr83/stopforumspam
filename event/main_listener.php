@@ -18,6 +18,9 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class main_listener implements EventSubscriberInterface
 {
+	/** @var \phpbb\auth\auth */
+	protected $auth;
+	
 	/** @var \phpbb\config\config */
 	protected $config;
 
@@ -208,6 +211,7 @@ class main_listener implements EventSubscriberInterface
 
 		$rowset['poster_ip'] = $row['poster_ip'];
 		$rowset['user_email'] = $row['user_email'];
+		$rowset['sfs_reported'] = $row['sfs_reported'];
 
 		$event['rowset_data'] = $rowset;
 	}
@@ -223,14 +227,15 @@ class main_listener implements EventSubscriberInterface
 		$poster_email = $event['row']['user_email'];
 		$poster_username = $event['row']['username'];
 		$post_id = $event['row']['post_id'];
-		$sfs_reported = $event['row']['sfs_reported']:
+		$sfs_reported = $event['row']['sfs_reported'];
 
 		if ($this->auth->acl_gets('a_', 'm_') && !empty($this->config['allow_sfs'] && !empty($this->config['sfs_api_key'])))
 		{
+			$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
 			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_reporttosfs', array('username' => $poster_username, 'userip' => $poster_ip, 'useremail' => $poster_email, 'postid' => $post_id));
 			$event['post_row'] = array_merge($event['post_row'], array(
-				'REPORT_TO_SFS' => empty($sfs_reported) ? true : false,
-				'SFS_LINK'			=> '<a href="' . $reporttosfs_url . '" data-ajax="reporttosfs.report" >' . $this->user->lang['REPORT_TO_SFS'] . '</a>';,
+				'S_REPORT_TO_SFS' => empty($sfs_reported) ? true : false,
+				'SFS_LINK'			=> '<a href="' . $reporttosfs_url . '" data-ajax="reporttosfs" >' . $this->user->lang['REPORT_TO_SFS'] . '</a>',
 			));
 		}
 	}

@@ -11,53 +11,57 @@
 <form id="acp_stopforumspam" method="post" action="{U_ACTION}">
 	<fieldset>
 		<dl>
-			<dt><label for="sfs_api_key">{L_SFS_API_KEY}{L_COLON}</label><br />{L_SFS_API_KEY_EXPLAIN}</dt>
-			<dd><input type="text" name="sfs_api_key" id="sfs_api_key" size="10" value="{SFS_THRESHOLD}" /></dd>
-		</dl>		
-		<dl>
-			<dt>{L_SFS_ENABLED}{L_COLON}</dt>
-			<dd><input type="radio" class="radio" name="allow_sfs" value="1" <!-- IF ALLOW_SFS -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
-				<input type="radio" class="radio" name="allow_sfs" value="0" <!-- IF not ALLOW_SFS -->checked="checked"<!-- ENDIF --> /> {L_NO} {CURL_ACTIVE}</dd>
+			<dt><label for="sfs_enabled">{L_SFS_ENABLED}{L_COLON}</label></dt>
+			<dd><input type="radio" class="radio" name="allow_sfs" value="1" <!-- IF ALLOW_SFS -->id="sfs_enabled" checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
+				<input type="radio" class="radio" name="allow_sfs" value="0" <!-- IF not ALLOW_SFS -->id="sfs_enabled"  checked="checked"<!-- ENDIF --> /> {L_NO} {CURL_ACTIVE}</dd>
 		</dl>
 		<dl>
-			<dt>{L_SFS_BY_NAME}{L_COLON}</dt>
-			<dd><input type="radio" class="radio" name="sfs_by_name" value="1" <!-- IF SFS_BY_NAME -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
-				<input type="radio" class="radio" name="sfs_by_name" value="0" <!-- IF not SFS_BY_NAME -->checked="checked"<!-- ENDIF --> /> {L_NO}</dd>
+			<dt><label for="sfs_by_name">{L_SFS_BY_NAME}{L_COLON}</label></dt>
+			<dd><input type="radio" class="radio" name="sfs_by_name" value="1" <!-- IF SFS_BY_NAME -->id="sfs_by_name"  checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
+				<input type="radio" class="radio" name="sfs_by_name" value="0" <!-- IF not SFS_BY_NAME -->id="sfs_by_name" checked="checked"<!-- ENDIF --> /> {L_NO}</dd>
 		</dl>
 		<dl>
-			<dt>{L_SFS_BY_EMAIL}{L_COLON}</dt>
-			<dd><input type="radio" class="radio" name="sfs_by_email" value="1" <!-- IF SFS_BY_EMAIL -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
-				<input type="radio" class="radio" name="sfs_by_email" value="0" <!-- IF not SFS_BY_EMAIL -->checked="checked"<!-- ENDIF --> /> {L_NO}</dd>
+			<dt><label for="sfs_by_email">{L_SFS_BY_EMAIL}{L_COLON}</label></dt>
+			<dd><input type="radio" class="radio" name="sfs_by_email" value="1" <!-- IF SFS_BY_EMAIL -->id="sfs_by_email" checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
+				<input type="radio" class="radio" name="sfs_by_email" value="0" <!-- IF not SFS_BY_EMAIL -->id="sfs_by_email" checked="checked"<!-- ENDIF --> /> {L_NO}</dd>
 		</dl>
 		<dl>
-			<dt>{L_SFS_BY_IP}{L_COLON}</dt>
-			<dd><input type="radio" class="radio" name="sfs_by_ip" value="1" <!-- IF SFS_BY_IP -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
-				<input type="radio" class="radio" name="sfs_by_ip" value="0" <!-- IF not SFS_BY_IP -->checked="checked"<!-- ENDIF --> /> {L_NO}</dd>
-		</dl>		
+			<dt><label for="sfs_by_ip">{L_SFS_BY_IP}{L_COLON}</label></dt>
+			<dd><input type="radio" class="radio" name="sfs_by_ip" value="1" <!-- IF SFS_BY_IP -->id="sfs_by_ip" checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
+				<input type="radio" class="radio" name="sfs_by_ip" value="0" <!-- IF not SFS_BY_IP -->id="sfs_by_ip" checked="checked"<!-- ENDIF --> /> {L_NO}</dd>
+		</dl>
 		<dl>
 			<dt><label for="sfs_threshold">{L_SFS_THRESHOLD_SCORE}{L_COLON}</label><br />{L_SFS_THRESHOLD_SCORE_EXPLAIN}</dt>
 			<dd><input type="text" name="sfs_threshold" id="sfs_threshold" size="10" value="{SFS_THRESHOLD}" /></dd>
 		</dl>
 		<dl>
-			<dt>{L_SFS_BAN_IP}{L_COLON}<br>{L_SFS_BAN_IP_EXPLAIN}</dt>
-			<dd><input type="radio" class="radio" name="sfs_ban_ip" value="1" <!-- IF SFS_BAN_IP -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
-				<input type="radio" class="radio" name="sfs_ban_ip" value="0" <!-- IF not SFS_BAN_IP -->checked="checked"<!-- ENDIF --> /> {L_NO}</dd>
+			<dt><label for="sfs_ban_ip">{L_SFS_BAN_IP}{L_COLON}</label><br>{L_SFS_BAN_IP_EXPLAIN}</dt>
+			<dd><input type="radio" class="radio" name="sfs_ban_ip" value="1" <!-- IF SFS_BAN_IP -->id="sfs_ban_ip" checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
+				<input type="radio" class="radio" name="sfs_ban_ip" value="0" <!-- IF not SFS_BAN_IP -->id="sfs_ban_ip" checked="checked"<!-- ENDIF --> /> {L_NO}</dd>
 		</dl>
 		<dl>
-			<dt>{L_SFS_BAN_REASON}{L_COLON}<br>{L_SFS_BAN_REASON_EXPLAIN}</dt>
-			<dd><input type="radio" class="radio" name="sfs_ban_reason" value="1" <!-- IF SFS_BAN_REASON -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
-				<input type="radio" class="radio" name="sfs_ban_reason" value="0" <!-- IF not SFS_BAN_REASON -->checked="checked"<!-- ENDIF --> /> {L_NO}</dd>
-		</dl>		
-		<dl>
-			<dt>{L_SFS_LOG_MESSAGE}{L_COLON}<br>{L_SFS_LOG_MESSAGE_EXPLAIN}</dt>
-			<dd><input type="radio" class="radio" name="sfs_log_message" value="1" <!-- IF SFS_LOG_MESSAGE -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
-				<input type="radio" class="radio" name="sfs_log_message" value="0" <!-- IF not SFS_LOG_MESSAGE -->checked="checked"<!-- ENDIF --> /> {L_NO}</dd>
+			<dt><label for="sfs_ban_time">{L_BAN_LENGTH}{L_COLON}</label></dt>
+			<dd><select name="sfs_ban_time" id="sfs_ban_time">{SFS_BAN_TIME}</select></dd>
 		</dl>
 		<dl>
-			<dt>{L_SFS_DOWN}{L_COLON}<br>{L_SFS_DOWN_EXPLAIN}</dt>
-			<dd><input type="radio" class="radio" name="sfs_down" value="1" <!-- IF SFS_DOWN -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
-				<input type="radio" class="radio" name="sfs_down" value="0" <!-- IF not SFS_DOWN -->checked="checked"<!-- ENDIF --> /> {L_NO}</dd>
-		</dl>		
+			<dt><label for="sfs_ban_reason">{L_SFS_BAN_REASON}{L_COLON}</label><br>{L_SFS_BAN_REASON_EXPLAIN}</dt>
+			<dd><input type="radio" class="radio" name="sfs_ban_reason" value="1" <!-- IF SFS_BAN_REASON -->id="sfs_ban_reason" checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
+				<input type="radio" class="radio" name="sfs_ban_reason" value="0" <!-- IF not SFS_BAN_REASON -->id="sfs_ban_reason" checked="checked"<!-- ENDIF --> /> {L_NO}</dd>
+		</dl>
+		<dl>
+			<dt><label for="sfs_log_message">{L_SFS_LOG_MESSAGE}{L_COLON}</label><br>{L_SFS_LOG_MESSAGE_EXPLAIN}</dt>
+			<dd><input type="radio" class="radio" name="sfs_log_message" value="1" <!-- IF SFS_LOG_MESSAGE -->id="sfs_log_message" checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
+				<input type="radio" class="radio" name="sfs_log_message" value="0" <!-- IF not SFS_LOG_MESSAGE -->id="sfs_log_message" checked="checked"<!-- ENDIF --> /> {L_NO}</dd>
+		</dl>
+		<dl>
+			<dt><label for="sfs_down">{L_SFS_DOWN}{L_COLON}</label><br>{L_SFS_DOWN_EXPLAIN}</dt>
+			<dd><input type="radio" class="radio" name="sfs_down" value="1" <!-- IF SFS_DOWN -->id="sfs_down" checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
+				<input type="radio" class="radio" name="sfs_down" value="0" <!-- IF not SFS_DOWN -->id="sfs_down" checked="checked"<!-- ENDIF --> /> {L_NO}</dd>
+		</dl>
+		<dl>
+			<dt><label for="sfs_api_key">{L_SFS_API_KEY}{L_COLON}</label><br />{L_SFS_API_KEY_EXPLAIN}</dt>
+			<dd><input type="text" name="sfs_api_key" id="sfs_api_key" class="input" value="{SFS_API_KEY}" /></dd>
+		</dl>
 		<p class="submit-buttons">
 			<input class="button1" type="submit" id="submit" name="submit" value="{L_SUBMIT}" />&nbsp;
 			<input class="button2" type="reset" id="reset" name="reset" value="{L_RESET}" />

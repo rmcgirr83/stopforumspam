@@ -10,7 +10,6 @@
 
 namespace rmcgirr83\stopforumspam\core;
 
-use Symfony\Component\HttpFoundation\JsonResponse;
 use phpbb\exception\http_exception;
 
 class reporttosfs
@@ -18,8 +17,14 @@ class reporttosfs
 	/** @var \phpbb\auth\auth */
 	protected $auth;
 
+	/** @var \phpbb\config\config */
+	protected $config;
+
 	/** @var \phpbb\db\driver\driver_interface */
 	protected $db;
+
+	/** @var \phpbb\log\log */
+	protected $log;	
 
 	/** @var \phpbb\request\request */
 	protected $request;
@@ -38,7 +43,9 @@ class reporttosfs
 
 	public function __construct(
 			\phpbb\auth\auth $auth,
+			\phpbb\config\config $config,
 			\phpbb\db\driver\driver_interface $db,
+			\phpbb\log\log $log,
 			\phpbb\request\request $request,
 			\phpbb\template\template $template,
 			\phpbb\user $user,
@@ -46,7 +53,9 @@ class reporttosfs
 			$php_ext)
 	{
 		$this->auth = $auth;
+		$this->config = $config;
 		$this->db = $db;
+		$this->log = $log;
 		$this->request = $request;
 		$this->template = $template;
 		$this->user = $user;
@@ -54,64 +63,62 @@ class reporttosfs
 		$this->php_ext = $php_ext;
 	}
 
-	public function whoposted($username, $userip, $useremail, $postid)
+	public function reporttosfs($username, $userip, $useremail, $postid)
 	{
 		// only allow this via ajax calls
-		if (!$this->request->is_ajax() || !$this->auth->acl_gets('a_', 'm_') || empty($this->config['allow_sfs']) || empty($this->config['sfs_api_key']))
+		if ($this->request->is_ajax() && $this->auth->acl_gets('a_', 'm_') && (!empty($this->config['allow_sfs']) && !empty($this->config['sfs_api_key'])))
 		{
-			throw new http_exception(403, 'NOT_AUTHORISED');
-		}
 
-		$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
+			$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
 
-		$sql = 'SELECT sfs_reported
-			FROM ' . POSTS_TABLE . '
-			WHERE ' . $this->db->sql_in_set('post_id', array( (int) $postid));
-		$result = $this->db->sql_query($sql);
-		$sfs_done = (int) $this->db->sql_fetchfield('sfs_reported');
+			$sql = 'SELECT sfs_reported
+				FROM ' . POSTS_TABLE . '
+				WHERE ' . $this->db->sql_in_set('post_id', array( (int) $postid));
+			$result = $this->db->sql_query($sql);
+			$sfs_done = (int) $this->db->sql_fetchfield('sfs_reported');
 
-		if ($sfs_done)
-		{
-			throw new http_exception(403, 'SFS_REPORTED');
-		}
-
-		$username_encode = urlencode($username);
-
-		// We'll use curl..most servers have it installed as default
-		if (function_exists('curl_init'))
-		{
-			// add the spammer to the SFS database
-			$http_request = 'http://www.stopforumspam.com/add.php';
-			$http_request .= '?username=' . $username_encode;
-			$http_request .= '&ip_addr=' . $userip;
-			$http_request .= '&email=' . $useremail;
-			$http_request .= '&api_key=' . $settings['sfs_api_key'];
-
-			$json_response = new \phpbb\json_response();
-			if (!$response)
+			if ($sfs_done)
 			{
-				$json_response->send(array(
-					'success'	=> false,
-				));
+				throw new http_exception(403, 'SFS_REPORTED');
 			}
 
-			$sfs_ip_check = $this->user->lang('SFS_IP_STOPPED', $userip);
-			$sfs_username_check = $this->user->lang('SFS_USERNAME_STOPPED', $username);
-			$sfs_email_check = $this->user->lang('SFS_EMAIL_STOPPED', $useremail);
+			$username_encode = urlencode($username);
+			$useremail_encode = urlencode($useremail);
 
-			$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_MESSAGE', time(), array($sfs_username_check, $sfs_ip_check, $sfs_email_check));
+			// We'll use curl..most servers have it installed as default
+			if (function_exists('curl_init'))
+			{
+				// add the spammer to the SFS database
+				$http_request = 'http://www.stopforumspam.com/add.php';
+				$http_request .= '?username=' . $username_encode;
+				$http_request .= '&ip_addr=75.26.95.97';//' . $userip;
+				$http_request .= '&email=' . $useremail_encode;
+				$http_request .= '&api_key=' . $this->config['sfs_api_key'];
 
-			// Now set the new user to have the total amount of posts.  ;)
-			$this->db->sql_query('UPDATE ' . POSTS_TABLE . ' SET ' . $this->db->sql_build_array('UPDATE', array(
-				'sfs_reported' => true,
-			)) . ' WHERE post_id = ' . (int) $postid);
+				$json_response = new \phpbb\json_response();
+				$response = $this->get_file($http_request);
 
-			$json_response->send(array(
-				'success'	=> true,
-			));
+				if (!$response)
+				{
+					$json_response->send(array(
+						'success'	=> false,
+					));
+				}
+
+				$sfs_username_check = $this->user->lang('SFS_USERNAME_STOPPED', $username);
+				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_REPORTED', time(), array($sfs_username_check));
+
+				// Now set the new user to have the total amount of posts.  ;)
+				$this->db->sql_query('UPDATE ' . POSTS_TABLE . ' SET ' . $this->db->sql_build_array('UPDATE', array(
+					'sfs_reported' => true,
+				)) . ' WHERE post_id = ' . (int) $postid);
+
+				$json_response->send(array(
+					'success'	=> true,
+				));
+			}
 		}
-
-		return false;
+		throw new http_exception(403, 'NOT_AUTHORISED');
 	}
 
 	// use curl to get response from SFS

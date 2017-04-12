@@ -43,4 +43,5 @@ $lang = array_merge($lang, array(
 	'SFS_POSTING'	=> 'No email, tried making a post',
 	'SFS_BANNED'	=> 'Found in the Stop Forum Spam database',
 	'SFS_REPORTED'	=> 'Post has already been reported',
+	'REPORT_TO_SFS'	=> 'Report to SFS',
 ));

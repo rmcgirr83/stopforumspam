@@ -1,5 +1,5 @@
 services:
-     rmcgirr83.stopforumspam.mainlistener:
+    rmcgirr83.stopforumspam.mainlistener:
         class: rmcgirr83\stopforumspam\event\main_listener
         arguments:
             - '@auth'
@@ -16,10 +16,12 @@ services:
         tags:
             - { name: event.listener }
     rmcgirr83.stopforumspam.core.reporttosfs:
-        class: rmcgirr83\whoposted\core\reporttosfs
+        class: rmcgirr83\stopforumspam\core\reporttosfs
         arguments:
             - '@auth'
+            - '@config'
             - '@dbal.conn'
+            - '@log'
             - '@request'
             - '@template'
             - '@user'

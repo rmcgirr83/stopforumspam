@@ -20,7 +20,8 @@ class stopforumspam_module
 		global $config, $request, $template, $user;
 		global $phpbb_container, $phpbb_root_path, $phpEx;
 
-		$user->add_lang_ext('rmcgirr83/stopforumspam', 'acp_stopforumspam');
+		$user->add_lang_ext('rmcgirr83/stopforumspam', 'acp/acp_stopforumspam');
+		$user->add_lang('acp/ban');
 
 		$this->page_title = $user->lang['SFS_CONTROL'];
 		$this->tpl_name = 'stopforumspam_body';
@@ -73,6 +74,7 @@ class stopforumspam_module
 			'SFS_BY_EMAIL'	=> ($config['sfs_by_email']) ? true : false,
 			'SFS_BY_IP'		=> ($config['sfs_by_ip']) ? true : false,
 			'SFS_BAN_REASON'	=> ($config['sfs_ban_reason']) ? true : false,
+			'SFS_BAN_TIME'		=> $this->display_ban_time($config['sfs_ban_time']),
 
 			'U_ACTION'			=> $this->u_action,
 		));
@@ -110,5 +112,23 @@ class stopforumspam_module
 		$config->set('sfs_by_ip', $request->variable('sfs_by_ip', 0));
 		$config->set('sfs_ban_reason', $request->variable('sfs_ban_reason', 0));
 		$config->set('sfs_api_key', $request->variable('sfs_api_key', ''));
+		$config->set('sfs_ban_time', $request->variable('sfs_ban_time', 0));
 	}
+
+	protected function display_ban_time($ban_time = 0)
+	{
+		global $user, $db, $template;
+
+		// Ban length options
+		$ban_text = array(0 => $user->lang['PERMANENT'], 30 => $user->lang['30_MINS'], 60 => $user->lang['1_HOUR'], 360 => $user->lang['6_HOURS'], 1440 => $user->lang['1_DAY'], 10080 => $user->lang['7_DAYS'], 20160 => $user->lang['2_WEEKS'], 40320 => $user->lang['1_MONTH'], 524160 => $user->lang['1_YEAR']);
+
+		$ban_options = '';
+		foreach ($ban_text as $length => $text)
+		{
+			$selected = ($length == $ban_time) ? ' selected="selected"' : '';
+			$ban_options .= "<option value='{$length}'$selected>$text</option>";
+		}
+
+		return $ban_options;
+	}	
 }

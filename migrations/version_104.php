@@ -26,6 +26,7 @@ class version_104 extends \phpbb\db\migration\migration
 	{
 		return(array(
 			array('config.add', array('sfs_api_key', '')),
+			array('config.add', array('sfs_ban_time', 60)),
 		));
 	}
 
