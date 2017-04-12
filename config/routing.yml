@@ -1,3 +1,6 @@
 rmcgirr83_stopforumspam_core_reporttosfs:
-    path: /reporttosfs/{username}/{userip}/{useremail}/{postid}
+    path: /reporttosfs/{username}/{userip}/{useremail}/{postid}/{posterid}
     defaults: { _controller: rmcgirr83.stopforumspam.core.reporttosfs:reporttosfs }
+    requirements:
+        postid: '/d+'
+        posterid: '/d+'

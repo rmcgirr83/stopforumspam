@@ -18,8 +18,13 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class main_listener implements EventSubscriberInterface
 {
+	private $sfs_admins_mods = array();
+
 	/** @var \phpbb\auth\auth */
 	protected $auth;
+
+	/** @var \phpbb\cache\service */
+	protected $cache;
 	
 	/** @var \phpbb\config\config */
 	protected $config;
@@ -42,6 +47,9 @@ class main_listener implements EventSubscriberInterface
 	/** @var \phpbb\template\template */
 	protected $template;
 
+	/* @var \rmcgirr83\stopforumspam\core\sfsgroups */
+	protected $sfsgroups;	
+
 	/** @var string phpBB root path */
 	protected $phpbb_root_path;
 
@@ -50,6 +58,7 @@ class main_listener implements EventSubscriberInterface
 
 	public function __construct(
 		\phpbb\auth\auth $auth,
+		\phpbb\cache\service $cache,
 		\phpbb\config\config $config,
 		\phpbb\user $user,
 		\phpbb\db\driver\driver_interface $db,
@@ -57,11 +66,13 @@ class main_listener implements EventSubscriberInterface
 		\phpbb\log\log $log,
 		\phpbb\request\request $request,
 		\phpbb\template\template $template,
+		\rmcgirr83\stopforumspam\core\sfsgroups $sfsgroups,
 		$phpbb_root_path,
 		$php_ext,
 		\rmcgirr83\contactadmin\controller\main_controller $contactadmin = null)
 	{
 		$this->auth = $auth;
+		$this->cache = $cache;
 		$this->config = $config;
 		$this->user = $user;
 		$this->db = $db;
@@ -69,6 +80,7 @@ class main_listener implements EventSubscriberInterface
 		$this->log = $log;
 		$this->request = $request;
 		$this->template = $template;
+		$this->sfsgroups = $sfsgroups
 		$this->root_path = $phpbb_root_path;
 		$this->php_ext = $php_ext;
 		$this->contactadmin = $contactadmin;
@@ -86,6 +98,7 @@ class main_listener implements EventSubscriberInterface
 			'core.posting_modify_message_text'		=> 'poster_modify_message_text',
 			'core.posting_modify_submission_errors'	=> 'user_sfs_validate_posting',
 			// report to sfs?
+			'core.viewtopic_before_f_read_check'	=> 'viewtopic_before_f_read_check',
 			'core.viewtopic_post_rowset_data'		=> 'viewtopic_post_rowset_data',
 			'core.viewtopic_modify_post_row'		=> 'viewtopic_modify_post_row',
 			// Custom events for integration with Contact Admin Extension
@@ -200,6 +213,17 @@ class main_listener implements EventSubscriberInterface
 	}
 
 	/*
+	 * 	viewtopic_before_f_read_check()	Not using this for anything other than injecting lang vars
+	*/
+	public function viewtopic_before_f_read_check()
+	{
+		$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
+		
+		// now set the variable to use further on
+		$this->sfs_admins_mods = $this->sfsgroups->getadminsmods();
+	}
+
+	/*
 	 * viewtopic_post_rowset_data	add the posters ip into the rowset
 	 * @param 	$event	\phpbb\event
 	 * @return string
@@ -223,16 +247,18 @@ class main_listener implements EventSubscriberInterface
 	*/
 	public function viewtopic_modify_post_row($event)
 	{
-		$poster_ip = $event['row']['poster_ip'];
-		$poster_email = $event['row']['user_email'];
-		$poster_username = $event['row']['username'];
-		$post_id = $event['row']['post_id'];
-		$sfs_reported = $event['row']['sfs_reported'];
+		$row = $event['row'];
 
-		if ($this->auth->acl_gets('a_', 'm_') && !empty($this->config['allow_sfs'] && !empty($this->config['sfs_api_key'])))
+		$poster_ip = $row['poster_ip'];
+		$poster_email = $row['user_email'];
+		$poster_username = $row['username'];
+		$post_id = $row['post_id'];
+		$sfs_reported = $row['sfs_reported'];
+		$poster_id = $row['poster_id'];
+
+		if ($this->auth->acl_gets('a_', 'm_') && !empty($this->config['allow_sfs'] && !empty($this->config['sfs_api_key'])) && !$sfs_reported && !in_array($poster_id, $sfs_admins_mods))
 		{
-			$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
-			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_reporttosfs', array('username' => $poster_username, 'userip' => $poster_ip, 'useremail' => $poster_email, 'postid' => $post_id));
+			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_reporttosfs', array('username' => $poster_username, 'userip' => $poster_ip, 'useremail' => $poster_email, 'postid' => $post_id, 'posterid' => $poster_id));
 			$event['post_row'] = array_merge($event['post_row'], array(
 				'S_REPORT_TO_SFS' => empty($sfs_reported) ? true : false,
 				'SFS_LINK'			=> '<a href="' . $reporttosfs_url . '" data-ajax="reporttosfs" >' . $this->user->lang['REPORT_TO_SFS'] . '</a>',

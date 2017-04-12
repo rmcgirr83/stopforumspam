@@ -3,6 +3,7 @@ services:
         class: rmcgirr83\stopforumspam\event\main_listener
         arguments:
             - '@auth'
+            - '@cache'
             - '@config'
             - '@user'
             - '@dbal.conn'
@@ -10,20 +11,28 @@ services:
             - '@log'
             - '@request'
             - '@template'
+            - '@rmcgirr83.stopforumspam.core.sfsgroups'
             - '%core.root_path%'
             - '%core.php_ext%'
-            - '@?rmcgirr83.contactadmin.main.controller'            
+            - '@?rmcgirr83.contactadmin.main.controller'
         tags:
             - { name: event.listener }
     rmcgirr83.stopforumspam.core.reporttosfs:
         class: rmcgirr83\stopforumspam\core\reporttosfs
         arguments:
             - '@auth'
+            - '@cache'
             - '@config'
             - '@dbal.conn'
             - '@log'
             - '@request'
             - '@template'
             - '@user'
+            - '@rmcgirr83.stopforumspam.core.sfsgroups'
             - '%core.root_path%'
             - '%core.php_ext%'
+    rmcgirr83.stopforumspam.core.sfsgroups:
+        class: rmcgirr83\stopforumspam\core\sfsgroups
+        arguments:
+            - '@auth'
+            - '@cache'

@@ -40,7 +40,7 @@ $lang = array_merge($lang, array(
 	'SFS_ENABLED_EXPLAIN'	=> 'Enable or disable the extension.  This applies to both user registration and guest posts.',
 	'SFS_THRESHOLD_SCORE'	=> 'Stop Forum Spam threshold',
 	'SFS_THRESHOLD_SCORE_EXPLAIN'	=> 'The extension will check against a threshold (e.g., the number of times a user name, email or IP address is found within the stop forum database). You can input any number between 1 and 99.  The lower the number the greater the possibility of a false positive.',
-	'SFS_LOG_MESSAGE'			=> 'Log a message',
+	'SFS_LOG_MESSAGE'		=> 'Log a message',
 	'SFS_LOG_MESSAGE_EXPLAIN'	=> 'If set as yes messages will be logged in the ACP in either the admin or user logs stating the action done.',
 	'SFS_BAN_IP'			=> 'Ban IP',
 	'SFS_BAN_IP_EXPLAIN'	=> 'If set as yes the users IP will be banned per the setting of “Length of ban”',
@@ -51,7 +51,7 @@ $lang = array_merge($lang, array(
 	'SFS_API_KEY'			=> 'Stop Forum Spam API key',
 	'SFS_API_KEY_EXPLAIN'	=> 'If you want to submit spammers to the Stop Forum Spam database, input your API key from <a target="_new" href="http://www.stopforumspam.com/keys">stop forum spam</a> here.  You must be registered on the SFS website to get an API key',
 	// ACP message logs
-	'LOG_SFS_MESSAGE'			=> '<strong>Stop Forum Spam triggered</strong>:<br />Username: %1$s<br />IP: %2$s<br />Email: %3$s',
+	'LOG_SFS_MESSAGE'		=> '<strong>Stop Forum Spam triggered</strong>:<br />Username: %1$s<br />IP: %2$s<br />Email: %3$s',
 	'LOG_SFS_DOWN'			=> '<strong>Stop Forum Spam was down during a registration or a forum post</strong>',
 	'LOG_SFS_DOWN_USER_ALLOWED' => '<strong>Stop Forum Spam was down.</strong> Following user was allowed on the forum:<br />Username: %1$s<br />IP:%2$s<br />Email: %3$s',
 	'LOG_SFS_NEED_CURL'		=> 'The stop forum spam extension needs <strong>cURL</strong> to work correctly.  Please speak to your server host to get cURL installed and active.',

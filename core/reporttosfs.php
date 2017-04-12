@@ -35,6 +35,9 @@ class reporttosfs
 	/** @var \phpbb\user */
 	protected $user;
 
+	/* @var \rmcgirr83\stopforumspam\core\sfsgroups */
+	protected $sfsgroups;
+	
 	/** @var string phpBB root path */
 	protected $phpbb_root_path;
 
@@ -49,6 +52,7 @@ class reporttosfs
 			\phpbb\request\request $request,
 			\phpbb\template\template $template,
 			\phpbb\user $user,
+			\rmcgirr83\stopforumspam\core\sfsgroups $sfsgroups,
 			$phpbb_root_path,
 			$php_ext)
 	{
@@ -59,17 +63,19 @@ class reporttosfs
 		$this->request = $request;
 		$this->template = $template;
 		$this->user = $user;
+		$this->sfsgroups = $sfsgroups
 		$this->root_path = $phpbb_root_path;
 		$this->php_ext = $php_ext;
 	}
 
-	public function reporttosfs($username, $userip, $useremail, $postid)
+	public function reporttosfs($username, $userip, $useremail, $postid, $posterid)
 	{
+		$admins_mods = $this->sfsgroups->getadminsmods();
+		
 		// only allow this via ajax calls
-		if ($this->request->is_ajax() && $this->auth->acl_gets('a_', 'm_') && (!empty($this->config['allow_sfs']) && !empty($this->config['sfs_api_key'])))
+		if ($this->request->is_ajax() && $this->auth->acl_gets('a_', 'm_') && (!empty($this->config['allow_sfs']) && !empty($this->config['sfs_api_key'])) && !in_array($posterid, $admins_mods))
 		{
-
-			$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
+			$this->user->add_lang_ext('rmcgirr83/stopforumspam', array('stopforumspam', 'acp/acp_stopforumspam');
 
 			$sql = 'SELECT sfs_reported
 				FROM ' . POSTS_TABLE . '
@@ -101,22 +107,27 @@ class reporttosfs
 				if (!$response)
 				{
 					$json_response->send(array(
-						'success'	=> false,
+						'MESSAGE_TITLE'	=> $this->user->lang('ERROR'),
+						'MESSAGE_TEXT'	=> $this->user->lang('SFS_ERROR_MESSAGE'),
+						'SUCCESS'	=> false,
 					));
 				}
 
 				$sfs_username_check = $this->user->lang('SFS_USERNAME_STOPPED', $username);
 				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_REPORTED', time(), array($sfs_username_check));
 
-				// Now set the new user to have the total amount of posts.  ;)
+				// Now set the post as reported
 				$this->db->sql_query('UPDATE ' . POSTS_TABLE . ' SET ' . $this->db->sql_build_array('UPDATE', array(
 					'sfs_reported' => true,
 				)) . ' WHERE post_id = ' . (int) $postid);
 
 				$json_response->send(array(
-					'success'	=> true,
+					'MESSAGE_TITLE'	=> $this->user->lang('SUCCESS'),
+					'MESSAGE_TEXT'	=> $this->user->lang('SFS_SUCCESS_MESSAGE'),
+					'SUCCESS'	=> true,
 				));
 			}
+			throw new http_exception(404, 'LOG_SFS_NEED_CURL');
 		}
 		throw new http_exception(403, 'NOT_AUTHORISED');
 	}
