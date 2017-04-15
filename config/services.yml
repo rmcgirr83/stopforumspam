@@ -21,16 +21,12 @@ services:
         class: rmcgirr83\stopforumspam\core\reporttosfs
         arguments:
             - '@auth'
-            - '@cache'
             - '@config'
             - '@dbal.conn'
             - '@log'
             - '@request'
-            - '@template'
             - '@user'
             - '@rmcgirr83.stopforumspam.core.sfsgroups'
-            - '%core.root_path%'
-            - '%core.php_ext%'
     rmcgirr83.stopforumspam.core.sfsgroups:
         class: rmcgirr83\stopforumspam\core\sfsgroups
         arguments:

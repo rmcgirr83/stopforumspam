@@ -25,7 +25,7 @@ class main_listener implements EventSubscriberInterface
 
 	/** @var \phpbb\cache\service */
 	protected $cache;
-	
+
 	/** @var \phpbb\config\config */
 	protected $config;
 
@@ -48,7 +48,7 @@ class main_listener implements EventSubscriberInterface
 	protected $template;
 
 	/* @var \rmcgirr83\stopforumspam\core\sfsgroups */
-	protected $sfsgroups;	
+	protected $sfsgroups;
 
 	/** @var string phpBB root path */
 	protected $phpbb_root_path;
@@ -80,7 +80,7 @@ class main_listener implements EventSubscriberInterface
 		$this->log = $log;
 		$this->request = $request;
 		$this->template = $template;
-		$this->sfsgroups = $sfsgroups
+		$this->sfsgroups = $sfsgroups;
 		$this->root_path = $phpbb_root_path;
 		$this->php_ext = $php_ext;
 		$this->contactadmin = $contactadmin;
@@ -217,10 +217,13 @@ class main_listener implements EventSubscriberInterface
 	*/
 	public function viewtopic_before_f_read_check()
 	{
-		$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
-		
-		// now set the variable to use further on
-		$this->sfs_admins_mods = $this->sfsgroups->getadminsmods();
+		if ($this->config['allow_sfs'])
+		{
+			$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
+			// now set the variable to use further on
+			$this->sfs_admins_mods = $this->sfsgroups->getadminsmods();
+			// Output the data vars to the template
+		}
 	}
 
 	/*
@@ -249,19 +252,14 @@ class main_listener implements EventSubscriberInterface
 	{
 		$row = $event['row'];
 
-		$poster_ip = $row['poster_ip'];
-		$poster_email = $row['user_email'];
-		$poster_username = $row['username'];
-		$post_id = $row['post_id'];
-		$sfs_reported = $row['sfs_reported'];
-		$poster_id = $row['poster_id'];
-
-		if ($this->auth->acl_gets('a_', 'm_') && !empty($this->config['allow_sfs'] && !empty($this->config['sfs_api_key'])) && !$sfs_reported && !in_array($poster_id, $sfs_admins_mods))
+		if ($this->auth->acl_gets('a_', 'm_') && !empty($row['poster_ip']) && !empty($this->config['allow_sfs'] && !empty($this->config['sfs_api_key'])) && !in_array((int) $event['poster_id'], $this->sfs_admins_mods))
 		{
-			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_reporttosfs', array('username' => $poster_username, 'userip' => $poster_ip, 'useremail' => $poster_email, 'postid' => $post_id, 'posterid' => $poster_id));
+			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_reporttosfs', array('username' => $row['username'], 'userip' => $row['poster_ip'], 'useremail' => $row['user_email'], 'postid' => (int) $row['post_id'], 'posterid' => (int) $event['poster_id']));
+			$report_link = phpbb_version_compare(PHPBB_VERSION, '3.2', '>=') ? '<a href="' . $reporttosfs_url . '" title="' . $this->user->lang['REPORT_TO_SFS']. '" data-ajax="reporttosfs" class="button button-icon-only"><i class="icon fa-exchange fa-fw" aria-hidden="true"></i><span>' . $this->user->lang['REPORT_TO_SFS'] . '</span></a>' : '<a href="' . $reporttosfs_url . '" title="' . $this->user->lang['REPORT_TO_SFS']. '" data-ajax="reporttosfs" class="button icon-button"><span>' . $this->user->lang['REPORT_TO_SFS'] . '</span></a>';
+			
 			$event['post_row'] = array_merge($event['post_row'], array(
-				'S_REPORT_TO_SFS' => empty($sfs_reported) ? true : false,
-				'SFS_LINK'			=> '<a href="' . $reporttosfs_url . '" data-ajax="reporttosfs" >' . $this->user->lang['REPORT_TO_SFS'] . '</a>',
+				'S_REPORT_TO_SFS' => true,
+				'SFS_LINK'			=> (!$row['sfs_reported']) ? $report_link : '',
 			));
 		}
 	}

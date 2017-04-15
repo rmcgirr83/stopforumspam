@@ -10,6 +10,7 @@
 
 namespace rmcgirr83\stopforumspam\core;
 
+use Symfony\Component\HttpFoundation\JsonResponse;
 use phpbb\exception\http_exception;
 
 class reporttosfs
@@ -24,25 +25,16 @@ class reporttosfs
 	protected $db;
 
 	/** @var \phpbb\log\log */
-	protected $log;	
+	protected $log;
 
 	/** @var \phpbb\request\request */
 	protected $request;
-
-	/** @var \phpbb\template\template */
-	protected $template;
 
 	/** @var \phpbb\user */
 	protected $user;
 
 	/* @var \rmcgirr83\stopforumspam\core\sfsgroups */
 	protected $sfsgroups;
-	
-	/** @var string phpBB root path */
-	protected $phpbb_root_path;
-
-	/** @var string PHP extension */
-	protected $php_ext;
 
 	public function __construct(
 			\phpbb\auth\auth $auth,
@@ -50,32 +42,28 @@ class reporttosfs
 			\phpbb\db\driver\driver_interface $db,
 			\phpbb\log\log $log,
 			\phpbb\request\request $request,
-			\phpbb\template\template $template,
 			\phpbb\user $user,
-			\rmcgirr83\stopforumspam\core\sfsgroups $sfsgroups,
-			$phpbb_root_path,
-			$php_ext)
+			\rmcgirr83\stopforumspam\core\sfsgroups $sfsgroups)
 	{
 		$this->auth = $auth;
 		$this->config = $config;
 		$this->db = $db;
 		$this->log = $log;
 		$this->request = $request;
-		$this->template = $template;
 		$this->user = $user;
-		$this->sfsgroups = $sfsgroups
-		$this->root_path = $phpbb_root_path;
-		$this->php_ext = $php_ext;
+		$this->sfsgroups = $sfsgroups;
 	}
 
 	public function reporttosfs($username, $userip, $useremail, $postid, $posterid)
 	{
 		$admins_mods = $this->sfsgroups->getadminsmods();
-		
+
+		$data = array();
 		// only allow this via ajax calls
-		if ($this->request->is_ajax() && $this->auth->acl_gets('a_', 'm_') && (!empty($this->config['allow_sfs']) && !empty($this->config['sfs_api_key'])) && !in_array($posterid, $admins_mods))
+		//$this->request->is_ajax() && 
+		if ($this->auth->acl_gets('a_', 'm_') && (!empty($this->config['allow_sfs']) && !empty($this->config['sfs_api_key'])) && !in_array($posterid, $admins_mods))
 		{
-			$this->user->add_lang_ext('rmcgirr83/stopforumspam', array('stopforumspam', 'acp/acp_stopforumspam');
+			$this->user->add_lang_ext('rmcgirr83/stopforumspam', array('stopforumspam', 'acp/acp_stopforumspam'));
 
 			$sql = 'SELECT sfs_reported
 				FROM ' . POSTS_TABLE . '
@@ -94,26 +82,28 @@ class reporttosfs
 			// We'll use curl..most servers have it installed as default
 			if (function_exists('curl_init'))
 			{
+
 				// add the spammer to the SFS database
 				$http_request = 'http://www.stopforumspam.com/add.php';
 				$http_request .= '?username=' . $username_encode;
-				$http_request .= '&ip_addr=75.26.95.97';//' . $userip;
+				$http_request .= '&ip_addr=' . $userip;
 				$http_request .= '&email=' . $useremail_encode;
 				$http_request .= '&api_key=' . $this->config['sfs_api_key'];
 
-				$json_response = new \phpbb\json_response();
 				$response = $this->get_file($http_request);
 
 				if (!$response)
 				{
-					$json_response->send(array(
+					$data = array(
 						'MESSAGE_TITLE'	=> $this->user->lang('ERROR'),
 						'MESSAGE_TEXT'	=> $this->user->lang('SFS_ERROR_MESSAGE'),
-						'SUCCESS'	=> false,
-					));
+						'success'	=> false,
+					);
+					return new JsonResponse($data);
 				}
 
 				$sfs_username_check = $this->user->lang('SFS_USERNAME_STOPPED', $username);
+				//$sfs_postid = 
 				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_REPORTED', time(), array($sfs_username_check));
 
 				// Now set the post as reported
@@ -121,13 +111,15 @@ class reporttosfs
 					'sfs_reported' => true,
 				)) . ' WHERE post_id = ' . (int) $postid);
 
-				$json_response->send(array(
+				$data = array(
 					'MESSAGE_TITLE'	=> $this->user->lang('SUCCESS'),
 					'MESSAGE_TEXT'	=> $this->user->lang('SFS_SUCCESS_MESSAGE'),
-					'SUCCESS'	=> true,
-				));
+					'success'	=> true,
+					'postid'	=> $postid,
+				);
+				return new JsonResponse($data);
 			}
-			throw new http_exception(404, 'LOG_SFS_NEED_CURL');
+			throw new http_exception(404, 'SFS_NEED_CURL');
 		}
 		throw new http_exception(403, 'NOT_AUTHORISED');
 	}

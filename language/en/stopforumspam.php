@@ -45,4 +45,6 @@ $lang = array_merge($lang, array(
 	'SFS_REPORTED'	=> 'Post has already been reported',
 	'REPORT_TO_SFS'	=> 'Report to SFS',
 	'SFS_SUCCESS_MESSAGE'	=> 'User was successfully reported to the stop forum database',
+	'SFS_WAS_REPORTED'	=> 'Post was reported to SFS',
+	'SFS_NEED_CURL'	=> 'The extension requires cURL which doesn’t seem to be installed',
 ));

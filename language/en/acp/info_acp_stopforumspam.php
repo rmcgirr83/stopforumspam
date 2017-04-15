@@ -44,4 +44,5 @@ $lang = array_merge($lang, array(
 	'LOG_SFS_NEED_CURL'		=> 'The stop forum spam extension needs <strong>cURL</strong> to work correctly.  Please speak to your server host to get cURL installed and active.',
 	'LOG_SFS_CONFIG_SAVED'	=> '<strong>Stop Forum Spam settings changed</strong>',
 	'LOG_SFS_REPORTED'		=> '<strong>User was reported to SFS</strong><br>» %1$s',
+	'LOG_SFS_REPORTED_CLEARED'	=> 'Reported posts to stop forum spam were cleared',
 ));

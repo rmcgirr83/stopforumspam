@@ -17,16 +17,31 @@ class stopforumspam_module
 
 	function main($id, $mode)
 	{
-		global $config, $request, $template, $user;
+		global $config, $db, $request, $template, $user;
 		global $phpbb_container, $phpbb_root_path, $phpEx;
 
 		$user->add_lang_ext('rmcgirr83/stopforumspam', 'acp/acp_stopforumspam');
 		$user->add_lang('acp/ban');
 
+		$log = $phpbb_container->get('log');
+
+		$action = $request->variable('action', '');
+		if ($action == 'reset_sfs')
+		{
+			$sql = 'UPDATE ' . POSTS_TABLE . ' SET sfs_reported = 0
+				WHERE sfs_reported = 1';
+			$db->sql_query($sql);
+
+			$log->add('admin', $user->data['user_id'], $user->ip, 'LOG_SFS_REPORTED_CLEARED');
+
+			if ($request->is_ajax())
+			{
+				trigger_error('SFS_REPORTED_CLEARED');
+			}
+		}
+
 		$this->page_title = $user->lang['SFS_CONTROL'];
 		$this->tpl_name = 'stopforumspam_body';
-
-		$log = $phpbb_container->get('log');
 
 		add_form_key('sfs');
 		$allow_sfs = $this->allow_sfs();
@@ -130,5 +145,5 @@ class stopforumspam_module
 		}
 
 		return $ban_options;
-	}	
+	}
 }

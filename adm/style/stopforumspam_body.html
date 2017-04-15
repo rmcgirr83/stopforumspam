@@ -8,8 +8,8 @@
 	</div>
 <!-- ENDIF -->
 
-<form id="acp_stopforumspam" method="post" action="{U_ACTION}">
-	<fieldset>
+<fieldset>
+	<form id="acp_stopforumspam" method="post" action="{U_ACTION}">
 		<dl>
 			<dt><label for="sfs_enabled">{L_SFS_ENABLED}{L_COLON}</label></dt>
 			<dd><input type="radio" class="radio" name="allow_sfs" value="1" <!-- IF ALLOW_SFS -->id="sfs_enabled" checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
@@ -61,12 +61,20 @@
 		<dl>
 			<dt><label for="sfs_api_key">{L_SFS_API_KEY}{L_COLON}</label><br />{L_SFS_API_KEY_EXPLAIN}</dt>
 			<dd><input type="text" name="sfs_api_key" id="sfs_api_key" class="input" value="{SFS_API_KEY}" /></dd>
-		</dl>
+		</dl>	
 		<p class="submit-buttons">
 			<input class="button1" type="submit" id="submit" name="submit" value="{L_SUBMIT}" />&nbsp;
 			<input class="button2" type="reset" id="reset" name="reset" value="{L_RESET}" />
 		</p>
 		{S_FORM_TOKEN}
-	</fieldset>
-</form>
+	</form>
+</fieldset>
+<fieldset>	
+	<form id="action_reset_sfs_reported" method="post" action="{U_ACTION}" data-ajax="true">
+		<dl>
+			<dt><label for="action_reset_sfs">{L_SFS_CLEAR}</label><br /><span>{L_SFS_CLEAR_EXPLAIN}</span></dt>
+			<dd><input type="hidden" name="action" value="reset_sfs" /><input class="button2" type="submit" id="action_reset_sfs" name="action_reset_sfs" value="{L_RUN}" /></dd>
+		</dl>
+	</form>
+</fieldset>
 <!-- INCLUDE overall_footer.html -->

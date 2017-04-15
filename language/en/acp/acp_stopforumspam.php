@@ -50,11 +50,9 @@ $lang = array_merge($lang, array(
 	'SFS_DOWN_EXPLAIN'		=> 'Should registration/posting go through if the stop forum spam website is down',
 	'SFS_API_KEY'			=> 'Stop Forum Spam API key',
 	'SFS_API_KEY_EXPLAIN'	=> 'If you want to submit spammers to the Stop Forum Spam database, input your API key from <a target="_new" href="http://www.stopforumspam.com/keys">stop forum spam</a> here.  You must be registered on the SFS website to get an API key',
-	// ACP message logs
-	'LOG_SFS_MESSAGE'		=> '<strong>Stop Forum Spam triggered</strong>:<br />Username: %1$s<br />IP: %2$s<br />Email: %3$s',
-	'LOG_SFS_DOWN'			=> '<strong>Stop Forum Spam was down during a registration or a forum post</strong>',
-	'LOG_SFS_DOWN_USER_ALLOWED' => '<strong>Stop Forum Spam was down.</strong> Following user was allowed on the forum:<br />Username: %1$s<br />IP:%2$s<br />Email: %3$s',
-	'LOG_SFS_NEED_CURL'		=> 'The stop forum spam extension needs <strong>cURL</strong> to work correctly.  Please speak to your server host to get cURL installed and active.',
+	'SFS_CLEAR'	=> 'Reset reported posts',
+	'SFS_CLEAR_EXPLAIN'	=> 'Will reset all posts reported to stop forum spam',
+	// ACP messages
 	'SFS_BY_NAME'	=> 'Check against user name',
 	'SFS_BY_EMAIL'	=> 'Check against email',
 	'SFS_BY_IP'		=> 'Check against IP',
@@ -62,4 +60,5 @@ $lang = array_merge($lang, array(
 	'TOO_LARGE_SFS_THRESHOLD'	=> 'The threshold value is too large.',
 	'SFS_SETTINGS_ERROR'		=> 'There was an error saving your settings. Please submit the back trace with your error report.',
 	'SFS_SETTINGS_SUCCESS'		=> 'The settings were successfully saved.',
+	'SFS_REPORTED_CLEARED' => 'Posts reported to stop forum spam were reset.',
 ));
