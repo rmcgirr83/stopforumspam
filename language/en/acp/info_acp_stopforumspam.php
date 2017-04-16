@@ -38,9 +38,11 @@ $lang = array_merge($lang, array(
 	'ACP_SFS_TITLE'			=> 'Stop Forum Spam',
 	'SFS_CONTROL'			=> 'Stop Forum Spam Settings',
 	// ACP message logs
-	'LOG_SFS_MESSAGE'			=> '<strong>Stop Forum Spam triggered</strong>:<br />Username: %1$s<br />IP: %2$s<br />Email: %3$s',
+	'LOG_SFS_MESSAGE'		=> '<strong>Stop Forum Spam triggered</strong>:<br />Username: %1$s<br />IP: %2$s<br />Email: %3$s',
 	'LOG_SFS_DOWN'			=> '<strong>Stop Forum Spam was down during a registration or a forum post</strong>',
 	'LOG_SFS_DOWN_USER_ALLOWED' => '<strong>Stop Forum Spam was down.</strong> Following user was allowed on the forum:<br />Username: %1$s<br />IP:%2$s<br />Email: %3$s',
 	'LOG_SFS_NEED_CURL'		=> 'The stop forum spam extension needs <strong>cURL</strong> to work correctly.  Please speak to your server host to get cURL installed and active.',
 	'LOG_SFS_CONFIG_SAVED'	=> '<strong>Stop Forum Spam settings changed</strong>',
+	'LOG_SFS_REPORTED'		=> '<strong>User was reported to Stop Forum Spam</strong><br>» %1$s',
+	'LOG_SFS_REPORTED_CLEARED'	=> 'Reported posts to stop forum spam were cleared',
 ));

@@ -26,6 +26,19 @@ class version_104 extends \phpbb\db\migration\migration
 	{
 		return(array(
 			array('config.add', array('sfs_api_key', '')),
+			array('config.add', array('sfs_ban_time', 60)),
+			array('config.add', array('sfs_notify', 0)),
 		));
 	}
+
+	public function update_schema()
+	{
+		return array(
+			'add_columns'	=> array(
+				$this->table_prefix . 'posts'        => array(
+					'sfs_reported'	=> array('BOOL', 0),
+				),
+			),
+		);
+	}	
 }
