@@ -89,7 +89,8 @@ class stopforumspam_module
 			'SFS_BY_EMAIL'	=> ($config['sfs_by_email']) ? true : false,
 			'SFS_BY_IP'		=> ($config['sfs_by_ip']) ? true : false,
 			'SFS_BAN_REASON'	=> ($config['sfs_ban_reason']) ? true : false,
-			'SFS_BAN_TIME'		=> $this->display_ban_time($config['sfs_ban_time']),
+			'SFS_BAN_TIME'	=> $this->display_ban_time($config['sfs_ban_time']),
+			'SFS_NOTIFY'	=> ($config['sfs_notify']) ? true : false,
 
 			'U_ACTION'			=> $this->u_action,
 		));
@@ -126,8 +127,9 @@ class stopforumspam_module
 		$config->set('sfs_by_email', $request->variable('sfs_by_email', 0));
 		$config->set('sfs_by_ip', $request->variable('sfs_by_ip', 0));
 		$config->set('sfs_ban_reason', $request->variable('sfs_ban_reason', 0));
-		$config->set('sfs_api_key', $request->variable('sfs_api_key', ''));
+		$config->set('sfs_api_key', $request->variable('sfs_api_key', '', true));
 		$config->set('sfs_ban_time', $request->variable('sfs_ban_time', 0));
+		$config->set('sfs_notify', $request->variable('sfs_notify', 0));
 	}
 
 	protected function display_ban_time($ban_time = 0)

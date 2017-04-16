@@ -262,10 +262,10 @@ class main_listener implements EventSubscriberInterface
 	{
 		$row = $event['row'];
 		$topic_data = $event['topic_data'];
-//
-		if ($this->auth->acl_gets('a_', 'm_') && !empty($row['poster_ip']) && !empty($this->config['allow_sfs'] && !empty($this->config['sfs_api_key'])) && !in_array((int) $event['poster_id'], $this->sfs_admins_mods))
+
+		if ($this->auth->acl_gets('a_', 'm_') && !empty($row['poster_ip']) && !empty($this->config['allow_sfs'] && !empty($this->config['sfs_api_key'])) && !in_array((int) $event['poster_id'], $this->sfs_admins_mods) && $event['poster_id'] != ANONYMOUS)
 		{
-			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_reporttosfs', array('username' => $row['username'], 'userip' => $row['poster_ip'], 'useremail' => $row['user_email'], 'forumid' => $topic_data['forum_id'], 'topicid' => $topic_data['topic_id'], 'postid' => (int) $row['post_id'], 'posterid' => (int) $event['poster_id']));
+			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_reporttosfs', array('username' => $row['username'], 'userip' => $row['poster_ip'], 'useremail' => $row['user_email'], 'postid' => (int) $row['post_id'], 'posterid' => (int) $event['poster_id']));
 
 			$report_link = phpbb_version_compare(PHPBB_VERSION, '3.2', '>=') ? '<a href="' . $reporttosfs_url . '" title="' . $this->user->lang['REPORT_TO_SFS']. '" data-ajax="reporttosfs" class="button button-icon-only"><i class="icon fa-exchange fa-fw" aria-hidden="true"></i><span>' . $this->user->lang['REPORT_TO_SFS'] . '</span></a>' : '<a href="' . $reporttosfs_url . '" title="' . $this->user->lang['REPORT_TO_SFS']. '" data-ajax="reporttosfs" class="button icon-button"><span>' . $this->user->lang['REPORT_TO_SFS'] . '</span></a>';
 

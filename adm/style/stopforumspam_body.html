@@ -61,7 +61,12 @@
 		<dl>
 			<dt><label for="sfs_api_key">{L_SFS_API_KEY}{L_COLON}</label><br />{L_SFS_API_KEY_EXPLAIN}</dt>
 			<dd><input type="text" name="sfs_api_key" id="sfs_api_key" class="input" value="{SFS_API_KEY}" /></dd>
-		</dl>	
+		</dl>
+		<dl>
+			<dt><label for="sfs_notify">{L_SFS_NOTIFY}{L_COLON}</label><br />{L_SFS_NOTIFY_EXPLAIN}</dt>
+			<dd><input type="radio" class="radio" name="sfs_notify" value="1" <!-- IF SFS_NOTIFY -->id="sfs_notify" checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
+				<input type="radio" class="radio" name="sfs_notify" value="0" <!-- IF not SFS_NOTIFY -->id="sfs_notify" checked="checked"<!-- ENDIF --> /> {L_NO}</dd>
+		</dl>
 		<p class="submit-buttons">
 			<input class="button1" type="submit" id="submit" name="submit" value="{L_SUBMIT}" />&nbsp;
 			<input class="button2" type="reset" id="reset" name="reset" value="{L_RESET}" />
@@ -69,7 +74,7 @@
 		{S_FORM_TOKEN}
 	</form>
 </fieldset>
-<fieldset>	
+<fieldset>
 	<form id="action_reset_sfs_reported" method="post" action="{U_ACTION}" data-ajax="true">
 		<dl>
 			<dt><label for="action_reset_sfs">{L_SFS_CLEAR}</label><br /><span>{L_SFS_CLEAR_EXPLAIN}</span></dt>

@@ -16,6 +16,7 @@ use phpbb\exception\http_exception;
 
 class reporttosfs
 {
+	private $forumid = $topicid = 0;
 	/** @var \phpbb\auth\auth */
 	protected $auth;
 
@@ -60,19 +61,27 @@ class reporttosfs
 		$this->sfsgroups = $sfsgroups;
 	}
 
-	public function reporttosfs($username, $userip, $useremail, $forumid, $topicid, $postid, $posterid)
+	public function reporttosfs($username, $userip, $useremail, $postid, $posterid)
 	{
+		$postid = (int) $postid;
+		$posterid = (int) $posterid;
+
+		if ($postid <= 0)
+		{
+			throw new http_exception(403, 'NO_POST_SELECTED');
+		}
+
 		$admins_mods = $this->sfsgroups->getadminsmods();
 
 		$data = array();
 		// only allow this via ajax calls
-		if ($this->request->is_ajax() && $this->auth->acl_gets('a_', 'm_') && (!empty($this->config['allow_sfs']) && !empty($this->config['sfs_api_key'])) && !in_array($posterid, $admins_mods))
+		if ($this->request->is_ajax() && $this->auth->acl_gets('a_', 'm_') && !empty($this->config['allow_sfs']) && !empty($this->config['sfs_api_key']) && !in_array($posterid, $admins_mods) && $posterid != ANONYMOUS)
 		{
 			$this->user->add_lang_ext('rmcgirr83/stopforumspam', array('stopforumspam', 'acp/acp_stopforumspam'));
 
 			$sql = 'SELECT sfs_reported
 				FROM ' . POSTS_TABLE . '
-				WHERE ' . $this->db->sql_in_set('post_id', array( (int) $postid));
+				WHERE ' . $this->db->sql_in_set('post_id', array($postid));
 			$result = $this->db->sql_query($sql);
 			$sfs_done = (int) $this->db->sql_fetchfield('sfs_reported');
 			$this->db->sql_freeresult($result);
@@ -108,16 +117,22 @@ class reporttosfs
 					return new JsonResponse($data);
 				}
 
-				$this->check_report($postid);
-
-				// Now set the post as reported
-				$this->db->sql_query('UPDATE ' . POSTS_TABLE . ' SET ' . $this->db->sql_build_array('UPDATE', array(
-					'sfs_reported' => 1,
-				)) . ' WHERE post_id = ' . (int) $postid);
+				// Report the uhmmm reported?
+				if ($this->config['sfs_notify'])
+				{
+					$this->check_report($postid);
+				}
 
 				$sfs_username_check = $this->user->lang('SFS_USERNAME_STOPPED', $username);
 
-				$this->log->add('mod', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_REPORTED', false, array('forum_id' => $forumid, 'topic_id' => $topicid, 'post_id'  => $postid, $sfs_username_check));
+				if ($this->config['sfs_notify'])
+				{
+					$this->log->add('mod', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_REPORTED', false, array('forum_id' => $this->forumid, 'topic_id' => $this->topicid, 'post_id'  => $postid, $sfs_username_check));
+				}
+				else
+				{
+					$this->log->add('mod', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_REPORTED', false, array('post_id'  => $postid, $sfs_username_check));
+				}
 
 				$data = array(
 					'MESSAGE_TITLE'	=> $this->user->lang('SUCCESS'),
@@ -168,8 +183,9 @@ class reporttosfs
 			throw new http_exception(403, 'POST_NOT_EXIST');
 		}
 
-		$forum_id 							= (int) $report_data['forum_id'];
-		$topic_id 							= (int) $report_data['topic_id'];
+		$this->forumid						= (int) $report_data['forum_id'];
+		$this->topicid						= (int) $report_data['topic_id'];
+
 		$reported_post_text					= $report_data['post_text'];
 		$reported_post_bitfield				= $report_data['bbcode_bitfield'];
 		$reported_post_uid					= $report_data['bbcode_uid'];
@@ -179,7 +195,7 @@ class reporttosfs
 
 		$sql = 'SELECT *
 			FROM ' . FORUMS_TABLE . '
-			WHERE forum_id = ' . (int) $forum_id;
+			WHERE forum_id = ' . (int) $this->forumid;
 		$result = $this->db->sql_query($sql);
 		$forum_data = $this->db->sql_fetchrow($result);
 		$this->db->sql_freeresult($result);
@@ -224,8 +240,6 @@ class reporttosfs
 				$sql = 'INSERT INTO ' . REPORTS_TABLE . ' ' . $this->db->sql_build_array('INSERT', $sql_ary);
 				$this->db->sql_query($sql);
 
-				$phpbb_notifications = $this->container->get('notification_manager');
-
 				$sql = 'UPDATE ' . POSTS_TABLE . '
 					SET post_reported = 1
 					WHERE post_id = ' . (int) $postid;
@@ -235,11 +249,12 @@ class reporttosfs
 				{
 					$sql = 'UPDATE ' . TOPICS_TABLE . '
 						SET topic_reported = 1
-						WHERE topic_id = ' . (int) $topic_id . '
-							OR topic_moved_id = ' . (int) $topic_id;
+						WHERE topic_id = ' . (int) $this->topicid . '
+							OR topic_moved_id = ' . (int) $this->topicid;
 					$this->db->sql_query($sql);
 				}
 
+				$phpbb_notifications = $this->container->get('notification_manager');
 				$phpbb_notifications->add_notifications('notification.type.report_post', array_merge($report_data, $row, $forum_data, array(
 					'report_text'	=> $report_text,
 				)));
