@@ -22,6 +22,7 @@ services:
         arguments:
             - '@auth'
             - '@config'
+            - '@service_container'
             - '@dbal.conn'
             - '@log'
             - '@request'

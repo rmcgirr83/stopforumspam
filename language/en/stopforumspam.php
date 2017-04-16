@@ -43,8 +43,9 @@ $lang = array_merge($lang, array(
 	'SFS_POSTING'	=> 'No email, tried making a post',
 	'SFS_BANNED'	=> 'Found in the Stop Forum Spam database',
 	'SFS_REPORTED'	=> 'Post has already been reported',
-	'REPORT_TO_SFS'	=> 'Report to SFS',
+	'REPORT_TO_SFS'	=> 'Report to Stop Forum Spam',
 	'SFS_SUCCESS_MESSAGE'	=> 'User was successfully reported to the stop forum database',
-	'SFS_WAS_REPORTED'	=> 'Post was reported to SFS',
+	'SFS_WAS_REPORTED'	=> 'Post was reported to Stop Forum Spam',
 	'SFS_NEED_CURL'	=> 'The extension requires cURL which doesn’t seem to be installed',
+	'LOG_SFS_REPORTED' => '<strong>User was reported to Stop Forum Spam</strong><br>» %1$s',
 ));

@@ -93,6 +93,7 @@ class main_listener implements EventSubscriberInterface
 	static public function getSubscribedEvents()
 	{
 		return array(
+			'core.user_setup'						=> 'user_setup',
 			'core.ucp_register_data_after'			=> 'user_sfs_validate_registration',
 			'core.posting_modify_template_vars'		=> 'poster_data_email',
 			'core.posting_modify_message_text'		=> 'poster_modify_message_text',
@@ -104,6 +105,15 @@ class main_listener implements EventSubscriberInterface
 			// Custom events for integration with Contact Admin Extension
 			'rmcgirr83.contactadmin.modify_data_and_error'	=> 'user_sfs_validate_registration',
 		);
+	}
+
+	public function user_setup($event)
+	{
+		//Need to load lang vars for mcp logs
+		if ($this->user->page['page_name'] == 'mcp' . $this->php_ext)
+		{
+			$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'sfs_mcp');
+		}
 	}
 
 	public function user_sfs_validate_registration($event)
@@ -185,7 +195,7 @@ class main_listener implements EventSubscriberInterface
 				$username_error = $this->validate_username($event['post_data']['username']);
 				if ($username_error)
 				{
-					$error_array = array_merge($username_error, $error_array);
+					$error_array[] = $username_error;
 				}
 			}
 			// stopforumspam only works with IPv4 not IPv6
@@ -251,14 +261,15 @@ class main_listener implements EventSubscriberInterface
 	public function viewtopic_modify_post_row($event)
 	{
 		$row = $event['row'];
-
+		$topic_data = $event['topic_data'];
+//
 		if ($this->auth->acl_gets('a_', 'm_') && !empty($row['poster_ip']) && !empty($this->config['allow_sfs'] && !empty($this->config['sfs_api_key'])) && !in_array((int) $event['poster_id'], $this->sfs_admins_mods))
 		{
-			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_reporttosfs', array('username' => $row['username'], 'userip' => $row['poster_ip'], 'useremail' => $row['user_email'], 'postid' => (int) $row['post_id'], 'posterid' => (int) $event['poster_id']));
+			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_reporttosfs', array('username' => $row['username'], 'userip' => $row['poster_ip'], 'useremail' => $row['user_email'], 'forumid' => $topic_data['forum_id'], 'topicid' => $topic_data['topic_id'], 'postid' => (int) $row['post_id'], 'posterid' => (int) $event['poster_id']));
+
 			$report_link = phpbb_version_compare(PHPBB_VERSION, '3.2', '>=') ? '<a href="' . $reporttosfs_url . '" title="' . $this->user->lang['REPORT_TO_SFS']. '" data-ajax="reporttosfs" class="button button-icon-only"><i class="icon fa-exchange fa-fw" aria-hidden="true"></i><span>' . $this->user->lang['REPORT_TO_SFS'] . '</span></a>' : '<a href="' . $reporttosfs_url . '" title="' . $this->user->lang['REPORT_TO_SFS']. '" data-ajax="reporttosfs" class="button icon-button"><span>' . $this->user->lang['REPORT_TO_SFS'] . '</span></a>';
-			
+
 			$event['post_row'] = array_merge($event['post_row'], array(
-				'S_REPORT_TO_SFS' => true,
 				'SFS_LINK'			=> (!$row['sfs_reported']) ? $report_link : '',
 			));
 		}
@@ -388,11 +399,11 @@ class main_listener implements EventSubscriberInterface
 
 		if ($mode === 'admin')
 		{
-			$this->log->add('admin', $this->user->data['user_id'], $ip, $message, time(), array($sfs_username_check, $sfs_ip_check, $sfs_email_check));
+			$this->log->add('admin', $this->user->data['user_id'], $ip, $message, false, array($sfs_username_check, $sfs_ip_check, $sfs_email_check));
 		}
 		else
 		{
-			$this->log->add('user', $this->user->data['user_id'], $ip, $message, time(), array('reportee_id' => $this->user->data['user_id'], $sfs_username_check, $sfs_ip_check, $sfs_email_check));
+			$this->log->add('user', $this->user->data['user_id'], $ip, $message, false, array('reportee_id' => $this->user->data['user_id'], $sfs_username_check, $sfs_ip_check, $sfs_email_check));
 		}
 	}
 
@@ -420,7 +431,7 @@ class main_listener implements EventSubscriberInterface
 			return $contents;
 		}
 
-		$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_NEED_CURL', time());
+		$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_NEED_CURL');
 
 		return false;
 	}
