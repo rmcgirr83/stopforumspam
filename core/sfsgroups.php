@@ -10,8 +10,6 @@
 
 namespace rmcgirr83\stopforumspam\core;
 
-use phpbb\exception\http_exception;
-
 class sfsgroups
 {
 	/** @var \phpbb\auth\auth */
@@ -43,11 +41,11 @@ class sfsgroups
 			// Grab an array of user id's with mod permissions
 			$mod_ary = $this->auth->acl_get_list(false,'m_', false);
 			$mod_ary = (!empty($mod_ary[0]['m_'])) ? $mod_ary[0]['m_'] : array();
-			$admins_mods = array_unique(array_merge($admin_ary, $mod_ary));			
+			$admins_mods = array_unique(array_merge($admin_ary, $mod_ary));
 
 			// cache this data for 1 minute, this improves performance
 			$this->cache->put('_sfs_groups', $admins_mods, 60);
 		}
-		return $admins_mods;		
+		return $admins_mods;
 	}
 }

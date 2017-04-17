@@ -40,5 +40,5 @@ class version_104 extends \phpbb\db\migration\migration
 				),
 			),
 		);
-	}	
+	}
 }

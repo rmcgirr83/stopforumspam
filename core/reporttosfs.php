@@ -16,7 +16,8 @@ use phpbb\exception\http_exception;
 
 class reporttosfs
 {
-	private $forumid = $topicid = 0;
+	private $forumid = 0;
+	private $topicid = 0;
 	/** @var \phpbb\auth\auth */
 	protected $auth;
 
