@@ -261,7 +261,6 @@ class main_listener implements EventSubscriberInterface
 	public function viewtopic_modify_post_row($event)
 	{
 		$row = $event['row'];
-		$topic_data = $event['topic_data'];
 
 		if ($this->auth->acl_gets('a_', 'm_') && !empty($row['poster_ip']) && !empty($this->config['allow_sfs'] && !empty($this->config['sfs_api_key'])) && !in_array((int) $event['poster_id'], $this->sfs_admins_mods) && $event['poster_id'] != ANONYMOUS)
 		{

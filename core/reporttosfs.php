@@ -119,21 +119,16 @@ class reporttosfs
 				}
 
 				// Report the uhmmm reported?
-				if ($this->config['sfs_notify'])
-				{
-					$this->check_report($postid);
-				}
+				$this->check_report($postid);
 
-				$sfs_username_check = $this->user->lang('SFS_USERNAME_STOPPED', $username);
+				$sql = 'UPDATE ' . POSTS_TABLE . '
+					SET sfs_reported = 1
+					WHERE post_id = ' . (int) $postid;
+				$this->db->sql_query($sql);
 
-				if ($this->config['sfs_notify'])
-				{
-					$this->log->add('mod', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_REPORTED', false, array('forum_id' => $this->forumid, 'topic_id' => $this->topicid, 'post_id'  => $postid, $sfs_username_check));
-				}
-				else
-				{
-					$this->log->add('mod', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_REPORTED', false, array('post_id'  => $postid, $sfs_username_check));
-				}
+				$sfs_username = $this->user->lang('SFS_USERNAME_STOPPED', $username);
+
+				$this->log->add('mod', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_REPORTED', false, array($sfs_username, 'forum_id' => $this->forumid, 'topic_id' => $this->topicid, 'post_id'  => $postid));
 
 				$data = array(
 					'MESSAGE_TITLE'	=> $this->user->lang('SUCCESS'),
@@ -207,7 +202,7 @@ class reporttosfs
 		}
 
 		// if the post isn't reported, then report it
-		if (!$report_data['post_reported'])
+		if (!$report_data['post_reported'] && $this->config['sfs_notify'])
 		{
 			$report_name = 'other';
 			$report_text = $this->user->lang('SFS_WAS_REPORTED');
