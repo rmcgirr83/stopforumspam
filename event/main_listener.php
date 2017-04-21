@@ -84,10 +84,6 @@ class main_listener implements EventSubscriberInterface
 		$this->root_path = $phpbb_root_path;
 		$this->php_ext = $php_ext;
 		$this->contactadmin = $contactadmin;
-		if (!function_exists('phpbb_validate_email'))
-		{
-			include($this->root_path . 'includes/functions_user.' . $this->php_ext);
-		}
 	}
 
 	static public function getSubscribedEvents()
@@ -182,7 +178,10 @@ class main_listener implements EventSubscriberInterface
 		{
 			$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
 			$this->user->add_lang('ucp');
-
+			if (!function_exists('phpbb_validate_email'))
+			{
+				include($this->root_path . 'includes/functions_user.' . $this->php_ext);
+			}
 			// ensure email is populated on posting
 			$error = $this->validate_email($event['post_data']['email']);
 			if ($error)
