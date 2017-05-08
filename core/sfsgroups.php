@@ -32,7 +32,6 @@ class sfsgroups
 	 */
 	public function getadminsmods()
 	{
-		$admins_mods = array();
 		if (($admins_mods = $this->cache->get('_sfs_groups')) === false)
 		{
 			// Grab an array of user_id's with admin permissions

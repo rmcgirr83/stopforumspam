@@ -41,4 +41,14 @@ class version_104 extends \phpbb\db\migration\migration
 			),
 		);
 	}
+	public function revert_schema()
+	{
+		return array(
+			'drop_columns' => array(
+				$this->table_prefix . 'posts'	=> array(
+					'sfs_reported',
+				),
+			),
+		);
+	}
 }

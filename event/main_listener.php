@@ -324,9 +324,8 @@ class main_listener implements EventSubscriberInterface
 		$sfs_threshold = !empty($this->config['sfs_threshold']) ? $this->config['sfs_threshold'] : 1;
 
 		// Query the SFS database and pull the data into script
-		$xmlUrl = 'http://www.stopforumspam.com/api?username='.$username.'&ip='.$ip.'&email='.$email.'&f=xmldom';
-
-		$xmlStr = $this->get_file($xmlUrl);
+		$xmlUrl = 'https://www.stopforumspam.com/api?username='.$username.'&ip='.$ip.'&email='.$email.'&f=xmldom';
+		$xmlStr = $this->helper->route('rmcgirr83_stopforumspam_core_getfile', array('url' => $xmlUrl));
 
 		// Check if user is a spammer, but only if we successfully got the SFS data
 		if ($xmlStr)
@@ -405,40 +404,9 @@ class main_listener implements EventSubscriberInterface
 		}
 	}
 
-	// use curl to get response from SFS
-	private function get_file($url)
-	{
-		// We'll use curl..most servers have it installed as default
-		if (function_exists('curl_init'))
-		{
-			$ch = curl_init();
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-			curl_setopt($ch, CURLOPT_URL, $url);
-			curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-			$contents = curl_exec($ch);
-			$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-			curl_close($ch);
-
-			// if nothing is returned (SFS is down)
-			if ($httpcode != 200)
-			{
-				return false;
-			}
-
-			return $contents;
-		}
-
-		$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_NEED_CURL');
-
-		return false;
-	}
-
 	// validate email on posting
 	private function validate_email($email)
 	{
-		$error = array();
-
 		$error = phpbb_validate_email($email);
 
 		return $error;

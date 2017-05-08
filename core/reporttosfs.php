@@ -74,7 +74,6 @@ class reporttosfs
 
 		$admins_mods = $this->sfsgroups->getadminsmods();
 
-		$data = array();
 		// only allow this via ajax calls
 		if ($this->request->is_ajax() && $this->auth->acl_gets('a_', 'm_') && !empty($this->config['allow_sfs']) && !empty($this->config['sfs_api_key']) && !in_array($posterid, $admins_mods) && $posterid != ANONYMOUS)
 		{
@@ -100,7 +99,7 @@ class reporttosfs
 			{
 
 				// add the spammer to the SFS database
-				$http_request = 'http://www.stopforumspam.com/add.php';
+				$http_request = 'https://www.stopforumspam.com/add.php';
 				$http_request .= '?username=' . $username_encode;
 				$http_request .= '&ip_addr=' . $userip;
 				$http_request .= '&email=' . $useremail_encode;
@@ -144,24 +143,32 @@ class reporttosfs
 	}
 
 	// use curl to get response from SFS
-	private function get_file($url)
+	public function get_file($url)
 	{
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-		$contents = curl_exec($ch);
-		$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-		curl_close($ch);
-
-		// if nothing is returned (SFS is down)
-		if ($httpcode != 200)
+		// We'll use curl..most servers have it installed as default
+		if (function_exists('curl_init'))
 		{
-			return false;
+			$ch = curl_init();
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($ch, CURLOPT_URL, $url);
+			curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+			$contents = curl_exec($ch);
+			$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+			curl_close($ch);
+
+			// if nothing is returned (SFS is down)
+			if ($httpcode != 200)
+			{
+				return false;
+			}
+
+			return $contents;
 		}
 
-		return true;
+		$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_NEED_CURL');
+
+		return false;
 	}
 
 	private function check_report($postid)

@@ -26,8 +26,21 @@ class stopforumspam_module
 		$log = $phpbb_container->get('log');
 
 		$action = $request->variable('action', '');
+
+		$this->page_title = $user->lang['SFS_CONTROL'];
+		$this->tpl_name = 'stopforumspam_body';
+
+		add_form_key('sfs');
+		$allow_sfs = $this->allow_sfs();
+
 		if ($action == 'reset_sfs')
 		{
+			// Test if form key is valid
+			if (!check_form_key('sfs'))
+			{
+				trigger_error($user->lang['FORM_INVALID'] . adm_back_link($this->u_action), E_USER_WARNING);
+			}
+
 			$sql = 'UPDATE ' . POSTS_TABLE . ' SET sfs_reported = 0
 				WHERE sfs_reported = 1';
 			$db->sql_query($sql);
@@ -39,12 +52,6 @@ class stopforumspam_module
 				trigger_error('SFS_REPORTED_CLEARED');
 			}
 		}
-
-		$this->page_title = $user->lang['SFS_CONTROL'];
-		$this->tpl_name = 'stopforumspam_body';
-
-		add_form_key('sfs');
-		$allow_sfs = $this->allow_sfs();
 
 		if ($request->is_set_post('submit'))
 		{
