@@ -23,17 +23,11 @@ class main_listener implements EventSubscriberInterface
 	/** @var \phpbb\auth\auth */
 	protected $auth;
 
-	/** @var \phpbb\cache\service */
-	protected $cache;
-
 	/** @var \phpbb\config\config */
 	protected $config;
 
 	/** @var \phpbb\user */
 	protected $user;
-
-	/** @var phpbb\db\driver\driver_interface */
-	protected $db;
 
 	/** @var \phpbb\controller\helper */
 	protected $helper;
@@ -50,6 +44,9 @@ class main_listener implements EventSubscriberInterface
 	/* @var \rmcgirr83\stopforumspam\core\sfsgroups */
 	protected $sfsgroups;
 
+	/* @var \rmcgirr83\stopforumspam\core\sfsapi */
+	protected $sfsapi;
+
 	/** @var string phpBB root path */
 	protected $phpbb_root_path;
 
@@ -58,29 +55,27 @@ class main_listener implements EventSubscriberInterface
 
 	public function __construct(
 		\phpbb\auth\auth $auth,
-		\phpbb\cache\service $cache,
 		\phpbb\config\config $config,
 		\phpbb\user $user,
-		\phpbb\db\driver\driver_interface $db,
 		\phpbb\controller\helper $helper,
 		\phpbb\log\log $log,
 		\phpbb\request\request $request,
 		\phpbb\template\template $template,
 		\rmcgirr83\stopforumspam\core\sfsgroups $sfsgroups,
+		\rmcgirr83\stopforumspam\core\sfsapi $sfsapi,
 		$phpbb_root_path,
 		$php_ext,
 		\rmcgirr83\contactadmin\controller\main_controller $contactadmin = null)
 	{
 		$this->auth = $auth;
-		$this->cache = $cache;
 		$this->config = $config;
 		$this->user = $user;
-		$this->db = $db;
 		$this->helper = $helper;
 		$this->log = $log;
 		$this->request = $request;
 		$this->template = $template;
 		$this->sfsgroups = $sfsgroups;
+		$this->sfsapi = $sfsapi;
 		$this->root_path = $phpbb_root_path;
 		$this->php_ext = $php_ext;
 		$this->contactadmin = $contactadmin;
@@ -197,8 +192,8 @@ class main_listener implements EventSubscriberInterface
 					$error_array[] = $username_error;
 				}
 			}
-			// stopforumspam only works with IPv4 not IPv6
-			if (!sizeof($error_array) && strpos($this->user->ip, ':') == false)
+
+			if (!sizeof($error_array))
 			{
 				$check = $this->stopforumspam_check($event['post_data']['username'], $this->user->ip, $event['post_data']['email']);
 
@@ -312,9 +307,6 @@ class main_listener implements EventSubscriberInterface
 	*/
 	private function stopforumspam_check($username, $ip, $email)
 	{
-		// we need to urlencode for spaces
-		$username = urlencode($username);
-
 		// Default value
 		$spam_score = 0;
 
@@ -324,8 +316,8 @@ class main_listener implements EventSubscriberInterface
 		$sfs_threshold = !empty($this->config['sfs_threshold']) ? $this->config['sfs_threshold'] : 1;
 
 		// Query the SFS database and pull the data into script
-		$xmlUrl = 'https://www.stopforumspam.com/api?username='.$username.'&ip='.$ip.'&email='.$email.'&f=xmldom';
-		$xmlStr = $this->helper->route('rmcgirr83_stopforumspam_core_getfile', array('url' => $xmlUrl));
+		//$xmlStr = $this->getfile('query', $username, $ip, $email);
+		$xmlStr = $this->sfsapi->sfsapi('query', $username, $ip, $email, $this->config['sfs_api_key']);
 
 		// Check if user is a spammer, but only if we successfully got the SFS data
 		if ($xmlStr)

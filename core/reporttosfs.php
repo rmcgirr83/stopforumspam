@@ -42,6 +42,9 @@ class reporttosfs
 	/* @var \rmcgirr83\stopforumspam\core\sfsgroups */
 	protected $sfsgroups;
 
+	/* @var \rmcgirr83\stopforumspam\core\sfsapi */
+	protected $sfsapi;
+
 	public function __construct(
 			\phpbb\auth\auth $auth,
 			\phpbb\config\config $config,
@@ -50,7 +53,8 @@ class reporttosfs
 			\phpbb\log\log $log,
 			\phpbb\request\request $request,
 			\phpbb\user $user,
-			\rmcgirr83\stopforumspam\core\sfsgroups $sfsgroups)
+			\rmcgirr83\stopforumspam\core\sfsgroups $sfsgroups,
+			\rmcgirr83\stopforumspam\core\sfsapi $sfsapi)
 	{
 		$this->auth = $auth;
 		$this->config = $config;
@@ -60,8 +64,18 @@ class reporttosfs
 		$this->request = $request;
 		$this->user = $user;
 		$this->sfsgroups = $sfsgroups;
+		$this->sfsapi = $sfsapi;
 	}
 
+	/*
+	 * reporttosfs
+	 * @param 	$username 	username from forum inputs
+	 * @param	$userip		userip
+	 * @param	$useremail	useremail
+	 * @param	$postid		postid of the post
+	 * @param	$posterid	posterid that made the post
+	 * @return 	json response
+	*/
 	public function reporttosfs($username, $userip, $useremail, $postid, $posterid)
 	{
 		$postid = (int) $postid;
@@ -73,7 +87,6 @@ class reporttosfs
 		}
 
 		$admins_mods = $this->sfsgroups->getadminsmods();
-
 		// only allow this via ajax calls
 		if ($this->request->is_ajax() && $this->auth->acl_gets('a_', 'm_') && !empty($this->config['allow_sfs']) && !empty($this->config['sfs_api_key']) && !in_array($posterid, $admins_mods) && $posterid != ANONYMOUS)
 		{
@@ -90,87 +103,49 @@ class reporttosfs
 			{
 				throw new http_exception(403, 'SFS_REPORTED');
 			}
+			$response = $this->sfsapi->sfsapi('add', $username, $userip, $useremail, $this->config['sfs_api_key']);
 
-			$username_encode = urlencode($username);
-			$useremail_encode = urlencode($useremail);
-
-			// We'll use curl..most servers have it installed as default
-			if (function_exists('curl_init'))
+			if (!$response)
 			{
-
-				// add the spammer to the SFS database
-				$http_request = 'https://www.stopforumspam.com/add.php';
-				$http_request .= '?username=' . $username_encode;
-				$http_request .= '&ip_addr=' . $userip;
-				$http_request .= '&email=' . $useremail_encode;
-				$http_request .= '&api_key=' . $this->config['sfs_api_key'];
-
-				$response = $this->get_file($http_request);
-
-				if (!$response)
-				{
-					$data = array(
-						'MESSAGE_TITLE'	=> $this->user->lang('ERROR'),
-						'MESSAGE_TEXT'	=> $this->user->lang('SFS_ERROR_MESSAGE'),
-						'success'	=> false,
-					);
-					return new JsonResponse($data);
-				}
-
-				// Report the uhmmm reported?
-				$this->check_report($postid);
-
-				$sql = 'UPDATE ' . POSTS_TABLE . '
-					SET sfs_reported = 1
-					WHERE post_id = ' . (int) $postid;
-				$this->db->sql_query($sql);
-
-				$sfs_username = $this->user->lang('SFS_USERNAME_STOPPED', $username);
-
-				$this->log->add('mod', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_REPORTED', false, array($sfs_username, 'forum_id' => $this->forumid, 'topic_id' => $this->topicid, 'post_id'  => $postid));
-
 				$data = array(
-					'MESSAGE_TITLE'	=> $this->user->lang('SUCCESS'),
-					'MESSAGE_TEXT'	=> $this->user->lang('SFS_SUCCESS_MESSAGE'),
-					'success'	=> true,
-					'postid'	=> $postid,
+					'MESSAGE_TITLE'	=> $this->user->lang('ERROR'),
+					'MESSAGE_TEXT'	=> $this->user->lang('SFS_ERROR_MESSAGE'),
+					'success'	=> false,
 				);
 				return new JsonResponse($data);
 			}
-			throw new http_exception(404, 'SFS_NEED_CURL');
+
+			// Report the uhmmm reported?
+			if ($this->config['sfs_notify'])
+			{
+				$this->check_report($postid);
+			}
+
+			$sql = 'UPDATE ' . POSTS_TABLE . '
+				SET sfs_reported = 1
+				WHERE post_id = ' . (int) $postid;
+			$this->db->sql_query($sql);
+
+			$sfs_username = $this->user->lang('SFS_USERNAME_STOPPED', $username);
+
+			$this->log->add('mod', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_REPORTED', false, array($sfs_username, 'forum_id' => $this->forumid, 'topic_id' => $this->topicid, 'post_id'  => $postid));
+
+			$data = array(
+				'MESSAGE_TITLE'	=> $this->user->lang('SUCCESS'),
+				'MESSAGE_TEXT'	=> $this->user->lang('SFS_SUCCESS_MESSAGE'),
+				'success'	=> true,
+				'postid'	=> $postid,
+			);
+			return new JsonResponse($data);
 		}
 		throw new http_exception(403, 'NOT_AUTHORISED');
 	}
 
-	// use curl to get response from SFS
-	public function get_file($url)
-	{
-		// We'll use curl..most servers have it installed as default
-		if (function_exists('curl_init'))
-		{
-			$ch = curl_init();
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-			curl_setopt($ch, CURLOPT_URL, $url);
-			curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-			$contents = curl_exec($ch);
-			$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-			curl_close($ch);
-
-			// if nothing is returned (SFS is down)
-			if ($httpcode != 200)
-			{
-				return false;
-			}
-
-			return $contents;
-		}
-
-		$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_NEED_CURL');
-
-		return false;
-	}
-
+	/*
+	 * check_report
+	 * @param 	$postid 	postid from the report to sfs
+	 * @return 	null
+	*/
 	private function check_report($postid)
 	{
 		$sql = 'SELECT t.*, p.*
@@ -209,7 +184,7 @@ class reporttosfs
 		}
 
 		// if the post isn't reported, then report it
-		if (!$report_data['post_reported'] && $this->config['sfs_notify'])
+		if (!$report_data['post_reported'])
 		{
 			$report_name = 'other';
 			$report_text = $this->user->lang('SFS_WAS_REPORTED');
