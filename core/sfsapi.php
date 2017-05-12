@@ -24,12 +24,31 @@ class sfsapi
 		$this->log = $log;
 	}
 
-	// use curl to get response from SFS
+	/*
+	 * sfsapi
+	 * @param 	$type 			whether we are adding or querying
+	 * @param	$username		the users name
+	 * @param	$userip			the users ip
+	 * @param	$useremail		the users email addy
+	 * @param	$apikey			the api key of the forum
+	 * @return 	string			return either a string on success or false on failure
+	*/
 	public function sfsapi($type, $username, $userip, $useremail, $apikey = '')
 	{
+		// We'll use curl..most servers have it installed as default
+		if (!function_exists('curl_init'))
+		{
+			// no cURL no extension
+			$this->config->set('allow_sfs', false);
+
+			$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_NEED_CURL');
+
+			return false;
+		}
+
 		if ($type == 'add')
 		{
-			$http_request = 'http://www.stopforumspam.com/add.php';
+			$http_request = 'https://www.stopforumspam.com/add.php';
 			$http_request .= '?username=' . urlencode($username);
 			$http_request .= '&ip=' . $userip;
 			$http_request .= '&email=' . $useremail;
@@ -41,12 +60,9 @@ class sfsapi
 			$http_request = 'http://api.stopforumspam.com/api';
 			$http_request .= '?username=' . urlencode($username);
 			$http_request .= '&ip=' . $userip;
-			$http_request .= '&email=' . urlencode($useremail) . '&xmldom';
+			$http_request .= '&emailhash=' . md5($useremail) . '&json&nobadusername';
 		}
 
-		// We'll use curl..most servers have it installed as default
-		if (function_exists('curl_init'))
-		{
 			$ch = curl_init();
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 			curl_setopt($ch, CURLOPT_URL, $http_request);
@@ -63,13 +79,5 @@ class sfsapi
 			}
 
 			return $contents;
-		}
-
-		// no cURL no extension
-		$this->config->set('allow_sfs', false);
-
-		$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_NEED_CURL');
-
-		return false;
 	}
 }

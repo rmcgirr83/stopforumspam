@@ -226,7 +226,6 @@ class main_listener implements EventSubscriberInterface
 			$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
 			// now set the variable to use further on
 			$this->sfs_admins_mods = $this->sfsgroups->getadminsmods();
-			// Output the data vars to the template
 		}
 	}
 
@@ -287,7 +286,7 @@ class main_listener implements EventSubscriberInterface
 			}
 			else if ($this->config['contact_admin_form_enable'])
 			{
-				$link = ($this->config['contact_admin_form_enable'] && $this->config['email_enable']) ? append_sid("{$this->root_path}memberlist.$this->php_ext", 'mode=contactadmin') : 'mailto:' . htmlspecialchars($this->config['board_contact']);
+				$link = ($this->config['email_enable']) ? append_sid("{$this->root_path}memberlist.$this->php_ext", 'mode=contactadmin') : 'mailto:' . htmlspecialchars($this->config['board_contact']);
 				$message = $this->user->lang('NO_SOUP_FOR_YOU', '<a href="'. $link .'">','</a>');
 			}
 			else
@@ -316,36 +315,33 @@ class main_listener implements EventSubscriberInterface
 		$sfs_threshold = !empty($this->config['sfs_threshold']) ? $this->config['sfs_threshold'] : 1;
 
 		// Query the SFS database and pull the data into script
-		//$xmlStr = $this->getfile('query', $username, $ip, $email);
-		$xmlStr = $this->sfsapi->sfsapi('query', $username, $ip, $email, $this->config['sfs_api_key']);
+		$json = $this->sfsapi->sfsapi('query', $username, $ip, $email, $this->config['sfs_api_key']);
+		$json_decode = json_decode($json, true);
 
 		// Check if user is a spammer, but only if we successfully got the SFS data
-		if ($xmlStr)
+		if ($json_decode['success'])
 		{
-			$xmlObj = simplexml_load_string($xmlStr);
-
-			// Assign points for the total number of times each have been flagged
-			$ck_username = $xmlObj->username->frequency;
-			$ck_email = $xmlObj->email->frequency;
-			$ck_ip = $xmlObj->ip->frequency;
+			$username_freq = $json_decode['username']['frequency'];
+			$email_freq = $json_decode['emailhash']['frequency'];
+			$ip_freq = $json_decode['ip']['frequency'];
 
 			// ACP settings in effect
 			if ($this->config['sfs_by_name'] == false)
 			{
-				$ck_username = 0;
+				$username_freq = 0;
 			}
 
 			if ($this->config['sfs_by_email'] == false)
 			{
-				$ck_email = 0;
+				$email_freq = 0;
 			}
 
 			if ($this->config['sfs_by_ip'] == false)
 			{
-				$ck_ip = 0;
+				$ip_freq = 0;
 			}
 			// Return the total score
-			$spam_score = ($ck_username + $ck_email + $ck_ip);
+			$spam_score = ($username_freq + $email_freq + $ip_freq);
 
 			// If we've got a spammer we'll take away their soup!
 			if ($spam_score >= $sfs_threshold)
