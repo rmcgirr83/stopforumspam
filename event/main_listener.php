@@ -217,22 +217,32 @@ class main_listener implements EventSubscriberInterface
 	}
 
 	/*
-	 * 	viewtopic_before_f_read_check()	Not using this for anything other than injecting lang vars
+	 * viewtopic_before_f_read_check() 	inject lang vars and grab admins and mods
+	 * @param 		$event				\phpbb\event
+	 * @return		null
 	*/
-	public function viewtopic_before_f_read_check()
+	public function viewtopic_before_f_read_check($event)
 	{
 		if ($this->config['allow_sfs'])
 		{
 			$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
-			// now set the variable to use further on
+
+			// get global mods and admins
 			$this->sfs_admins_mods = $this->sfsgroups->getadminsmods();
+
+			// now get just the moderators of the forum
+			$forum_mods = $this->auth->acl_get_list(false, 'm_', $event['forum_id']);
+			$forum_mods = (!empty($forum_mods[$event['forum_id']]['m_'])) ? $forum_mods[$event['forum_id']]['m_'] : array();
+
+			// merge the arrays
+			$this->sfs_admins_mods = array_unique(array_merge($this->sfs_admins_mods, $forum_mods));
 		}
 	}
 
 	/*
 	 * viewtopic_post_rowset_data	add the posters ip into the rowset
-	 * @param 	$event	\phpbb\event
-	 * @return string
+	 * @param	$event				\phpbb\event
+	 * @return	string
 	*/
 	public function viewtopic_post_rowset_data($event)
 	{
@@ -248,8 +258,8 @@ class main_listener implements EventSubscriberInterface
 
 	/*
 	 * viewtopic_modify_post_row		show a link to admins and mods to report the spammer
-	 * @param 	$event	\phpbb\event
-	 * @return string
+	 * @param 	$event					\phpbb\event
+	 * @return	string
 	*/
 	public function viewtopic_modify_post_row($event)
 	{
