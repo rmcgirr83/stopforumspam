@@ -38,5 +38,6 @@ services:
     rmcgirr83.stopforumspam.core.sfsapi:
         class: rmcgirr83\stopforumspam\core\sfsapi
         arguments:
-            - '@config'        
-            - '@log'         
+            - '@config'
+            - '@log'
+            - '@user'

@@ -18,10 +18,14 @@ class sfsapi
 	/** @var \phpbb\log\log */
 	protected $log;
 
-	public function __construct(\phpbb\config\config $config, \phpbb\log\log $log)
+	/** @var \phpbb\user */
+	protected $user;
+
+	public function __construct(\phpbb\config\config $config, \phpbb\log\log $log, \phpbb\user $user)
 	{
 		$this->config = $config;
 		$this->log = $log;
+		$this->user = $user;
 	}
 
 	/*

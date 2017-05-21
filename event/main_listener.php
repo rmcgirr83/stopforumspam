@@ -48,10 +48,13 @@ class main_listener implements EventSubscriberInterface
 	protected $sfsapi;
 
 	/** @var string phpBB root path */
-	protected $phpbb_root_path;
+	protected $root_path;
 
 	/** @var string phpEx */
 	protected $php_ext;
+
+	/* @var \rmcgirr83\contactadmin\controller\main_controller */
+	protected $contactadmin;
 
 	public function __construct(
 		\phpbb\auth\auth $auth,
@@ -63,7 +66,7 @@ class main_listener implements EventSubscriberInterface
 		\phpbb\template\template $template,
 		\rmcgirr83\stopforumspam\core\sfsgroups $sfsgroups,
 		\rmcgirr83\stopforumspam\core\sfsapi $sfsapi,
-		$phpbb_root_path,
+		$root_path,
 		$php_ext,
 		\rmcgirr83\contactadmin\controller\main_controller $contactadmin = null)
 	{
@@ -76,7 +79,7 @@ class main_listener implements EventSubscriberInterface
 		$this->template = $template;
 		$this->sfsgroups = $sfsgroups;
 		$this->sfsapi = $sfsapi;
-		$this->root_path = $phpbb_root_path;
+		$this->root_path = $root_path;
 		$this->php_ext = $php_ext;
 		$this->contactadmin = $contactadmin;
 	}
