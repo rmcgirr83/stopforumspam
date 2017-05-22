@@ -52,10 +52,10 @@ class sfsapi
 
 		if ($type == 'add')
 		{
-			$http_request = 'https://www.stopforumspam.com/add.php';
+			$http_request = 'http://www.stopforumspam.com/add.php';
 			$http_request .= '?username=' . urlencode($username);
-			$http_request .= '&ip=' . $userip;
-			$http_request .= '&email=' . $useremail;
+			$http_request .= '&ip_addr=' . $userip;
+			$http_request .= '&email=' . urlencode($useremail);
 			$http_request .= '&api_key=' . $apikey;
 
 		}

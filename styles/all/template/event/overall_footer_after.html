@@ -6,6 +6,7 @@
 	phpbb.addAjaxCallback('reporttosfs', function(data) {
 		if (data.postid !== "undefined") {
 			$('#sfs' + data.postid).hide();
+			phpbb.closeDarkenWrapper(5000);
 		}
 	});
 
