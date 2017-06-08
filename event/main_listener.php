@@ -268,7 +268,7 @@ class main_listener implements EventSubscriberInterface
 	{
 		$row = $event['row'];
 
-		if ($this->auth->acl_gets('a_', 'm_') && !empty($row['poster_ip']) && !empty($this->config['allow_sfs'] && !empty($this->config['sfs_api_key'])) && !in_array((int) $event['poster_id'], $this->sfs_admins_mods) && $event['poster_id'] != ANONYMOUS)
+		if ($this->auth->acl_gets('a_', 'm_') && !empty($row['poster_ip']) && !empty($this->config['allow_sfs']) && !empty($this->config['sfs_api_key']) && !in_array((int) $event['poster_id'], $this->sfs_admins_mods) && $event['poster_id'] != ANONYMOUS)
 		{
 			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_reporttosfs', array('username' => $row['username'], 'userip' => $row['poster_ip'], 'useremail' => $row['user_email'], 'postid' => (int) $row['post_id'], 'posterid' => (int) $event['poster_id']));
 
