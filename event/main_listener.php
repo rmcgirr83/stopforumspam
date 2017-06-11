@@ -230,15 +230,8 @@ class main_listener implements EventSubscriberInterface
 		{
 			$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
 
-			// get global mods and admins
-			$this->sfs_admins_mods = $this->sfsgroups->getadminsmods();
-
-			// now get just the moderators of the forum
-			$forum_mods = $this->auth->acl_get_list(false, 'm_', $event['forum_id']);
-			$forum_mods = (!empty($forum_mods[$event['forum_id']]['m_'])) ? $forum_mods[$event['forum_id']]['m_'] : array();
-
-			// merge the arrays
-			$this->sfs_admins_mods = array_unique(array_merge($this->sfs_admins_mods, $forum_mods));
+			// get mods and admins
+			$this->sfs_admins_mods = $this->sfsgroups->getadminsmods($event['forum_id']);
 		}
 	}
 
@@ -268,9 +261,10 @@ class main_listener implements EventSubscriberInterface
 	{
 		$row = $event['row'];
 
-		if ($this->auth->acl_gets('a_', 'm_') && !empty($row['poster_ip']) && !empty($this->config['allow_sfs']) && !empty($this->config['sfs_api_key']) && !in_array((int) $event['poster_id'], $this->sfs_admins_mods) && $event['poster_id'] != ANONYMOUS)
+		$sfs_report_allowed = (!empty($row['poster_ip']) && !empty($this->config['allow_sfs']) && !empty($this->config['sfs_api_key']) && $event['poster_id'] != ANONYMOUS) ? true : false;
+		if ($sfs_report_allowed && in_array($this->user->data['user_id'], $this->sfs_admins_mods) && !in_array((int) $event['poster_id'], $this->sfs_admins_mods))
 		{
-			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_reporttosfs', array('username' => $row['username'], 'userip' => $row['poster_ip'], 'useremail' => $row['user_email'], 'postid' => (int) $row['post_id'], 'posterid' => (int) $event['poster_id']));
+			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_reporttosfs', array('username' => $row['username'], 'userip' => $row['poster_ip'], 'useremail' => $row['user_email'], 'postid' => (int) $row['post_id'], 'posterid' => (int) $event['poster_id'], 'forumid' => $event['topic_data']['forum_id']));
 
 			$report_link = phpbb_version_compare(PHPBB_VERSION, '3.2', '>=') ? '<a href="' . $reporttosfs_url . '" title="' . $this->user->lang['REPORT_TO_SFS']. '" data-ajax="reporttosfs" class="button button-icon-only"><i class="icon fa-exchange fa-fw" aria-hidden="true"></i><span>' . $this->user->lang['REPORT_TO_SFS'] . '</span></a>' : '<a href="' . $reporttosfs_url . '" title="' . $this->user->lang['REPORT_TO_SFS']. '" data-ajax="reporttosfs" class="button icon-button"><span>' . $this->user->lang['REPORT_TO_SFS'] . '</span></a>';
 

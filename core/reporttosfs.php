@@ -76,7 +76,7 @@ class reporttosfs
 	 * @param	$posterid	posterid that made the post
 	 * @return 	json response
 	*/
-	public function reporttosfs($username, $userip, $useremail, $postid, $posterid)
+	public function reporttosfs($username, $userip, $useremail, $postid, $posterid, $forumid)
 	{
 		$postid = (int) $postid;
 		$posterid = (int) $posterid;
@@ -86,9 +86,9 @@ class reporttosfs
 			throw new http_exception(403, 'NO_POST_SELECTED');
 		}
 
-		$admins_mods = $this->sfsgroups->getadminsmods();
+		$admins_mods = $this->sfsgroups->getadminsmods($forumid);
 		// only allow this via ajax calls
-		if ($this->request->is_ajax() && $this->auth->acl_gets('a_', 'm_') && !empty($this->config['allow_sfs']) && !empty($this->config['sfs_api_key']) && !in_array($posterid, $admins_mods) && $posterid != ANONYMOUS)
+		if ($this->request->is_ajax() && in_array($this->user->data['user_id'], $admins_mods) && !empty($this->config['allow_sfs']) && !empty($this->config['sfs_api_key']) && !in_array($posterid, $admins_mods) && $posterid != ANONYMOUS)
 		{
 			$this->user->add_lang_ext('rmcgirr83/stopforumspam', array('stopforumspam', 'acp/acp_stopforumspam'));
 
