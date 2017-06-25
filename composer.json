@@ -14,8 +14,7 @@
 		}
 	],
 	"require": {
-		"php": ">=5.3",
-		"phpbb/phpbb": ">=3.1.4-RC1"
+		"php": ">=5.3"
 	},
 	"extra": {
 		"display-name": "Stop Forum Spam",
