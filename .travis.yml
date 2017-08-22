@@ -10,8 +10,6 @@ matrix:
     - php: 5.3
       env: DB=mysqli # MyISAM
     - php: 5.4
-      env: DB=none;NOTESTS=1
-    - php: 5.4
       env: DB=mysqli #myisam
     - php: 5.4
       env: DB=mysql
@@ -21,6 +19,8 @@ matrix:
       env: DB=postgres
     - php: 5.4
       env: DB=sqlite3
+    - php: 5.5
+      env: DB=none;NOTESTS=1      
     - php: 5.5
       env: DB=mysqli
     - php: 5.6
