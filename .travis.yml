@@ -1,14 +1,13 @@
 # Opt into fully virtualized infrastructure
 sudo: required
+dist: precise
 
 language: php
 
 matrix:
   include:
-    - php: 5.3.3
-      env: DB=mysqli
-    - php: 5.3
-      env: DB=mysqli # MyISAM
+    - php: 5.5
+      env: DB=none;NOTESTS=1
     - php: 5.4
       env: DB=mysqli #myisam
     - php: 5.4
@@ -20,16 +19,21 @@ matrix:
     - php: 5.4
       env: DB=sqlite3
     - php: 5.5
-      env: DB=none;NOTESTS=1      
-    - php: 5.5
       env: DB=mysqli
     - php: 5.6
+      env: DB=mysqli
+    - php: 7.0
+      env: DB=mysqli
+    - php: 7.1
+      env: DB=mysqli
+    - php: nightly
       env: DB=mysqli
     - php: hhvm
       env: DB=mysqli
   allow_failures:
+    - php: nightly
     - php: hhvm
-  fast_finish: true
+fast_finish: true
 
 env:
   global:
@@ -37,14 +41,14 @@ env:
     - SNIFF="1"            # Should we run code sniffer on your code?
     - IMAGE_ICC="0"    # Should we run icc profile sniffer on your images?
     - EPV="1"              # Should we run EPV (Extension Pre Validator) on your code?
-    - PHPBB_BRANCH="3.1.x"
+    - PHPBB_BRANCH="3.2.x"
 
 branches:
   only:
     - master
     - develop
     - /^develop-.*$/
-    - /^release-.*$/
+    - /^\d+(\.\d+)?\.x$/
 
 install:
   - travis/prepare-phpbb.sh $EXTNAME $PHPBB_BRANCH
