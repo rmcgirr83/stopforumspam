@@ -86,9 +86,13 @@ class reporttosfs
 			throw new http_exception(403, 'NO_POST_SELECTED');
 		}
 
+		if (empty($this->config['allow_sfs']) || empty($this->config['sfs_api_key']) || empty($useremail) || empty($userip))
+		{
+			return false;
+		}
 		$admins_mods = $this->sfsgroups->getadminsmods($forumid);
 		// only allow this via ajax calls
-		if ($this->request->is_ajax() && in_array($this->user->data['user_id'], $admins_mods) && !empty($this->config['allow_sfs']) && !empty($this->config['sfs_api_key']) && !in_array($posterid, $admins_mods) && $posterid != ANONYMOUS)
+		if ($this->request->is_ajax() && in_array($this->user->data['user_id'], $admins_mods) && !in_array($posterid, $admins_mods) && $posterid != ANONYMOUS)
 		{
 			$this->user->add_lang_ext('rmcgirr83/stopforumspam', array('stopforumspam', 'acp/acp_stopforumspam'));
 
