@@ -162,7 +162,12 @@ class reporttosfs
 
 		if (!$report_data)
 		{
-			throw new http_exception(403, 'POST_NOT_EXIST');
+			$data = array(
+				'MESSAGE_TITLE'	=> $this->user->lang('ERROR'),
+				'MESSAGE_TEXT'	=> $this->user->lang('POST_NOT_EXIST'),
+				'success'	=> false,
+			);
+			return new JsonResponse($data);
 		}
 
 		$this->forumid						= (int) $report_data['forum_id'];
@@ -184,7 +189,12 @@ class reporttosfs
 
 		if (!$forum_data)
 		{
-			throw new http_exception(403, 'FORUM_NOT_EXIST');
+			$data = array(
+				'MESSAGE_TITLE'	=> $this->user->lang('ERROR'),
+				'MESSAGE_TEXT'	=> $this->user->lang('FORUM_NOT_EXIST'),
+				'success'	=> false,
+			);
+			return new JsonResponse($data);
 		}
 
 		// if the post isn't reported, then report it

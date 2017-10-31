@@ -33,6 +33,7 @@ services:
         class: rmcgirr83\stopforumspam\core\sfsgroups
         arguments:
             - '@auth'
+            - '@cache'
 
     rmcgirr83.stopforumspam.core.sfsapi:
         class: rmcgirr83\stopforumspam\core\sfsapi
