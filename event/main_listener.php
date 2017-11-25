@@ -130,13 +130,13 @@ class main_listener implements EventSubscriberInterface
 
 			if ($check)
 			{
-				if ($this->config['sfs_down'] && $check === 'sfs_down')
+				if ($this->config['sfs_down'] && is_string($check))
 				{
 					return;
 				}
 				$error_array[] = $this->show_message($check);
 				// now ban the spammer by IP
-				if ($this->config['sfs_ban_ip'])
+				if ($this->config['sfs_ban_ip'] && !is_string($check))
 				{
 					$this->ban_by_ip($this->user->ip);
 				}
@@ -202,14 +202,14 @@ class main_listener implements EventSubscriberInterface
 
 				if ($check)
 				{
-					if ($this->config['sfs_down'] && $check === 'sfs_down')
+					if ($this->config['sfs_down'] && is_string($check))
 					{
 						return;
 					}
 					$error_array[] = $this->show_message($check);
 
 					// now ban the spammer by IP
-					if ($this->config['sfs_ban_ip'])
+					if ($this->config['sfs_ban_ip'] && !is_string($check))
 					{
 						$this->ban_by_ip($this->user->ip);
 					}
