@@ -1,15 +1,13 @@
 # Opt into fully virtualized infrastructure
-sudo: required
+sudo: false
 dist: precise
 
 language: php
 
 matrix:
   include:
-    - php: 5.5
-      env: DB=none;NOTESTS=1
     - php: 5.4
-      env: DB=mysqli #myisam
+      env: DB=mysqli
     - php: 5.4
       env: DB=mysql
     - php: 5.4
@@ -20,18 +18,17 @@ matrix:
       env: DB=sqlite3
     - php: 5.5
       env: DB=mysqli
+    - php: 5.5
+      env: DB=none;NOTESTS=1
     - php: 5.6
       env: DB=mysqli
     - php: 7.0
       env: DB=mysqli
     - php: 7.1
       env: DB=mysqli
-    - php: nightly
-      env: DB=mysqli
     - php: hhvm
       env: DB=mysqli
   allow_failures:
-    - php: nightly
     - php: hhvm
 fast_finish: true
 
@@ -46,9 +43,11 @@ env:
 branches:
   only:
     - master
-    - develop
-    - /^develop-.*$/
+    - dev
     - /^\d+(\.\d+)?\.x$/
+
+before_install:
+    - composer self-update 1.5.2 --rollback
 
 install:
   - travis/prepare-phpbb.sh $EXTNAME $PHPBB_BRANCH
