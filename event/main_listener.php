@@ -334,7 +334,7 @@ class main_listener implements EventSubscriberInterface
 		if ($json_decode['success'])
 		{
 			$username_freq = $json_decode['username']['frequency'];
-			$email_freq = $json_decode['emailhash']['frequency'];
+			$email_freq = $json_decode['email']['frequency'];
 			$ip_freq = $json_decode['ip']['frequency'];
 
 			// ACP settings in effect

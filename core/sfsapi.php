@@ -61,10 +61,10 @@ class sfsapi
 		}
 		else
 		{
-			$http_request = 'http://api.stopforumspam.org/api';
+			$http_request = 'https://api.stopforumspam.org/api';
 			$http_request .= '?username=' . urlencode($username);
 			$http_request .= '&ip=' . $userip;
-			$http_request .= '&emailhash=' . md5($useremail) . '&json&nobadusername';
+			$http_request .= '&email=' . urlencode($useremail) . '&json&nobadusername';
 		}
 
 			$ch = curl_init();
