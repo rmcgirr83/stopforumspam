@@ -1,5 +1,5 @@
 # Opt into fully virtualized infrastructure
-sudo: false
+sudo: required
 dist: precise
 
 language: php
@@ -16,6 +16,8 @@ matrix:
       env: DB=postgres
     - php: 5.4
       env: DB=sqlite3
+    - php: 5.4
+      env: DB=mysqli;SLOWTESTS=1
     - php: 5.5
       env: DB=mysqli
     - php: 5.5
@@ -30,7 +32,7 @@ matrix:
       env: DB=mysqli
   allow_failures:
     - php: hhvm
-fast_finish: true
+  fast_finish: true
 
 env:
   global:
@@ -43,8 +45,9 @@ env:
 branches:
   only:
     - master
-    - dev
-    - /^\d+(\.\d+)?\.x$/
+    - develop
+    - /^develop-.*$/
+    - /^release-.*$/
 
 install:
   - travis/prepare-phpbb.sh $EXTNAME $PHPBB_BRANCH
