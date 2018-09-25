@@ -104,7 +104,7 @@ class main_listener implements EventSubscriberInterface
 	public function user_setup($event)
 	{
 		//Need to load lang vars for mcp logs
-		if ($this->user->page['page_name'] == 'mcp' . $this->php_ext)
+		if ($this->user->page['page_name'] == 'mcp.' . $this->php_ext)
 		{
 			$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'sfs_mcp');
 		}
