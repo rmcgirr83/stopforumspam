@@ -270,7 +270,7 @@ class main_listener implements EventSubscriberInterface
 
 		// ensure we have an IP and email address..this may happen if users have "post" bots on the forum
 		$sfs_report_allowed = (!empty($row['poster_ip']) && !empty($row['user_email']) && $event['poster_id'] != ANONYMOUS) ? true : false;
-		
+
 		if ($sfs_report_allowed && in_array($this->user->data['user_id'], $this->sfs_admins_mods) && !in_array((int) $event['poster_id'], $this->sfs_admins_mods))
 		{
 			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_reporttosfs', array('username' => urlencode($row['username']), 'userip' => $row['poster_ip'], 'useremail' => $row['user_email'], 'postid' => (int) $row['post_id'], 'posterid' => (int) $event['poster_id'], 'forumid' => $event['topic_data']['forum_id']));
