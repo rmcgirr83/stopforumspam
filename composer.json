@@ -1,11 +1,11 @@
 {
 	"name": "rmcgirr83/stopforumspam",
 	"type": "phpbb-extension",
-	"description": "Queries the stop forum spam database on registration and posting.  Extension settings are found under the extension tab of the forum. This extension requires at least phpBB version 3.1.4-RC1.",
+	"description": "Queries the stop forum spam database on registration and posting.  Extension settings are found under the extension tab of the forum. This extension requires at least phpBB version 3.2.",
 	"homepage": "https://github.com/rmcgirr83/phpbb-3.1-stopforumspam",
     "version": "1.1.10",
-    "time": "2018-09-25",
-	"license": "GPL-2.0-only",
+    "time": "2020-02-25",
+	"license": "GPL-2.0",
 	"authors": [
 		{
 			"name": "Rich McGirr",
@@ -19,7 +19,7 @@
 	"extra": {
 		"display-name": "Stop Forum Spam",
 		"soft-require": {
-			"phpbb/phpbb": ">=3.1.4-RC1"
+			"phpbb/phpbb": ">=3.2"
         },
         "version-check": {
             "host": "www.phpbb.com",
