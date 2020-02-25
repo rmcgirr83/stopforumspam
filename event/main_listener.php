@@ -104,7 +104,7 @@ class main_listener implements EventSubscriberInterface
 	public function user_setup($event)
 	{
 		//Need to load lang vars for mcp logs
-		if ($this->user->page['page_name'] == 'mcp.' . $this->php_ext)
+		if ($this->user->page['page_name'] == 'mcp' . $this->php_ext)
 		{
 			$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'sfs_mcp');
 		}
@@ -266,6 +266,7 @@ class main_listener implements EventSubscriberInterface
 		{
 			return;
 		}
+
 		$row = $event['row'];
 
 		// ensure we have an IP and email address..this may happen if users have "post" bots on the forum
@@ -275,7 +276,7 @@ class main_listener implements EventSubscriberInterface
 		{
 			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_reporttosfs', array('username' => urlencode($row['username']), 'userip' => $row['poster_ip'], 'useremail' => $row['user_email'], 'postid' => (int) $row['post_id'], 'posterid' => (int) $event['poster_id'], 'forumid' => $event['topic_data']['forum_id']));
 
-			$report_link = phpbb_version_compare(PHPBB_VERSION, '3.2', '>=') ? '<a href="' . $reporttosfs_url . '" title="' . $this->user->lang['REPORT_TO_SFS']. '" data-ajax="reporttosfs" class="button button-icon-only"><i class="icon fa-exchange fa-fw" aria-hidden="true"></i><span>' . $this->user->lang['REPORT_TO_SFS'] . '</span></a>' : '<a href="' . $reporttosfs_url . '" title="' . $this->user->lang['REPORT_TO_SFS']. '" data-ajax="reporttosfs" class="button icon-button"><span>' . $this->user->lang['REPORT_TO_SFS'] . '</span></a>';
+			$report_link = '<a href="' . $reporttosfs_url . '" title="' . $this->user->lang['REPORT_TO_SFS']. '" data-ajax="reporttosfs" class="button button-icon-only"><i class="icon fa-exchange fa-fw" aria-hidden="true"></i><span class="sr-only">{L_REPORT_TO_SFS}</span></a>';
 
 			$event['post_row'] = array_merge($event['post_row'], array(
 				'SFS_LINK'			=> (!$row['sfs_reported']) ? $report_link : '',
