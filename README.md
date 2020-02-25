@@ -1,7 +1,7 @@
 Stop Forum Spam
 ===============
 
-phpBB 3.1 Stop Forum Spam extension
+phpBB Stop Forum Spam extension (requires phpBB version 3.2 or higher)
 
 Extension will query the stop forum spam database on registration and posting (for guests only) and deny the post and or registration to go through if found. Will log an entry in the ACP if so set.
 
