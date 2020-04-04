@@ -31,7 +31,7 @@ class stopforumspam_module
 		add_form_key('sfs');
 		$curl_active = $this->allow_sfs();
 
-		$cache_built = false;
+		$cache_built = '';
 		if (!$cache->get('_sfs_adminsmods') && $config['sfs_api_key'])
 		{
 			$cache_built = $user->lang('SFS_NEED_CACHE');
@@ -74,10 +74,18 @@ class stopforumspam_module
 
 		if ($request->is_set_post('submit'))
 		{
+			// Test if the submitted form is valid
+			if (!check_form_key('sfs'))
+			{
+				trigger_error($this->user->lang['FORM_INVALID'] . adm_back_link($this->u_action));
+			}
+
 			if (!function_exists('validate_data'))
 			{
 				include($phpbb_root_path . 'includes/functions_user.' . $phpEx);
 			}
+
+			$has_api_key = $request->variable('sfs_api_key', '', true);
 
 			$check_row = array('sfs_threshold' => $request->variable('sfs_threshold', 0));
 			$validate_row = array('sfs_threshold' => array('num', false, 1, 99));
@@ -88,6 +96,11 @@ class stopforumspam_module
 
 			if (!sizeof($error))
 			{
+				if (!empty($has_api_key))
+				{
+					$this->build_adminsmods_cache();
+				}
+
 				// Set the options the user configured
 				$this->set_options();
 
@@ -129,6 +142,11 @@ class stopforumspam_module
 		if (function_exists('curl_init'))
 		{
 			$curl = true;
+		}
+
+		if (!$curl)
+		{
+			$config->set('allow_sfs', false);
 		}
 
 		return $curl;
