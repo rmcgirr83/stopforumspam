@@ -17,13 +17,11 @@ class stopforumspam_module
 
 	function main($id, $mode)
 	{
-		global $config, $db, $request, $template, $user;
-		global $phpbb_container, $phpbb_root_path, $phpEx;
+		global $cache, $config, $db, $request, $template, $user;
+		global $phpbb_container, $phpbb_root_path, $phpEx, $phpbb_log;
 
 		$user->add_lang_ext('rmcgirr83/stopforumspam', 'acp/acp_stopforumspam');
 		$user->add_lang('acp/ban');
-
-		$log = $phpbb_container->get('log');
 
 		$action = $request->variable('action', '');
 
@@ -31,35 +29,51 @@ class stopforumspam_module
 		$this->tpl_name = 'stopforumspam_body';
 
 		add_form_key('sfs');
-		$allow_sfs = $this->allow_sfs();
+		$curl_active = $this->allow_sfs();
 
-		if ($action == 'reset_sfs')
+		$cache_built = false;
+		if (!$cache->get('_sfs_adminsmods') && $config['sfs_api_key'])
 		{
-			// Test if form key is valid
-			if (!check_form_key('sfs'))
-			{
-				trigger_error($user->lang['FORM_INVALID'] . adm_back_link($this->u_action), E_USER_WARNING);
-			}
+			$cache_built = $user->lang('SFS_NEED_CACHE');
+		}
 
-			$sql = 'UPDATE ' . POSTS_TABLE . ' SET sfs_reported = 0
-				WHERE sfs_reported = 1';
-			$db->sql_query($sql);
+		switch ($action)
+		{
+			case 'clr_reports':
 
-			$log->add('admin', $user->data['user_id'], $user->ip, 'LOG_SFS_REPORTED_CLEARED');
+				$sql = 'UPDATE ' . POSTS_TABLE . ' SET sfs_reported = 0
+					WHERE sfs_reported = 1';
+				$db->sql_query($sql);
 
-			if ($request->is_ajax())
-			{
-				trigger_error('SFS_REPORTED_CLEARED');
-			}
+				$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_SFS_REPORTED_CLEARED');
+
+				if ($request->is_ajax())
+				{
+					trigger_error('SFS_REPORTED_CLEARED');
+				}
+			break;
+
+			case 'build_adminsmods':
+
+				if (empty($config['sfs_api_key']))
+				{
+					trigger_error('SFS_NEEDS_API');
+				}
+
+				$this->build_adminsmods_cache();
+
+				$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_ADMINSMODS_CACHE_BUILT');
+
+				if ($request->is_ajax())
+				{
+					$json_response = new \phpbb\json_response;
+					$json_response->send(array('success' => true, 'MESSAGE_TITLE' => $user->lang('INFORMATION'), 'MESSAGE_TEXT' => $user->lang('LOG_ADMINSMODS_CACHE_BUILT')));
+				}
+			break;
 		}
 
 		if ($request->is_set_post('submit'))
 		{
-			// Test if form key is valid
-			if (!check_form_key('sfs'))
-			{
-				trigger_error($user->lang['FORM_INVALID'] . adm_back_link($this->u_action), E_USER_WARNING);
-			}
 			if (!function_exists('validate_data'))
 			{
 				include($phpbb_root_path . 'includes/functions_user.' . $phpEx);
@@ -77,17 +91,19 @@ class stopforumspam_module
 				// Set the options the user configured
 				$this->set_options();
 
-				$log->add('admin', $user->data['user_id'], $user->ip, 'LOG_SFS_CONFIG_SAVED');
+				$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_SFS_CONFIG_SAVED');
 
 				trigger_error($user->lang['SFS_SETTINGS_SUCCESS'] . adm_back_link($this->u_action));
 			}
 		}
 
+		$url = $this->u_action;
+
 		$template->assign_vars(array(
 			'ERROR'			=> isset($error) ? ((sizeof($error)) ? implode('<br />', $error) : '') : '',
 			'SFS_API_KEY'	=> $config['sfs_api_key'],
-			'ALLOW_SFS'		=> ($config['allow_sfs']) ? true : false,
-			'CURL_ACTIVE'	=> (!empty($allow_sfs)) ? '' : '<br /><span class="error">' . $user->lang['LOG_SFS_NEED_CURL'] .'</span>',
+			'ALLOW_SFS'		=> ($config['allow_sfs'] && $curl_active) ? true : false,
+			'CURL_ACTIVE'	=> (!$curl_active) ? $user->lang['LOG_SFS_NEED_CURL'] : false,
 			'SFS_THRESHOLD'	=> (int) $config['sfs_threshold'],
 			'SFS_BAN_IP'	=> ($config['sfs_ban_ip']) ? true : false,
 			'SFS_LOG_MESSAGE'	=> ($config['sfs_log_message']) ? true : false,
@@ -98,8 +114,11 @@ class stopforumspam_module
 			'SFS_BAN_REASON'	=> ($config['sfs_ban_reason']) ? true : false,
 			'SFS_BAN_TIME'	=> $this->display_ban_time($config['sfs_ban_time']),
 			'SFS_NOTIFY'	=> ($config['sfs_notify']) ? true : false,
+			'NOTICE'	=> $cache_built,
 
-			'U_ACTION'			=> $this->u_action,
+			'U_BUILD_CACHE'	=> $url . '&amp;action=build_adminsmods',
+			'U_CLR_REPORTS'	=> $url . '&amp;action=clr_reports',
+			'U_ACTION'		=> $url,
 		));
 	}
 
@@ -154,5 +173,26 @@ class stopforumspam_module
 		}
 
 		return $ban_options;
+	}
+
+	protected function build_adminsmods_cache()
+	{
+		global $cache, $auth;
+
+		$cache->destroy('_sfs_adminsmods');
+
+		// Grab an array of user_id's with admin permissions
+		$admin_ary = $auth->acl_get_list(false, 'a_', false);
+		$admin_ary = (!empty($admin_ary[0]['a_'])) ? $admin_ary[0]['a_'] : array();
+
+		// Grab an array of user id's with global mod permissions
+		$mod_ary = $auth->acl_get_list(false,'m_', false);
+		$mod_ary = (!empty($mod_ary[0]['m_'])) ? $mod_ary[0]['m_'] : array();
+
+		$admins_mods = array_unique(array_merge($admin_ary, $mod_ary));
+
+		// cache this data for ever
+		$cache->put('_sfs_adminsmods', $admins_mods);
+
 	}
 }

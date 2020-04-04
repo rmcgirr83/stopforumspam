@@ -45,4 +45,5 @@ $lang = array_merge($lang, array(
 	'LOG_SFS_CONFIG_SAVED'	=> '<strong>Stop Forum Spam settings changed</strong>',
 	'LOG_SFS_REPORTED'		=> '<strong>User was reported to Stop Forum Spam</strong><br>» %1$s',
 	'LOG_SFS_REPORTED_CLEARED'	=> 'Reported posts to stop forum spam were cleared',
+	'LOG_ADMINSMODS_CACHE_BUILT'	=> 'Stop forum spam Admins and Mods cache was built',
 ));

@@ -2,6 +2,16 @@
 
 <h1>{L_SFS_CONTROL}</h1>
 
+<!-- IF CURL_ACTIVE -->
+	<div class="errorbox"><h3>{L_WARNING}</h3>
+		<p>{CURL_ACTIVE}</p>
+	</div>
+<!-- ENDIF -->
+<!-- IF NOTICE -->
+	<div class="errorbox notice" id="sfs_notice">
+		<p>{NOTICE}</p>
+	</div>
+<!-- ENDIF -->
 <!-- IF ERROR -->
 	<div class="errorbox"><h3>{L_WARNING}</h3>
 		<p>{ERROR}</p>
@@ -13,7 +23,7 @@
 		<dl>
 			<dt><label for="sfs_enabled">{L_SFS_ENABLED}{L_COLON}</label></dt>
 			<dd><input type="radio" class="radio" name="allow_sfs" value="1" <!-- IF ALLOW_SFS -->id="sfs_enabled" checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
-				<input type="radio" class="radio" name="allow_sfs" value="0" <!-- IF not ALLOW_SFS -->id="sfs_enabled"  checked="checked"<!-- ENDIF --> /> {L_NO} {CURL_ACTIVE}</dd>
+				<input type="radio" class="radio" name="allow_sfs" value="0" <!-- IF not ALLOW_SFS -->id="sfs_enabled"  checked="checked"<!-- ENDIF --> /> {L_NO}</dd>
 		</dl>
 		<dl>
 			<dt><label for="sfs_by_name">{L_SFS_BY_NAME}{L_COLON}</label></dt>
@@ -75,12 +85,14 @@
 	</form>
 </fieldset>
 <fieldset>
-	<form id="action_reset_sfs_reported" method="post" action="{U_ACTION}" data-ajax="true">
 		<dl>
-			<dt><label for="action_reset_sfs">{L_SFS_CLEAR}</label><br /><span>{L_SFS_CLEAR_EXPLAIN}</span></dt>
-			<dd><input type="hidden" name="action" value="reset_sfs" /><input class="button2" type="submit" id="action_reset_sfs" name="action_reset_sfs" value="{L_RUN}" /></dd>
+			<dt><label for="clr_reports">{L_SFS_CLEAR}</label><br /><span>{L_SFS_CLEAR_EXPLAIN}</span></dt>
+			<dd><a class="button1" style="padding: 0px 8px;" href="{U_CLR_REPORTS}" data-ajax="clr_reports">{L_RUN}</a></dd>
 		</dl>
-		{S_FORM_TOKEN}
-	</form>
+		<dl>
+			<dt><label for="build_adminsmods">{L_SFS_BUILD}</label><br /><span>{L_SFS_BUILD_EXPLAIN}</span></dt>
+			<dd><a class="button1" style="padding: 0px 8px;" href="{U_BUILD_CACHE}" data-ajax="build_adminsmods">{L_RUN}</a></dd></dd>
+		</dl>
 </fieldset>
+<!-- INCLUDEJS sfs_ajax.js -->
 <!-- INCLUDE overall_footer.html -->
