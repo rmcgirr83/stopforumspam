@@ -52,36 +52,45 @@ class sfsapi
 
 		if ($type == 'add')
 		{
-			$http_request = 'http://www.stopforumspam.com/add.php';
-			$http_request .= '?username=' . urlencode($username);
-			$http_request .= '&ip_addr=' . $userip;
-			$http_request .= '&email=' . urlencode($useremail);
-			$http_request .= '&api_key=' . $apikey;
+			$url = 'http://www.stopforumspam.com/add.php';
+			$data = array(
+				'username' => $username,
+				'email' => $useremail,
+				'ip' => $userip,
+				'apikey' => $apikey
+			);
 
+			$data = http_build_query($data);
 		}
 		else
 		{
-			$http_request = 'http://api.stopforumspam.org/api';
-			$http_request .= '?username=' . urlencode($username);
-			$http_request .= '&ip=' . $userip;
-			$http_request .= '&email=' . urlencode($useremail) . '&json&nobadusername';
+			$url = 'http://api.stopforumspam.org/api';
+			$data = array(
+				'username' => $username,
+				'email' => $useremail,
+				'ip' => $userip
+			);
+
+			$data = http_build_query($data);
+			$data = $data . '&nobadusername&json';
 		}
 
-			$ch = curl_init();
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($ch, CURLOPT_URL, $http_request);
-			curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-			$contents = curl_exec($ch);
-			$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-			curl_close($ch);
+		$ch = curl_init($url);
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+		$contents = curl_exec($ch);
+		$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		curl_close($ch);
 
-			// if nothing is returned (SFS is down)
-			if ($httpcode != 200)
-			{
-				return false;
-			}
+		// if nothing is returned (SFS is down)
+		if ($httpcode != 200)
+		{
+			return false;
+		}
 
-			return $contents;
+		return $contents;
 	}
 }
