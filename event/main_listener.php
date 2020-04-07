@@ -87,7 +87,7 @@ class main_listener implements EventSubscriberInterface
 	static public function getSubscribedEvents()
 	{
 		return array(
-			'core.user_setup'						=> 'user_setup',
+			'core.modify_mcp_modules_display_option'	=> 'user_setup',
 			'core.ucp_register_data_after'			=> 'user_sfs_validate_registration',
 			'core.posting_modify_template_vars'		=> 'poster_data_email',
 			'core.posting_modify_message_text'		=> 'poster_modify_message_text',
@@ -103,11 +103,7 @@ class main_listener implements EventSubscriberInterface
 
 	public function user_setup($event)
 	{
-		//Need to load lang vars for mcp logs
-		if ($this->user->page['page_name'] == 'mcp' . $this->php_ext)
-		{
-			$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'sfs_mcp');
-		}
+				$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'sfs_mcp');
 	}
 
 	public function user_sfs_validate_registration($event)
@@ -274,7 +270,7 @@ class main_listener implements EventSubscriberInterface
 
 		if ($sfs_report_allowed && in_array($this->user->data['user_id'], $this->sfs_admins_mods) && !in_array((int) $event['poster_id'], $this->sfs_admins_mods))
 		{
-			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_reporttosfs', array('username' => urlencode($row['username']), 'userip' => $row['poster_ip'], 'useremail' => $row['user_email'], 'postid' => (int) $row['post_id'], 'posterid' => (int) $event['poster_id'], 'forumid' => $event['topic_data']['forum_id']));
+			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_reporttosfs', array('postid' => (int) $row['post_id'], 'posterid' => (int) $event['poster_id']));
 
 			$report_link = '<a href="' . $reporttosfs_url . '" title="' . $this->user->lang['REPORT_TO_SFS']. '" data-ajax="reporttosfs" class="button button-icon-only"><i class="icon fa-exchange fa-fw" aria-hidden="true"></i><span class="sr-only">{L_REPORT_TO_SFS}</span></a>';
 

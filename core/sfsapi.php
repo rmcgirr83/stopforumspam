@@ -55,16 +55,16 @@ class sfsapi
 			$url = 'http://www.stopforumspam.com/add.php';
 			$data = array(
 				'username' => $username,
-				'email' => $useremail,
 				'ip' => $userip,
-				'apikey' => $apikey
+				'email' => $useremail,
+				'api_key' => $apikey
 			);
 
 			$data = http_build_query($data);
 		}
 		else
 		{
-			$url = 'http://api.stopforumspam.org/api';
+			$url = 'https://www.stopforumspam.com/api';
 			$data = array(
 				'username' => $username,
 				'email' => $useremail,

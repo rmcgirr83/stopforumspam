@@ -76,14 +76,37 @@ class reporttosfs
 	 * @param	$posterid	posterid that made the post
 	 * @return 	json response
 	*/
-	public function reporttosfs($username, $userip, $useremail, $postid, $posterid, $forumid)
+	public function reporttosfs($postid, $posterid)
 	{
 		$postid = (int) $postid;
 		$posterid = (int) $posterid;
 
+		$username = $userip = $sfs_reported = $useremail = $forumid = '';
+
+		$sql = 'SELECT p.sfs_reported, p.poster_ip, p.forum_id, p.post_username, u.user_email
+			FROM ' . POSTS_TABLE . ' p
+			LEFT JOIN ' . USERS_TABLE . ' u on p.poster_id = u.user_id
+			WHERE p.post_id = ' . $postid;
+		$result = $this->db->sql_query($sql);
+
+		while ($row = $this->db->sql_fetchrow($result))
+		{
+			$username = $row['post_username'];
+			$userip = $row['poster_ip'];
+			$useremail = $row['user_email'];
+			$forumid = (int) $row['forum_id'];
+			$sfs_reported = (int) $row['sfs_reported'];
+		}
+		$this->db->sql_freeresult($result);
+
 		if ($postid <= 0)
 		{
 			throw new http_exception(403, 'NO_POST_SELECTED');
+		}
+
+		if ($sfs_reported)
+		{
+			throw new http_exception(403, 'SFS_REPORTED');
 		}
 
 		if (empty($this->config['allow_sfs']) || empty($this->config['sfs_api_key']) || empty($useremail) || empty($userip))
@@ -91,22 +114,12 @@ class reporttosfs
 			return false;
 		}
 		$admins_mods = $this->sfsgroups->getadminsmods($forumid);
+
 		// only allow this via ajax calls
 		if ($this->request->is_ajax() && in_array($this->user->data['user_id'], $admins_mods) && !in_array($posterid, $admins_mods) && $posterid != ANONYMOUS)
 		{
 			$this->user->add_lang_ext('rmcgirr83/stopforumspam', array('stopforumspam', 'acp/acp_stopforumspam'));
 
-			$sql = 'SELECT sfs_reported
-				FROM ' . POSTS_TABLE . '
-				WHERE ' . $this->db->sql_in_set('post_id', array($postid));
-			$result = $this->db->sql_query($sql);
-			$sfs_done = (int) $this->db->sql_fetchfield('sfs_reported');
-			$this->db->sql_freeresult($result);
-
-			if ($sfs_done)
-			{
-				throw new http_exception(403, 'SFS_REPORTED');
-			}
 			$response = $this->sfsapi->sfsapi('add', $username, $userip, $useremail, $this->config['sfs_api_key']);
 
 			if (!$response)
