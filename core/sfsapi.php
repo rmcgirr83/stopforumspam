@@ -64,7 +64,7 @@ class sfsapi
 		}
 		else
 		{
-			$url = 'https://www.stopforumspam.com/api';
+			$url = 'http://www.stopforumspam.com/api';
 			$data = array(
 				'username' => $username,
 				'email' => $useremail,
