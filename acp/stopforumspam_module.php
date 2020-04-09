@@ -23,6 +23,8 @@ class stopforumspam_module
 		$user->add_lang_ext('rmcgirr83/stopforumspam', 'acp/acp_stopforumspam');
 		$user->add_lang('acp/ban');
 
+		$sfsgroups = $phpbb_container->get('rmcgirr83.stopforumspam.core.sfsgroups');
+
 		$action = $request->variable('action', '');
 
 		$this->page_title = $user->lang['SFS_CONTROL'];
@@ -60,7 +62,7 @@ class stopforumspam_module
 					trigger_error('SFS_NEEDS_API');
 				}
 
-				$this->build_adminsmods_cache();
+				$sfsgroups->build_adminsmods_cache();
 
 				$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_ADMINSMODS_CACHE_BUILT');
 
@@ -98,7 +100,7 @@ class stopforumspam_module
 			{
 				if (!empty($has_api_key))
 				{
-					$this->build_adminsmods_cache();
+					$sfsgroups->build_adminsmods_cache();
 				}
 
 				// Set the options the user configured
@@ -191,26 +193,5 @@ class stopforumspam_module
 		}
 
 		return $ban_options;
-	}
-
-	protected function build_adminsmods_cache()
-	{
-		global $cache, $auth;
-
-		$cache->destroy('_sfs_adminsmods');
-
-		// Grab an array of user_id's with admin permissions
-		$admin_ary = $auth->acl_get_list(false, 'a_', false);
-		$admin_ary = (!empty($admin_ary[0]['a_'])) ? $admin_ary[0]['a_'] : array();
-
-		// Grab an array of user id's with global mod permissions
-		$mod_ary = $auth->acl_get_list(false,'m_', false);
-		$mod_ary = (!empty($mod_ary[0]['m_'])) ? $mod_ary[0]['m_'] : array();
-
-		$admins_mods = array_unique(array_merge($admin_ary, $mod_ary));
-
-		// cache this data for ever
-		$cache->put('_sfs_adminsmods', $admins_mods);
-
 	}
 }
