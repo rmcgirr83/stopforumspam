@@ -3,6 +3,7 @@ services:
         class: rmcgirr83\stopforumspam\event\main_listener
         arguments:
             - '@auth'
+            - '@cache'
             - '@config'
             - '@user'
             - '@controller.helper'
