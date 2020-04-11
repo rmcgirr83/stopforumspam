@@ -18,8 +18,6 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class main_listener implements EventSubscriberInterface
 {
-	private $sfs_admins_mods = array();
-
 	/** @var \phpbb\auth\auth */
 	protected $auth;
 
@@ -146,9 +144,9 @@ class main_listener implements EventSubscriberInterface
 				}
 				$error_array[] = $this->show_message($check);
 				// now ban the spammer by IP
-				if ($this->config['sfs_ban_ip'] && !is_string($check))
+				if (!is_string($check))
 				{
-					$this->ban_by_ip($this->user->ip);
+					$this->sfsapi->sfs_ban('ip', $this->user->ip);
 				}
 			}
 		}
@@ -186,10 +184,12 @@ class main_listener implements EventSubscriberInterface
 		{
 			$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
 			$this->user->add_lang('ucp');
+
 			if (!function_exists('phpbb_validate_email'))
 			{
 				include($this->root_path . 'includes/functions_user.' . $this->php_ext);
 			}
+
 			// ensure email is populated on posting
 			$error = $this->validate_email($event['post_data']['email']);
 			if ($error)
@@ -219,9 +219,9 @@ class main_listener implements EventSubscriberInterface
 					$error_array[] = $this->show_message($check);
 
 					// now ban the spammer by IP
-					if ($this->config['sfs_ban_ip'] && !is_string($check))
+					if (!is_string($check))
 					{
-						$this->ban_by_ip($this->user->ip);
+						$this->sfsapi->sfs_ban('ip', $this->user->ip);
 					}
 				}
 			}
@@ -443,15 +443,5 @@ class main_listener implements EventSubscriberInterface
 		}
 
 		return $error;
-	}
-
-	// ban a nub
-	private function ban_by_ip($ip)
-	{
-		$ban_reason = (!empty($this->config['sfs_ban_reason'])) ? $this->user->lang['SFS_BANNED'] : '';
-		// ban the nub
-		user_ban('ip', $ip, (int) $this->config['sfs_ban_time'], 0, false, $this->user->lang['SFS_BANNED'], $ban_reason);
-
-		return;
 	}
 }

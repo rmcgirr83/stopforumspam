@@ -16,8 +16,6 @@ use phpbb\exception\http_exception;
 
 class reporttosfs
 {
-	private $forumid = 0;
-	private $topicid = 0;
 	/** @var \phpbb\auth\auth */
 	protected $auth;
 
@@ -81,28 +79,41 @@ class reporttosfs
 		$postid = (int) $postid;
 		$posterid = (int) $posterid;
 
+		$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
+
+		// don't allow banning of anonymous user
+		if ($posterid == ANONYMOUS)
+		{
+			throw new http_exception(403, 'CANNOT_BAN_ANONYMOUS');
+		}
+
+		// post id must be greater than 0
+		if ($postid <= 0)
+		{
+			throw new http_exception(403, 'POST_NOT_EXIST');
+		}
+
 		$username = $userip = $sfs_reported = $useremail = $forumid = '';
 
 		$sql = 'SELECT p.sfs_reported, p.poster_ip, p.forum_id, p.post_username, u.user_email
 			FROM ' . POSTS_TABLE . ' p
 			LEFT JOIN ' . USERS_TABLE . ' u on p.poster_id = u.user_id
-			WHERE p.post_id = ' . $postid;
+			WHERE p.post_id = ' . $postid . ' AND p.poster_id = ' . $posterid;
 		$result = $this->db->sql_query($sql);
-
-		while ($row = $this->db->sql_fetchrow($result))
-		{
-			$username = $row['post_username'];
-			$userip = $row['poster_ip'];
-			$useremail = $row['user_email'];
-			$forumid = (int) $row['forum_id'];
-			$sfs_reported = (int) $row['sfs_reported'];
-		}
+		$row = $this->db->sql_fetchrow($result);
 		$this->db->sql_freeresult($result);
 
-		if ($postid <= 0)
+		// info must exist
+		if (!$row)
 		{
-			throw new http_exception(403, 'NO_POST_SELECTED');
+			throw new http_exception(403, 'INFO_NOT_FOUND');
 		}
+		
+		$username = $row['post_username'];
+		$userip = $row['poster_ip'];
+		$useremail = $row['user_email'];
+		$forumid = (int) $row['forum_id'];
+		$sfs_reported = (int) $row['sfs_reported'];
 
 		if ($sfs_reported)
 		{
@@ -113,13 +124,12 @@ class reporttosfs
 		{
 			return false;
 		}
+
 		$admins_mods = $this->sfsgroups->getadminsmods($forumid);
 
 		// only allow this via ajax calls
-		if ($this->request->is_ajax() && in_array($this->user->data['user_id'], $admins_mods) && !in_array($posterid, $admins_mods) && $posterid != ANONYMOUS)
+		if ($this->request->is_ajax() && in_array($this->user->data['user_id'], $admins_mods) && !in_array($posterid, $admins_mods))
 		{
-			$this->user->add_lang_ext('rmcgirr83/stopforumspam', array('stopforumspam', 'acp/acp_stopforumspam'));
-
 			$response = $this->sfsapi->sfsapi('add', $username, $userip, $useremail, $this->config['sfs_api_key']);
 
 			if (!$response)
@@ -145,6 +155,8 @@ class reporttosfs
 
 			$sfs_username = $this->user->lang('SFS_USERNAME_STOPPED', $username);
 
+			$this->sfsapi->sfs_ban('user', $username);
+
 			$this->log->add('mod', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_REPORTED', false, array($sfs_username, 'forum_id' => $this->forumid, 'topic_id' => $this->topicid, 'post_id'  => $postid));
 
 			$data = array(
@@ -155,7 +167,7 @@ class reporttosfs
 			);
 			return new JsonResponse($data);
 		}
-		throw new http_exception(403, 'NOT_AUTHORISED');
+		throw new http_exception(403, 'CANNOT_BAN_ADMINS_MODS');
 	}
 
 	/*

@@ -34,7 +34,11 @@ if (empty($lang) || !is_array($lang))
 // in a url you again do not need to specify an order e.g., 'Click %sHERE%s' is fine
 
 $lang = array_merge($lang, array(
-	'NO_POST_SELECTED'	=> 'You must select at least one post to perform this action.',
+	'CANNOT_BAN_ANONYMOUS'	=> 'You are not allowed to ban the anonymous account.',
+	'CANNOT_BAN_ADMINS_MODS'	=> 'You can not ban admins or mods of this forum.',
+	'FORUM_NOT_EXIST'		=> 'The forum selected does not exist.',
+	'INFO_NOT_FOUND'	=> 'The combination of posterid and postid doesn’t exist.',
+	'POST_NOT_EXIST'	=> 'The post you requested does not exist.',
 	'NO_SOUP_FOR_YOU'	=> 'No soup for you! It looks like you have been flagged as a spammer.<br />If you feel this decision was made in error %scontact the board admin%s.',
 	'NO_SOUP_FOR_YOU_NO_CONTACT'	=> 'No soup for you! It looks like you have been flagged as a spammer.',
 	'SFS_IP_STOPPED'	=> '<a target="_new" title="Check IP at StopForumSpam.com (opens in a new window)" href="http://www.stopforumspam.com/ipcheck/%1$s">%1$s</a>',

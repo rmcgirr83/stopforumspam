@@ -21,11 +21,19 @@ class sfsapi
 	/** @var \phpbb\user */
 	protected $user;
 
-	public function __construct(\phpbb\config\config $config, \phpbb\log\log $log, \phpbb\user $user)
+	/** @var string phpBB root path */
+	protected $root_path;
+
+	/** @var string phpEx */
+	protected $php_ext;
+
+	public function __construct(\phpbb\config\config $config, \phpbb\log\log $log, \phpbb\user $user, $root_path, $php_ext)
 	{
 		$this->config = $config;
 		$this->log = $log;
 		$this->user = $user;
+		$this->root_path = $root_path;
+		$this->php_ext = $php_ext;
 	}
 
 	/*
@@ -92,5 +100,22 @@ class sfsapi
 		}
 
 		return $contents;
+	}
+
+	// ban a nub
+	public function sfs_ban($type, $user_info)
+	{
+		if (!function_exists('user_ban'))
+		{
+			include($this->root_path . 'includes/functions_user.' . $this->php_ext);
+		}
+
+		if ($this->config['sfs_ban_ip'])
+		{
+			$ban_reason = (!empty($this->config['sfs_ban_reason'])) ? $this->user->lang['SFS_BANNED'] : '';
+			// ban the nub
+			user_ban($type, $user_info, (int) $this->config['sfs_ban_time'], 0, false, $this->user->lang['SFS_BANNED'], $ban_reason);
+		}
+		return;
 	}
 }
