@@ -100,6 +100,7 @@ class main_listener implements EventSubscriberInterface
 			'core.viewtopic_before_f_read_check'	=> 'viewtopic_before_f_read_check',
 			'core.viewtopic_post_rowset_data'		=> 'viewtopic_post_rowset_data',
 			'core.viewtopic_modify_post_row'		=> 'viewtopic_modify_post_row',
+			'core.ucp_pm_view_message'				=> 'ucp_pm_view_message',
 			// Custom events for integration with Contact Admin Extension
 			'rmcgirr83.contactadmin.modify_data_and_error'	=> 'user_sfs_validate_registration',
 		);
@@ -115,7 +116,7 @@ class main_listener implements EventSubscriberInterface
 
 	public function user_setup($event)
 	{
-				$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'sfs_mcp');
+		$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'sfs_mcp');
 	}
 
 	public function user_sfs_validate_registration($event)
@@ -290,6 +291,43 @@ class main_listener implements EventSubscriberInterface
 
 			$event['post_row'] = array_merge($event['post_row'], array(
 				'SFS_LINK'			=> (!$row['sfs_reported']) ? $report_link : '',
+			));
+		}
+	}
+
+	/*
+	 * ucp_pm_view_message				show a link to report a spammer
+	 * @param 	$event					\phpbb\event
+	 * @return	string
+	*/
+	public function ucp_pm_view_message($event)
+	{
+
+		$user_info = $event['user_info'];
+
+		if (empty($this->config['allow_sfs']) || empty($this->config['sfs_api_key']) /*|| $this->user->data['user_id'] == $user_info['user_id']*/)
+		{
+			return;
+		}
+
+		$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
+
+		// get mods and admins
+		$this->sfs_admins_mods = $this->sfsgroups->getadminsmods(0);
+
+		$message_row = $event['message_row'];
+
+		// ensure we have an IP and email address..this may happen if users have "post" bots on the forum
+		$sfs_report_allowed = (!empty($user_info['author_ip']) && !empty($user_info['user_email']) && !in_array((int) $user_info['user_id'], $this->sfs_admins_mods)) ? true : false;
+
+		if ($sfs_report_allowed)
+		{
+			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_report_pm_to_sfs', array('msgid' => (int) $message_row['msg_id'], 'authorid' => (int) $user_info['user_id']));
+
+			$report_link = '<a href="' . $reporttosfs_url . '" title="' . $this->user->lang['REPORT_TO_SFS']. '" data-ajax="report_pm_to_sfs" class="button button-icon-only"><i class="icon fa-exchange fa-fw" aria-hidden="true"></i><span class="sr-only">{L_REPORT_TO_SFS}</span></a>';
+
+			$event['msg_data'] = array_merge($event['msg_data'], array(
+				'SFS_LINK'			=> (!$message_row['sfs_reported']) ? $report_link : '',
 			));
 		}
 	}

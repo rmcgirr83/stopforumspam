@@ -3,7 +3,7 @@
 *
 * Stop forum Spam extension for the phpBB Forum Software package.
 *
-* @copyright (c) 2015 Rich McGirr (RMcGirr83)
+* @copyright (c) 2020 Rich McGirr (RMcGirr83)
 * @license GNU General Public License, version 2 (GPL-2.0)
 *
 */
@@ -14,11 +14,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use phpbb\exception\http_exception;
 
-class reporttosfs
+class report_pm_to_sfs
 {
-	/** @var \phpbb\auth\auth */
-	protected $auth;
-
 	/** @var \phpbb\config\config */
 	protected $config;
 
@@ -44,7 +41,6 @@ class reporttosfs
 	protected $sfsapi;
 
 	public function __construct(
-			\phpbb\auth\auth $auth,
 			\phpbb\config\config $config,
 			ContainerInterface $container,
 			\phpbb\db\driver\driver_interface $db,
@@ -54,7 +50,6 @@ class reporttosfs
 			\rmcgirr83\stopforumspam\core\sfsgroups $sfsgroups,
 			\rmcgirr83\stopforumspam\core\sfsapi $sfsapi)
 	{
-		$this->auth = $auth;
 		$this->config = $config;
 		$this->container = $container;
 		$this->db = $db;
@@ -67,38 +62,34 @@ class reporttosfs
 
 	/*
 	 * reporttosfs
-	 * @param 	$username 	username from forum inputs
-	 * @param	$userip		userip
-	 * @param	$useremail	useremail
-	 * @param	$postid		postid of the post
 	 * @param	$posterid	posterid that made the post
 	 * @return 	json response
 	*/
-	public function reporttosfs($postid, $posterid)
+	public function report_pm_to_sfs($msgid, $authorid)
 	{
-		$postid = (int) $postid;
-		$posterid = (int) $posterid;
+
+		if (empty($this->config['allow_sfs']) || empty($this->config['sfs_api_key']))
+		{
+			return false;
+		}
+
+		$author_id = (int) $authorid;
+		$msg_id = (int) $msgid;
 
 		$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
 
-		// don't allow banning of anonymous user
-		if ($posterid == ANONYMOUS)
+		// msg_id must be greater than 0
+		if ($msg_id <= 0)
 		{
-			throw new http_exception(403, 'CANNOT_BAN_ANONYMOUS');
+			throw new http_exception(403, 'PM_NOT_EXIST');
 		}
 
-		// post id must be greater than 0
-		if ($postid <= 0)
-		{
-			throw new http_exception(403, 'POST_NOT_EXIST');
-		}
+		$username = $userip = $sfs_reported = $useremail = '';
 
-		$username = $userip = $sfs_reported = $useremail = $forumid = '';
-
-		$sql = 'SELECT p.sfs_reported, p.poster_ip, p.forum_id, p.post_username, u.user_email
-			FROM ' . POSTS_TABLE . ' p
-			LEFT JOIN ' . USERS_TABLE . ' u on p.poster_id = u.user_id
-			WHERE p.post_id = ' . $postid . ' AND p.poster_id = ' . $posterid;
+		$sql = 'SELECT pm.sfs_reported, pm.author_id, pm.author_ip, u.username, u.user_email
+			FROM ' . PRIVMSGS_TABLE . ' pm
+			LEFT JOIN ' . USERS_TABLE . ' u on pm.author_id = u.user_id
+			WHERE pm.msg_id = ' . (int) $msg_id . ' AND pm.author_id = ' . (int) $author_id;
 		$result = $this->db->sql_query($sql);
 		$row = $this->db->sql_fetchrow($result);
 		$this->db->sql_freeresult($result);
@@ -108,11 +99,10 @@ class reporttosfs
 		{
 			throw new http_exception(403, 'INFO_NOT_FOUND');
 		}
-		
-		$username = $row['post_username'];
-		$userip = $row['poster_ip'];
+
+		$username = $row['username'];
+		$userip = $row['author_ip'];
 		$useremail = $row['user_email'];
-		$forumid = (int) $row['forum_id'];
 		$sfs_reported = (int) $row['sfs_reported'];
 
 		if ($sfs_reported)
@@ -120,15 +110,11 @@ class reporttosfs
 			throw new http_exception(403, 'SFS_REPORTED');
 		}
 
-		if (empty($this->config['allow_sfs']) || empty($this->config['sfs_api_key']) || empty($useremail) || empty($userip))
-		{
-			return false;
-		}
-
-		$admins_mods = $this->sfsgroups->getadminsmods($forumid);
+		$admins_mods = $this->sfsgroups->getadminsmods(0);
 
 		// only allow this via ajax calls
-		if ($this->request->is_ajax() && in_array($this->user->data['user_id'], $admins_mods) && !in_array($posterid, $admins_mods))
+		//
+		if ($this->request->is_ajax() && !in_array($author_id, $admins_mods))
 		{
 			$response = $this->sfsapi->sfsapi('add', $username, $userip, $useremail, $this->config['sfs_api_key']);
 
@@ -145,42 +131,38 @@ class reporttosfs
 			// Report the uhmmm reported?
 			if ($this->config['sfs_notify'])
 			{
-				$this->check_report($postid);
+				$this->check_report($msg_id);
 			}
 
-			$sql = 'UPDATE ' . POSTS_TABLE . '
+			$sql = 'UPDATE ' . PRIVMSGS_TABLE . '
 				SET sfs_reported = 1
-				WHERE post_id = ' . (int) $postid;
+				WHERE msg_id = ' . (int) $msg_id;
 			$this->db->sql_query($sql);
 
 			$sfs_username = $this->user->lang('SFS_USERNAME_STOPPED', $username);
 
-			$this->sfsapi->sfs_ban('user', $username);
-
-			$this->log->add('mod', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_REPORTED', false, array($sfs_username, 'forum_id' => $this->forumid, 'topic_id' => $this->topicid, 'post_id'  => $postid));
+			$this->log->add('mod', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_REPORTED', false, array($sfs_username, 'msg_id'  => $msg_id));
 
 			$data = array(
 				'MESSAGE_TITLE'	=> $this->user->lang('SUCCESS'),
 				'MESSAGE_TEXT'	=> $this->user->lang('SFS_SUCCESS_MESSAGE'),
 				'success'	=> true,
-				'postid'	=> $postid,
+				'msg_id'	=> $msg_id,
 			);
 			return new JsonResponse($data);
 		}
-		throw new http_exception(403, 'CANNOT_BAN_ADMINS_MODS');
 	}
 
 	/*
 	 * check_report
-	 * @param 	$postid 	postid from the report to sfs
+	 * @param 	$msg_id 	msg_id from the report to sfs
 	 * @return 	null
 	*/
-	private function check_report($postid)
+	private function check_report($msg_id)
 	{
-		$sql = 'SELECT t.*, p.*
-			FROM ' . POSTS_TABLE . ' p, ' . TOPICS_TABLE . ' t
-			WHERE p.post_id = ' . (int) $postid . '
-				AND p.topic_id = t.topic_id';
+		$sql = 'SELECT *
+			FROM ' . PRIVMSGS_TABLE . '
+			WHERE msg_id = ' . (int) $msg_id;
 		$result = $this->db->sql_query($sql);
 		$report_data = $this->db->sql_fetchrow($result);
 		$this->db->sql_freeresult($result);
@@ -189,17 +171,17 @@ class reporttosfs
 		{
 			$data = array(
 				'MESSAGE_TITLE'	=> $this->user->lang('ERROR'),
-				'MESSAGE_TEXT'	=> $this->user->lang('POST_NOT_EXIST'),
+				'MESSAGE_TEXT'	=> $this->user->lang('PM_NOT_EXIST'),
 				'success'	=> false,
 			);
 			return new JsonResponse($data);
 		}
 
-		// if the post isn't reported, then report it
-		if (!$report_data['post_reported'])
+		// if the pm isn't reported, then report it
+		if (!$report_data['message_reported'])
 		{
 			$report_name = 'other';
-			$report_text = $this->user->lang('SFS_WAS_REPORTED');
+			$report_text = $this->user->lang('SFS_PM_WAS_REPORTED');
 
 			$sql = 'SELECT *
 				FROM ' . REPORTS_REASONS_TABLE . "
@@ -208,8 +190,9 @@ class reporttosfs
 			$row = $this->db->sql_fetchrow($result);
 			$this->db->sql_freeresult($result);
 
-			$phpbb_notifications = $this->container->get('phpbb.report.handlers.report_handler_post');
-			$phpbb_notifications->add_report($postid, $row['reason_id'], $report_text, 0);
+
+			$phpbb_notifications = $this->container->get('phpbb.report.handlers.report_handler_pm');
+			$phpbb_notifications->add_report($msg_id, $row['reason_id'], $report_text, 0);
 		}
 	}
 }
