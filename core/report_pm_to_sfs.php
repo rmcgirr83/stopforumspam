@@ -190,7 +190,6 @@ class report_pm_to_sfs
 			$row = $this->db->sql_fetchrow($result);
 			$this->db->sql_freeresult($result);
 
-
 			$phpbb_notifications = $this->container->get('phpbb.report.handlers.report_handler_pm');
 			$phpbb_notifications->add_report($msg_id, $row['reason_id'], $report_text, 0);
 		}

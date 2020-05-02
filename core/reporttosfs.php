@@ -108,7 +108,7 @@ class reporttosfs
 		{
 			throw new http_exception(403, 'INFO_NOT_FOUND');
 		}
-		
+
 		$username = $row['post_username'];
 		$userip = $row['poster_ip'];
 		$useremail = $row['user_email'];
