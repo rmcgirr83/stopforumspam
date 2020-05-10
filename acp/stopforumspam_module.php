@@ -47,6 +47,10 @@ class stopforumspam_module
 					WHERE sfs_reported = 1';
 				$db->sql_query($sql);
 
+				$sql = 'UPDATE ' . PRIVMSGS_TABLE . ' SET sfs_reported = 0
+					WHERE sfs_reported = 1';
+				$db->sql_query($sql);
+
 				$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_SFS_REPORTED_CLEARED');
 
 				if ($request->is_ajax())
@@ -114,6 +118,24 @@ class stopforumspam_module
 
 		$url = $this->u_action;
 
+		$sql = 'SELECT COUNT(sfs_reported) AS stat
+			FROM ' . POSTS_TABLE . '
+			WHERE sfs_reported = 1';
+		$result = $db->sql_query($sql);
+		$row = $db->sql_fetchfield('stat');
+		$db->sql_freeresult($result);
+
+		$posts_reported = $row;
+
+		$sql = 'SELECT COUNT(sfs_reported) AS stat
+			FROM ' . PRIVMSGS_TABLE . '
+			WHERE sfs_reported = 1';
+		$result = $db->sql_query($sql);
+		$row = $db->sql_fetchfield('stat');
+		$db->sql_freeresult($result);
+
+		$pms_reported = $row;
+
 		$template->assign_vars(array(
 			'ERROR'			=> isset($error) ? ((sizeof($error)) ? implode('<br />', $error) : '') : '',
 			'SFS_API_KEY'	=> $config['sfs_api_key'],
@@ -130,6 +152,7 @@ class stopforumspam_module
 			'SFS_BAN_TIME'	=> $this->display_ban_time($config['sfs_ban_time']),
 			'SFS_NOTIFY'	=> ($config['sfs_notify']) ? true : false,
 			'NOTICE'	=> $cache_built,
+			'L_SFS_CLEAR_EXPLAIN'	=> $user->lang('SFS_CLEAR_EXPLAIN', (int) $posts_reported, (int) $pms_reported),
 
 			'U_BUILD_CACHE'	=> $url . '&amp;action=build_adminsmods',
 			'U_CLR_REPORTS'	=> $url . '&amp;action=clr_reports',
@@ -137,7 +160,7 @@ class stopforumspam_module
 		));
 	}
 
-	function allow_sfs()
+	protected function allow_sfs()
 	{
 		// Determine if cURL is enabled on the server
 		$curl = false;

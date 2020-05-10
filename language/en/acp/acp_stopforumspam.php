@@ -54,7 +54,7 @@ $lang = array_merge($lang, array(
 	'SFS_NOTIFY'			=> 'Board Notification',
 	'SFS_NOTIFY_EXPLAIN'	=> 'If set yes and there is an API key set above, then board notifications will also be triggered when a post is reported to stop forum spam',
 	'SFS_CLEAR'	=> 'Reset reported posts',
-	'SFS_CLEAR_EXPLAIN'	=> 'Will reset all posts reported to stop forum spam',
+	'SFS_CLEAR_EXPLAIN'	=> 'Will reset all posts ( %1s total ) and private messages ( %2s total ) reported to stop forum spam',
 	'SFS_BUILD' => 'Build cache of Admins and Mods',
 	'SFS_BUILD_EXPLAIN'	=> 'Builds a cache of Admins and Global Mods for use when reporting to SFS',
 	'SFS_NEEDS_API'	=> 'To build the cache you need an API key from stop forum spam',
@@ -66,5 +66,5 @@ $lang = array_merge($lang, array(
 	'TOO_LARGE_SFS_THRESHOLD'	=> 'The threshold value is too large.',
 	'SFS_SETTINGS_ERROR'		=> 'There was an error saving your settings. Please submit the back trace with your error report.',
 	'SFS_SETTINGS_SUCCESS'		=> 'The settings were successfully saved.',
-	'SFS_REPORTED_CLEARED' => 'Posts reported to stop forum spam were reset.',
+	'SFS_REPORTED_CLEARED' => 'Posts and private messages reported to stop forum spam were reset.',
 ));
