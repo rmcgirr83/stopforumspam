@@ -281,7 +281,8 @@ class main_listener implements EventSubscriberInterface
 		$row = $event['row'];
 
 		// ensure we have an IP and email address..this may happen if users have "post" bots on the forum
-		$sfs_report_allowed = (!empty($row['poster_ip']) && !empty($row['user_email']) && $event['poster_id'] != ANONYMOUS) ? true : false;
+		// also ensure the IP is something other than 127.0.0.1 which can happen if the anonymised extension is installed
+		$sfs_report_allowed = (!empty($row['poster_ip'] && $row['poster_ip'] != '127.0.0.1') && !empty($row['user_email']) && $event['poster_id'] != ANONYMOUS) ? true : false;
 
 		if ($sfs_report_allowed && in_array($this->user->data['user_id'], $this->sfs_admins_mods) && !in_array((int) $event['poster_id'], $this->sfs_admins_mods))
 		{
@@ -318,7 +319,8 @@ class main_listener implements EventSubscriberInterface
 		$message_row = $event['message_row'];
 
 		// ensure we have an IP and email address..this may happen if users have "post" bots on the forum
-		$sfs_report_allowed = (!empty($user_info['author_ip']) && !empty($user_info['user_email']) && !in_array((int) $user_info['user_id'], $this->sfs_admins_mods)) ? true : false;
+		// also ensure the IP is something other than 127.0.0.1 which can happen if the anonymised extension is installed
+		$sfs_report_allowed = (!empty($user_info['author_ip'] && $user_info['author_ip'] != '127.0.0.1') && !empty($user_info['user_email']) && !in_array((int) $user_info['user_id'], $this->sfs_admins_mods)) ? true : false;
 
 		if ($sfs_report_allowed)
 		{

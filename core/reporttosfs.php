@@ -115,6 +115,11 @@ class reporttosfs
 		$forumid = (int) $row['forum_id'];
 		$sfs_reported = (int) $row['sfs_reported'];
 
+		// ensure the IP is something other than 127.0.0.1 which can happen if the anonymised extension is installed
+		if ($userip == '127.0.0.1')
+		{
+			throw new http_exception(403, 'SFS_ANONYMIZED_IP');
+		}
 		if ($sfs_reported)
 		{
 			throw new http_exception(403, 'SFS_REPORTED');
