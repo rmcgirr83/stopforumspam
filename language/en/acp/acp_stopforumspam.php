@@ -49,7 +49,7 @@ $lang = array_merge($lang, array(
 	'SFS_DOWN'				=> 'Allow if Stop Forum Spam is down',
 	'SFS_DOWN_EXPLAIN'		=> 'Should registration/posting go through if the stop forum spam website is down',
 	'SFS_API_KEY'			=> 'Stop Forum Spam API key',
-	'SFS_API_KEY_EXPLAIN'	=> 'If you want to submit spammers to the Stop Forum Spam database, input your API key from <a target="_new" href="http://www.stopforumspam.com/keys">stop forum spam</a> here.  You must be registered on the SFS website to get an API key',
+	'SFS_API_KEY_EXPLAIN'	=> 'If you want to submit spammers to the Stop Forum Spam database, input your API key from <a target="_blank" href="http://www.stopforumspam.com/keys">stop forum spam</a> here.  You must be registered on the SFS website to get an API key',
 	'SFS_NEED_CACHE'		=> 'There is an API key but no cache was built for admins and mods.  Please click the button to generate the cache for admins and mods otherwise they can be reported.',
 	'SFS_NOTIFY'			=> 'Board Notification',
 	'SFS_NOTIFY_EXPLAIN'	=> 'If set yes and there is an API key set above, then board notifications will also be triggered when a post is reported to stop forum spam',
