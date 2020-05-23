@@ -55,8 +55,20 @@ class stopforumspam_module
 
 				if ($request->is_ajax())
 				{
-					trigger_error('SFS_REPORTED_CLEARED');
+
+					$data = [
+						'REFRESH_DATA'			=> [
+							'url'	=> '',
+							'time'	=> 5,
+						],
+						'MESSAGE_TITLE'	=> $user->lang('SUCCESS'),
+						'MESSAGE_TEXT'	=> $user->lang('SFS_REPORTED_CLEARED'),
+					];
+
+					$json_response = new \phpbb\json_response;
+					$json_response->send($data);
 				}
+
 			break;
 
 			case 'build_adminsmods':
@@ -72,8 +84,17 @@ class stopforumspam_module
 
 				if ($request->is_ajax())
 				{
+					$data = [
+						'REFRESH_DATA'			=> [
+							'url'	=> '',
+							'time'	=> 5,
+						],
+						'MESSAGE_TITLE'	=> $user->lang('SUCCESS'),
+						'MESSAGE_TEXT'	=> $user->lang('LOG_ADMINSMODS_CACHE_BUILT'),
+
+					];
 					$json_response = new \phpbb\json_response;
-					$json_response->send(array('success' => true, 'MESSAGE_TITLE' => $user->lang('INFORMATION'), 'MESSAGE_TEXT' => $user->lang('LOG_ADMINSMODS_CACHE_BUILT')));
+					$json_response->send($data);
 				}
 			break;
 		}

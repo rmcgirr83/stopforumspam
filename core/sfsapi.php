@@ -112,7 +112,7 @@ class sfsapi
 
 		if ($this->config['sfs_ban_ip'])
 		{
-			$lang_display = ($type = 'user') ? $this->user->lang['SFS_USER_BANNED'] : $this->user->lang['SFS_BANNED'];
+			$lang_display = ($type == 'user') ? $this->user->lang['SFS_USER_BANNED'] : $this->user->lang['SFS_BANNED'];
 			$ban_reason = (!empty($this->config['sfs_ban_reason'])) ? $lang_display : '';
 			// ban the nub
 			user_ban($type, $user_info, (int) $this->config['sfs_ban_time'], 0, false, $lang_display, $ban_reason);
