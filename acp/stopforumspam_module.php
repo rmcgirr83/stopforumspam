@@ -183,6 +183,8 @@ class stopforumspam_module
 
 	protected function allow_sfs()
 	{
+		global $config;
+
 		// Determine if cURL is enabled on the server
 		$curl = false;
 		if (function_exists('curl_init'))
@@ -201,7 +203,7 @@ class stopforumspam_module
 	/**
 	 * Set the options a user can configure
 	 *
-	 * @return null
+	 * @return void
 	 * @access protected
 	 */
 	protected function set_options()
@@ -224,7 +226,7 @@ class stopforumspam_module
 
 	protected function display_ban_time($ban_time = 0)
 	{
-		global $user, $db, $template;
+		global $user;
 
 		// Ban length options
 		$ban_text = array(0 => $user->lang['PERMANENT'], 30 => $user->lang['30_MINS'], 60 => $user->lang['1_HOUR'], 360 => $user->lang['6_HOURS'], 1440 => $user->lang['1_DAY'], 10080 => $user->lang['7_DAYS'], 20160 => $user->lang['2_WEEKS'], 40320 => $user->lang['1_MONTH'], 524160 => $user->lang['1_YEAR']);
