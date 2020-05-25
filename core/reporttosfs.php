@@ -95,7 +95,7 @@ class reporttosfs
 
 		$username = $userip = $sfs_reported = $useremail = $forumid = '';
 
-		$sql = 'SELECT p.sfs_reported, p.poster_ip, p.forum_id, p.post_username, u.user_email
+		$sql = 'SELECT p.sfs_reported, p.poster_ip, p.forum_id, u.username, u.user_email
 			FROM ' . POSTS_TABLE . ' p
 			LEFT JOIN ' . USERS_TABLE . ' u on p.poster_id = u.user_id
 			WHERE p.post_id = ' . $postid . ' AND p.poster_id = ' . $posterid;
@@ -109,7 +109,7 @@ class reporttosfs
 			throw new http_exception(403, 'INFO_NOT_FOUND');
 		}
 
-		$username = $row['post_username'];
+		$username = $row['username'];
 		$userip = $row['poster_ip'];
 		$useremail = $row['user_email'];
 		$forumid = (int) $row['forum_id'];
