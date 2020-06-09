@@ -53,6 +53,7 @@ $lang = array_merge($lang, array(
 	'SFS_USER_BANNED'	=> 'Banned due to a post on the forum',
 	'SFS_REPORTED'	=> 'Post has already been reported',
 	'REPORT_TO_SFS'	=> 'Report to Stop Forum Spam',
+	'BUTTON_SFS'	=> 'Report to SFS',
 	'SFS_SUCCESS_MESSAGE'	=> 'User was successfully reported to the stop forum database',
 	'SFS_WAS_REPORTED'	=> 'Post was reported to Stop Forum Spam',
 	'SFS_PM_WAS_REPORTED'	=> 'PM was reported to Stop Form Spam',

@@ -288,10 +288,8 @@ class main_listener implements EventSubscriberInterface
 		{
 			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_reporttosfs', array('postid' => (int) $row['post_id'], 'posterid' => (int) $event['poster_id']));
 
-			$report_link = '<a href="' . $reporttosfs_url . '" title="' . $this->user->lang['REPORT_TO_SFS']. '" data-ajax="reporttosfs" class="button button-icon-only"><i class="icon fa-exchange fa-fw" aria-hidden="true"></i><span class="sr-only">{L_REPORT_TO_SFS}</span></a>';
-
 			$event['post_row'] = array_merge($event['post_row'], array(
-				'SFS_LINK'			=> (!$row['sfs_reported']) ? $report_link : '',
+				'SFS_LINK'			=> (!$row['sfs_reported']) ? $reporttosfs_url : '',
 			));
 		}
 	}
