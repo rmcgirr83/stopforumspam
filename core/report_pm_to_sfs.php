@@ -67,16 +67,23 @@ class report_pm_to_sfs
 	*/
 	public function report_pm_to_sfs($msgid, $authorid)
 	{
+		$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
+
+		$admins_mods = $this->sfsgroups->getadminsmods(0);
+
+		$author_id = (int) $authorid;
+		$msg_id = (int) $msgid;
+
+		// Check if reporting PMs is enabled
+		if (!$this->config['allow_pm_report'] || in_array($author_id, $admins_mods))
+		{
+			throw new http_exception(403, 'SFS_PM_REPORT_NOT_ALLOWED');
+		}
 
 		if (empty($this->config['allow_sfs']) || empty($this->config['sfs_api_key']))
 		{
 			return false;
 		}
-
-		$author_id = (int) $authorid;
-		$msg_id = (int) $msgid;
-
-		$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
 
 		// msg_id must be greater than 0
 		if ($msg_id <= 0)
@@ -107,14 +114,12 @@ class report_pm_to_sfs
 
 		if ($sfs_reported)
 		{
-			throw new http_exception(403, 'SFS_REPORTED');
+			throw new http_exception(403, 'SFS_PM_REPORTED');
 		}
-
-		$admins_mods = $this->sfsgroups->getadminsmods(0);
 
 		// only allow this via ajax calls
 		//
-		if ($this->request->is_ajax() && !in_array($author_id, $admins_mods))
+		if ($this->request->is_ajax())
 		{
 			$response = $this->sfsapi->sfsapi('add', $username, $userip, $useremail, $this->config['sfs_api_key']);
 
@@ -141,7 +146,7 @@ class report_pm_to_sfs
 
 			$sfs_username = $this->user->lang('SFS_USERNAME_STOPPED', $username);
 
-			$this->log->add('mod', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_REPORTED', false, array($sfs_username, 'msg_id'  => $msg_id));
+			$this->log->add('mod', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_PM_REPORTED', false, array($sfs_username, 'msg_id'  => $msg_id));
 
 			$data = array(
 				'MESSAGE_TITLE'	=> $this->user->lang('SUCCESS'),

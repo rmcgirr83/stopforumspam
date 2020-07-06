@@ -90,7 +90,7 @@ class main_listener implements EventSubscriberInterface
 	static public function getSubscribedEvents()
 	{
 		return array(
-			'core.common'	=> 'build_adminsmods_cache',
+			'core.user_setup_after'					=> 'build_adminsmods_cache',
 			'core.modify_mcp_modules_display_option'	=> 'user_setup',
 			'core.ucp_register_data_after'			=> 'user_sfs_validate_registration',
 			'core.posting_modify_template_vars'		=> 'poster_data_email',
@@ -304,7 +304,7 @@ class main_listener implements EventSubscriberInterface
 
 		$user_info = $event['user_info'];
 
-		if (empty($this->config['allow_sfs']) || empty($this->config['sfs_api_key']) /*|| $this->user->data['user_id'] == $user_info['user_id']*/)
+		if (empty($this->config['allow_sfs']) || empty($this->config['sfs_api_key']) || $this->user->data['user_id'] == $user_info['user_id'])
 		{
 			return;
 		}
@@ -327,7 +327,7 @@ class main_listener implements EventSubscriberInterface
 			$report_link = '<a href="' . $reporttosfs_url . '" title="' . $this->user->lang['REPORT_TO_SFS']. '" data-ajax="report_pm_to_sfs" class="button button-icon-only"><i class="icon fa-exchange fa-fw" aria-hidden="true"></i><span class="sr-only">{L_REPORT_TO_SFS}</span></a>';
 
 			$event['msg_data'] = array_merge($event['msg_data'], array(
-				'SFS_LINK'			=> (!$message_row['sfs_reported']) ? $report_link : '',
+				'SFS_LINK'			=> (!$message_row['sfs_reported'] && $this->config['allow_pm_report']) ? $report_link : '',
 			));
 		}
 	}
