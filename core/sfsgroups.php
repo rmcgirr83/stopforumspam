@@ -29,7 +29,7 @@ class sfsgroups
 	/*
 	* getadminsmods		generate a cache of users who are mods of forums and merge with the already existing cache of admins and mods
 	*					this is used in the listener as well as reporttosfs files
-	* @param	$forum_id	the id of a forum 
+	* @param	$forum_id	the id of a forum
 	* @return 	null
 	* @access	public
 	*/

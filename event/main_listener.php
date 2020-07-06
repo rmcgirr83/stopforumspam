@@ -110,7 +110,7 @@ class main_listener implements EventSubscriberInterface
 	/*
 	* user_setup		add lang vars on user setup
 	*
-	* @param	$event	the event object 
+	* @param	$event	the event object
 	* @return 	null
 	* @access	public
 	*/
@@ -122,7 +122,7 @@ class main_listener implements EventSubscriberInterface
 	/*
 	* user_sfs_validate_registration		validate a users registration event
 	*
-	* @param	$event	the event object 
+	* @param	$event	the event object
 	* @return 	$error
 	* @access	public
 	*/
@@ -164,7 +164,7 @@ class main_listener implements EventSubscriberInterface
 	/*
 	* poster_data_email			inject email address into posting if allowed for guests
 	*
-	* @param	$event			the event object 
+	* @param	$event			the event object
 	* @return 	null
 	* @access	public
 	*/
@@ -183,7 +183,7 @@ class main_listener implements EventSubscriberInterface
 	/*
 	* poster_modify_message_text	inject email address into post data  for validation
 	*
-	* @param	$event			the event object 
+	* @param	$event			the event object
 	* @return 	null
 	* @access	public
 	*/
@@ -197,7 +197,7 @@ class main_listener implements EventSubscriberInterface
 	/*
 	* user_sfs_validate_posting		validate username and email for guest posting
 	*
-	* @param	$event			the event object 
+	* @param	$event			the event object
 	* @return 	$error_array
 	* @access	public
 	*/
@@ -258,7 +258,7 @@ class main_listener implements EventSubscriberInterface
 	* update_sfs_admin_mods 			update admin and mods cache when adding|deleting users to|from a group
 	* @param 		$event				event object
 	* @return		null
-	* @access		public 
+	* @access		public
 	*/
 	public function update_sfs_admin_mods($event)
 	{
