@@ -95,7 +95,7 @@ class reporttosfs
 		$sql = 'SELECT p.sfs_reported, p.poster_ip, p.forum_id, u.username, u.user_email
 			FROM ' . POSTS_TABLE . ' p
 			LEFT JOIN ' . USERS_TABLE . ' u on p.poster_id = u.user_id
-			WHERE p.post_id = ' . $postid . ' AND p.poster_id = ' . $posterid;
+			WHERE p.post_id = ' . (int) $postid . ' AND p.poster_id = ' . (int) $posterid;
 		$result = $this->db->sql_query($sql);
 		$row = $this->db->sql_fetchrow($result);
 		$this->db->sql_freeresult($result);

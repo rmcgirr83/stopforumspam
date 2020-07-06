@@ -393,7 +393,7 @@ class main_listener implements EventSubscriberInterface
 			}
 			else if ($this->config['contact_admin_form_enable'])
 			{
-				$link = ($this->config['email_enable']) ? append_sid("{$this->root_path}memberlist.$this->php_ext", 'mode=contactadmin') : 'mailto:' . htmlspecialchars($this->config['board_contact']);
+				$link = ($this->config['email_enable']) ? append_sid("{$this->root_path}memberlist.$this->php_ext", 'mode=contactadmin') : 'mailto:' . phpbb_get_board_contact($this->config, $this->php_ext);
 				$message = $this->user->lang('NO_SOUP_FOR_YOU', '<a href="'. $link .'">','</a>');
 			}
 			else
