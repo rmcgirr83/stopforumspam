@@ -61,9 +61,10 @@ class report_pm_to_sfs
 	}
 
 	/*
-	 * reporttosfs
-	 * @param	$posterid	posterid that made the post
-	 * @return 	json response
+	* report_pm_to_sfs
+	* @param	$msgid			the pm msgid
+	* @param	$authorid		the author id of the pm
+	* @return 	json response
 	*/
 	public function report_pm_to_sfs($msgid, $authorid)
 	{
@@ -159,9 +160,9 @@ class report_pm_to_sfs
 	}
 
 	/*
-	 * check_report
-	 * @param 	$msg_id 	msg_id from the report to sfs
-	 * @return 	null
+	 * check_report				check to see if the PM msg has already been reported
+	 * @param 	$msg_id 		msg_id from the report to sfs
+	 * @return 	json response if found
 	*/
 	private function check_report($msg_id)
 	{

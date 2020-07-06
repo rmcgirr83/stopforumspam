@@ -90,12 +90,13 @@ class main_listener implements EventSubscriberInterface
 	static public function getSubscribedEvents()
 	{
 		return array(
-			'core.user_setup_after'					=> 'build_adminsmods_cache',
 			'core.modify_mcp_modules_display_option'	=> 'user_setup',
 			'core.ucp_register_data_after'			=> 'user_sfs_validate_registration',
 			'core.posting_modify_template_vars'		=> 'poster_data_email',
 			'core.posting_modify_message_text'		=> 'poster_modify_message_text',
 			'core.posting_modify_submission_errors'	=> 'user_sfs_validate_posting',
+			'core.group_add_user_after'				=> 'update_sfs_admin_mods',
+			'core.group_delete_user_after'			=> 'update_sfs_admin_mods',
 			// report to sfs?
 			'core.viewtopic_before_f_read_check'	=> 'viewtopic_before_f_read_check',
 			'core.viewtopic_post_rowset_data'		=> 'viewtopic_post_rowset_data',
@@ -106,19 +107,25 @@ class main_listener implements EventSubscriberInterface
 		);
 	}
 
-	public function build_adminsmods_cache()
-	{
-		if ($this->cache->get('_sfs_adminsmods') == false && !empty($this->config['sfs_api_key']))
-		{
-			$this->sfsgroups->build_adminsmods_cache();
-		}
-	}
-
+	/*
+	* user_setup		add lang vars on user setup
+	*
+	* @param	$event	the event object 
+	* @return 	null
+	* @access	public
+	*/
 	public function user_setup($event)
 	{
 		$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'sfs_mcp');
 	}
 
+	/*
+	* user_sfs_validate_registration		validate a users registration event
+	*
+	* @param	$event	the event object 
+	* @return 	$error
+	* @access	public
+	*/
 	public function user_sfs_validate_registration($event)
 	{
 		if ($this->config['allow_sfs'] == false)
@@ -155,8 +162,11 @@ class main_listener implements EventSubscriberInterface
 	}
 
 	/*
-	* inject email for anonymous postings
-	* it is strictly used as a check against SFS
+	* poster_data_email			inject email address into posting if allowed for guests
+	*
+	* @param	$event			the event object 
+	* @return 	null
+	* @access	public
 	*/
 	public function poster_data_email($event)
 	{
@@ -170,6 +180,13 @@ class main_listener implements EventSubscriberInterface
 		}
 	}
 
+	/*
+	* poster_modify_message_text	inject email address into post data  for validation
+	*
+	* @param	$event			the event object 
+	* @return 	null
+	* @access	public
+	*/
 	public function poster_modify_message_text($event)
 	{
 		$event['post_data'] = array_merge($event['post_data'], array(
@@ -177,6 +194,13 @@ class main_listener implements EventSubscriberInterface
 		));
 	}
 
+	/*
+	* user_sfs_validate_posting		validate username and email for guest posting
+	*
+	* @param	$event			the event object 
+	* @return 	$error_array
+	* @access	public
+	*/
 	public function user_sfs_validate_posting($event)
 	{
 		$error_array = $event['error'];
@@ -231,9 +255,23 @@ class main_listener implements EventSubscriberInterface
 	}
 
 	/*
-	 * viewtopic_before_f_read_check() 	inject lang vars and grab admins and mods
-	 * @param 		$event				\phpbb\event
-	 * @return		null
+	* update_sfs_admin_mods 			update admin and mods cache when adding|deleting users to|from a group
+	* @param 		$event				event object
+	* @return		null
+	* @access		public 
+	*/
+	public function update_sfs_admin_mods($event)
+	{
+		// can't determine group id by default so always run this when updating groups
+		// apparently no way to get around this
+		$this->sfsgroups->build_adminsmods_cache();
+	}
+
+	/*
+	* viewtopic_before_f_read_check() 	inject lang vars and grab admins and mods
+	* @param 		$event				event object
+	* @return		null
+	* @access		public
 	*/
 	public function viewtopic_before_f_read_check($event)
 	{
@@ -250,9 +288,10 @@ class main_listener implements EventSubscriberInterface
 	}
 
 	/*
-	 * viewtopic_post_rowset_data	add the posters ip into the rowset
-	 * @param	$event				\phpbb\event
-	 * @return	string
+	* viewtopic_post_rowset_data	add the posters ip into the rowset
+	* @param	$event				event object
+	* @return	string
+	* @access		public
 	*/
 	public function viewtopic_post_rowset_data($event)
 	{
@@ -267,9 +306,10 @@ class main_listener implements EventSubscriberInterface
 	}
 
 	/*
-	 * viewtopic_modify_post_row		show a link to admins and mods to report the spammer
-	 * @param 	$event					\phpbb\event
-	 * @return	string
+	* viewtopic_modify_post_row		show a link to admins and mods to report the spammer
+	* @param 		$event			event object
+	* @return		null
+	* @access		public
 	*/
 	public function viewtopic_modify_post_row($event)
 	{
@@ -295,9 +335,10 @@ class main_listener implements EventSubscriberInterface
 	}
 
 	/*
-	 * ucp_pm_view_message				show a link to report a spammer
-	 * @param 	$event					\phpbb\event
-	 * @return	string
+	* ucp_pm_view_message				show a link to report a spammer
+	* @param 	$event					event object
+	* @return	null
+	* @access	public
 	*/
 	public function ucp_pm_view_message($event)
 	{
@@ -333,9 +374,10 @@ class main_listener implements EventSubscriberInterface
 	}
 
 	/*
-	 * show_message
-	 * @param 	$check 	the type of check we are, uhmmm, checking
-	 * @return string
+	* show_message
+	* @param 		$check 		the type of check we are, uhmmm, checking
+	* @return 		string
+	* @access		public
 	*/
 	private function show_message($check = '')
 	{
@@ -351,7 +393,7 @@ class main_listener implements EventSubscriberInterface
 			}
 			else if ($this->config['contact_admin_form_enable'])
 			{
-				$link = ($this->config['email_enable']) ? append_sid("{$this->root_path}memberlist.$this->php_ext", 'mode=contactadmin') : 'mailto:' . phpbb_get_board_contact($this->config, $this->php_ext);
+				$link = ($this->config['email_enable']) ? append_sid("{$this->root_path}memberlist.$this->php_ext", 'mode=contactadmin') : 'mailto:' . htmlspecialchars($this->config['board_contact']);
 				$message = $this->user->lang('NO_SOUP_FOR_YOU', '<a href="'. $link .'">','</a>');
 			}
 			else
@@ -363,11 +405,12 @@ class main_listener implements EventSubscriberInterface
 	}
 
 	/*
-	 * stopforumspam_check
-	 * @param 	$username 	username from the forum inputs
-	 * @param	$ip			the users ip
-	 * @param	$email		email from the forum inputs
-	 * @return 	bool		true if found, false if not
+	* stopforumspam_check
+	* @param 	$username 		username from the forum inputs
+	* @param	$ip				the users ip
+	* @param	$email			email from the forum inputs
+	* @return 	bool|string		true if found, false if not, string if other
+	* @access	public
 	*/
 	private function stopforumspam_check($username, $ip, $email)
 	{
@@ -440,7 +483,16 @@ class main_listener implements EventSubscriberInterface
 		}
 	}
 
-	// log messages
+	/*
+	* log_message			function used in this class to inject messages into the logs
+	* @param 	$mode 		the mode that we are doing for the log either admin or user
+	* @param	$username	the users name
+	* @param	$ip			the users ip
+	* @param	$message	the message we are injecting
+	* @param	$email		email from the forum inputs
+	* @return 	null
+	* @access	public
+	*/
 	private function log_message($mode, $username, $ip, $message, $email)
 	{
 		$sfs_ip_check = $this->user->lang('SFS_IP_STOPPED', $ip);
@@ -457,7 +509,12 @@ class main_listener implements EventSubscriberInterface
 		}
 	}
 
-	// validate email on posting
+	/*
+	* validate_email		function used in this class to validate a guest posters email address
+	* @param	$email		email from the forum inputs
+	* @return 	string
+	* @access	public
+	*/
 	private function validate_email($email)
 	{
 		$error = phpbb_validate_email($email);
@@ -465,7 +522,12 @@ class main_listener implements EventSubscriberInterface
 		return $error;
 	}
 
-	// validate username on posting
+	/*
+	* validate_username		function used in this class to validate a guest posters username
+	* @param	$username	username from the forum inputs
+	* @return 	string
+	* @access	public
+	*/
 	private function validate_username($username)
 	{
 		$error = array();

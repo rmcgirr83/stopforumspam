@@ -66,13 +66,10 @@ class reporttosfs
 	}
 
 	/*
-	 * reporttosfs
-	 * @param 	$username 	username from forum inputs
-	 * @param	$userip		userip
-	 * @param	$useremail	useremail
-	 * @param	$postid		postid of the post
-	 * @param	$posterid	posterid that made the post
-	 * @return 	json response
+	* reporttosfs			reporting of post to stopforum database
+	* @param	$postid		postid of the post
+	* @param	$posterid	posterid that made the post
+	* @return 	json response
 	*/
 	public function reporttosfs($postid, $posterid)
 	{
@@ -98,7 +95,7 @@ class reporttosfs
 		$sql = 'SELECT p.sfs_reported, p.poster_ip, p.forum_id, u.username, u.user_email
 			FROM ' . POSTS_TABLE . ' p
 			LEFT JOIN ' . USERS_TABLE . ' u on p.poster_id = u.user_id
-			WHERE p.post_id = ' . (int) $postid . ' AND p.poster_id = ' . (int) $posterid;
+			WHERE p.post_id = ' . $postid . ' AND p.poster_id = ' . $posterid;
 		$result = $this->db->sql_query($sql);
 		$row = $this->db->sql_fetchrow($result);
 		$this->db->sql_freeresult($result);
@@ -176,9 +173,9 @@ class reporttosfs
 	}
 
 	/*
-	 * check_report
-	 * @param 	$postid 	postid from the report to sfs
-	 * @return 	null
+	* check_report			check to see if the post msg has already been reported
+	* @param 	$postid 	postid from the report to sfs
+	* @return 	json response if found
 	*/
 	private function check_report($postid)
 	{

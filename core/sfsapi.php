@@ -37,13 +37,13 @@ class sfsapi
 	}
 
 	/*
-	 * sfsapi
-	 * @param 	$type 			whether we are adding or querying
-	 * @param	$username		the users name
-	 * @param	$userip			the users ip
-	 * @param	$useremail		the users email addy
-	 * @param	$apikey			the api key of the forum
-	 * @return 	string			return either a string on success or false on failure
+	* sfsapi
+	* @param 	$type 			whether we are adding or querying
+	* @param	$username		the users name
+	* @param	$userip			the users ip
+	* @param	$useremail		the users email addy
+	* @param	$apikey			the api key of the forum
+	* @return 	string			return either a string on success or false on failure
 	*/
 	public function sfsapi($type, $username, $userip, $useremail, $apikey = '')
 	{
@@ -102,7 +102,12 @@ class sfsapi
 		return $contents;
 	}
 
-	// ban a nub
+	/*
+	* sfs_ban
+	* @param 	$type 			ban by either IP or username
+	* @param	$user_info		the users info of who we are banning
+	* @return 	null			return either a string on success or false on failure
+	*/
 	public function sfs_ban($type, $user_info)
 	{
 		if (!function_exists('user_ban'))

@@ -27,9 +27,12 @@ class sfsgroups
 	}
 
 	/*
-	 * just generate a cache of users who are admins and mods
-	 * this is used in the listener as well as reporttosfs files
-	 */
+	* getadminsmods		generate a cache of users who are mods of forums and merge with the already existing cache of admins and mods
+	*					this is used in the listener as well as reporttosfs files
+	* @param	$forum_id	the id of a forum 
+	* @return 	null
+	* @access	public
+	*/
 	public function getadminsmods($forum_id)
 	{
 		$admins_mods = $this->cache->get('_sfs_adminsmods');
@@ -55,9 +58,11 @@ class sfsgroups
 	}
 
 	/*
-	 * generate a cache of users who are admins and mods
-	 * this is used in the listener as well as reporttosfs files
-	 */
+	* build_adminsmods_cache		generate a cache of users who are admins and global mods
+	*								this is used in the listener as well as reporttosfs files
+	* @return 	null
+	* @access	public
+	*/
 	public function build_adminsmods_cache()
 	{
 		// Grab an array of user_id's with admin permissions
