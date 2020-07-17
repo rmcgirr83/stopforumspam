@@ -27,7 +27,6 @@ use phpbb\exception\http_exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-
 class reporttosfs
 {
 	/** @var \phpbb\auth\auth */
