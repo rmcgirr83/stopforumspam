@@ -10,9 +10,20 @@
 
 namespace rmcgirr83\stopforumspam\core;
 
-use Symfony\Component\HttpFoundation\JsonResponse;
+/**
+* ignore
+*/
+use phpbb\config\config;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use phpbb\db\driver\driver_interface;
+use phpbb\language\language;
+use phpbb\log\log;
+use phpbb\request\request;
+use phpbb\user;
+use rmcgirr83\stopforumspam\core\sfsgroups;
+use rmcgirr83\stopforumspam\core\sfsapi;
 use phpbb\exception\http_exception;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class report_pm_to_sfs
 {
@@ -24,6 +35,9 @@ class report_pm_to_sfs
 
 	/** @var \phpbb\db\driver\driver_interface */
 	protected $db;
+
+	/** @var \phpbb\language\language */
+	protected $language;
 
 	/** @var \phpbb\log\log */
 	protected $log;
@@ -41,18 +55,20 @@ class report_pm_to_sfs
 	protected $sfsapi;
 
 	public function __construct(
-			\phpbb\config\config $config,
+			config $config,
 			ContainerInterface $container,
-			\phpbb\db\driver\driver_interface $db,
-			\phpbb\log\log $log,
-			\phpbb\request\request $request,
-			\phpbb\user $user,
-			\rmcgirr83\stopforumspam\core\sfsgroups $sfsgroups,
-			\rmcgirr83\stopforumspam\core\sfsapi $sfsapi)
+			driver_interface $db,
+			language $language,
+			log $log,
+			request $request,
+			user $user,
+			sfsgroups $sfsgroups,
+			sfsapi $sfsapi)
 	{
 		$this->config = $config;
 		$this->container = $container;
 		$this->db = $db;
+		$this->language = $language;
 		$this->log = $log;
 		$this->request = $request;
 		$this->user = $user;
@@ -62,13 +78,13 @@ class report_pm_to_sfs
 
 	/*
 	* report_pm_to_sfs
-	* @param	$msgid			the pm msgid
-	* @param	$authorid		the author id of the pm
+	* @param	int		$msgid			the pm msgid
+	* @param	int		$authorid		the author id of the pm
 	* @return 	json response
 	*/
 	public function report_pm_to_sfs($msgid, $authorid)
 	{
-		$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
+		$this->language->add_lang('stopforumspam', 'rmcgirr83/stopforumspam');
 
 		$admins_mods = $this->sfsgroups->getadminsmods(0);
 
@@ -126,11 +142,11 @@ class report_pm_to_sfs
 
 			if (!$response)
 			{
-				$data = array(
+				$data = [
 					'MESSAGE_TITLE'	=> $this->user->lang('ERROR'),
 					'MESSAGE_TEXT'	=> $this->user->lang('SFS_ERROR_MESSAGE'),
 					'success'	=> false,
-				);
+				];
 				return new JsonResponse($data);
 			}
 
@@ -145,23 +161,24 @@ class report_pm_to_sfs
 				WHERE msg_id = ' . (int) $msg_id;
 			$this->db->sql_query($sql);
 
-			$sfs_username = $this->user->lang('SFS_USERNAME_STOPPED', $username);
+			$sfs_username = $this->language->lang('SFS_USERNAME_STOPPED', $username);
 
-			$this->log->add('mod', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_PM_REPORTED', false, array($sfs_username, 'msg_id'  => $msg_id));
+			$this->log->add('mod', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_PM_REPORTED', false, [$sfs_username, 'msg_id'  => $msg_id]);
 
-			$data = array(
-				'MESSAGE_TITLE'	=> $this->user->lang('SUCCESS'),
-				'MESSAGE_TEXT'	=> $this->user->lang('SFS_SUCCESS_MESSAGE'),
+			$data = [
+				'MESSAGE_TITLE'	=> $this->language->lang('SUCCESS'),
+				'MESSAGE_TEXT'	=> $this->language->lang('SFS_SUCCESS_MESSAGE'),
 				'success'	=> true,
 				'msg_id'	=> $msg_id,
-			);
+			];
+
 			return new JsonResponse($data);
 		}
 	}
 
 	/*
-	 * check_report				check to see if the PM msg has already been reported
-	 * @param 	$msg_id 		msg_id from the report to sfs
+	 * check_report					check to see if the PM msg has already been reported
+	 * @param 	int	$msg_id 		msg_id from the report to sfs
 	 * @return 	json response if found
 	*/
 	private function check_report($msg_id)
@@ -175,11 +192,11 @@ class report_pm_to_sfs
 
 		if (!$report_data)
 		{
-			$data = array(
+			$data = [
 				'MESSAGE_TITLE'	=> $this->user->lang('ERROR'),
 				'MESSAGE_TEXT'	=> $this->user->lang('PM_NOT_EXIST'),
 				'success'	=> false,
-			);
+			];
 			return new JsonResponse($data);
 		}
 

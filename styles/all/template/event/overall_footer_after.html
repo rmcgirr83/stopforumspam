@@ -2,7 +2,7 @@
 (function($) {  // Avoid conflicts with other libraries
 
 'use strict';
-	
+
 	phpbb.addAjaxCallback('reporttosfs', function(data) {
 		if (data.postid !== "undefined") {
 			$('#sfs' + data.postid).hide();

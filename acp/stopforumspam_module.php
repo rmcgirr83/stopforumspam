@@ -17,17 +17,17 @@ class stopforumspam_module
 
 	function main($id, $mode)
 	{
-		global $cache, $config, $db, $request, $template, $user;
+		global $cache, $config, $db, $language, $request, $template, $user;
 		global $phpbb_container, $phpbb_root_path, $phpEx, $phpbb_log;
 
-		$user->add_lang_ext('rmcgirr83/stopforumspam', 'acp/acp_stopforumspam');
-		$user->add_lang('acp/ban');
+		$language->add_lang('acp/acp_stopforumspam', 'rmcgirr83/stopforumspam');
+		$language->add_lang('acp/ban');
 
 		$sfsgroups = $phpbb_container->get('rmcgirr83.stopforumspam.core.sfsgroups');
 
 		$action = $request->variable('action', '');
 
-		$this->page_title = $user->lang['SFS_CONTROL'];
+		$this->page_title = $language->lang['SFS_CONTROL'];
 		$this->tpl_name = 'stopforumspam_body';
 
 		add_form_key('sfs');
@@ -36,7 +36,7 @@ class stopforumspam_module
 		$cache_built = '';
 		if (!$cache->get('_sfs_adminsmods') && $config['sfs_api_key'])
 		{
-			$cache_built = $user->lang('SFS_NEED_CACHE');
+			$cache_built = $language->lang('SFS_NEED_CACHE');
 		}
 
 		switch ($action)
@@ -61,8 +61,8 @@ class stopforumspam_module
 							'url'	=> '',
 							'time'	=> 5,
 						],
-						'MESSAGE_TITLE'	=> $user->lang('SUCCESS'),
-						'MESSAGE_TEXT'	=> $user->lang('SFS_REPORTED_CLEARED'),
+						'MESSAGE_TITLE'	=> $language->lang('SUCCESS'),
+						'MESSAGE_TEXT'	=> $language->lang('SFS_REPORTED_CLEARED'),
 					];
 
 					$json_response = new \phpbb\json_response;
@@ -89,8 +89,8 @@ class stopforumspam_module
 							'url'	=> '',
 							'time'	=> 5,
 						],
-						'MESSAGE_TITLE'	=> $user->lang('SUCCESS'),
-						'MESSAGE_TEXT'	=> $user->lang('LOG_ADMINSMODS_CACHE_BUILT'),
+						'MESSAGE_TITLE'	=> $language->lang('SUCCESS'),
+						'MESSAGE_TEXT'	=> $language->lang('LOG_ADMINSMODS_CACHE_BUILT'),
 
 					];
 					$json_response = new \phpbb\json_response;
@@ -114,12 +114,12 @@ class stopforumspam_module
 
 			$has_api_key = $request->variable('sfs_api_key', '', true);
 
-			$check_row = array('sfs_threshold' => $request->variable('sfs_threshold', 0));
-			$validate_row = array('sfs_threshold' => array('num', false, 1, 99));
+			$check_row = ['sfs_threshold' => $request->variable('sfs_threshold', 0)];
+			$validate_row = ['sfs_threshold' => array('num', false, 1, 99)];
 			$error = validate_data($check_row, $validate_row);
 
 			// Replace "error" strings with their real, localised form
-			$error = array_map(array($user, 'lang'), $error);
+			$error = array_map([$user, 'lang'], $error);
 
 			if (!sizeof($error))
 			{
@@ -133,7 +133,7 @@ class stopforumspam_module
 
 				$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_SFS_CONFIG_SAVED');
 
-				trigger_error($user->lang['SFS_SETTINGS_SUCCESS'] . adm_back_link($this->u_action));
+				trigger_error($language->lang('SFS_SETTINGS_SUCCESS') . adm_back_link($this->u_action));
 			}
 		}
 
@@ -157,11 +157,11 @@ class stopforumspam_module
 
 		$pms_reported = $row;
 
-		$template->assign_vars(array(
+		$template->assign_vars([
 			'ERROR'			=> isset($error) ? ((sizeof($error)) ? implode('<br />', $error) : '') : '',
 			'SFS_API_KEY'	=> $config['sfs_api_key'],
 			'ALLOW_SFS'		=> ($config['allow_sfs'] && $curl_active) ? true : false,
-			'CURL_ACTIVE'	=> (!$curl_active) ? $user->lang['LOG_SFS_NEED_CURL'] : false,
+			'CURL_ACTIVE'	=> (!$curl_active) ? $language->lang('LOG_SFS_NEED_CURL') : false,
 			'SFS_THRESHOLD'	=> (int) $config['sfs_threshold'],
 			'SFS_BAN_IP'	=> ($config['sfs_ban_ip']) ? true : false,
 			'SFS_LOG_MESSAGE'	=> ($config['sfs_log_message']) ? true : false,
@@ -173,12 +173,12 @@ class stopforumspam_module
 			'SFS_BAN_TIME'	=> $this->display_ban_time($config['sfs_ban_time']),
 			'SFS_NOTIFY'	=> ($config['sfs_notify']) ? true : false,
 			'NOTICE'	=> $cache_built,
-			'L_SFS_CLEAR_EXPLAIN'	=> $user->lang('SFS_CLEAR_EXPLAIN', (int) $posts_reported, (int) $pms_reported),
+			'L_SFS_CLEAR_EXPLAIN'	=> $language->lang('SFS_CLEAR_EXPLAIN', (int) $posts_reported, (int) $pms_reported),
 
 			'U_BUILD_CACHE'	=> $url . '&amp;action=build_adminsmods',
 			'U_CLR_REPORTS'	=> $url . '&amp;action=clr_reports',
 			'U_ACTION'		=> $url,
-		));
+		]);
 	}
 
 	protected function allow_sfs()
@@ -226,10 +226,10 @@ class stopforumspam_module
 
 	protected function display_ban_time($ban_time = 0)
 	{
-		global $user;
+		global $language;
 
 		// Ban length options
-		$ban_text = array(0 => $user->lang['PERMANENT'], 30 => $user->lang['30_MINS'], 60 => $user->lang['1_HOUR'], 360 => $user->lang['6_HOURS'], 1440 => $user->lang['1_DAY'], 10080 => $user->lang['7_DAYS'], 20160 => $user->lang['2_WEEKS'], 40320 => $user->lang['1_MONTH'], 524160 => $user->lang['1_YEAR']);
+		$ban_text = [0 => $language->lang['PERMANENT'], 30 => $language->lang['30_MINS'], 60 => $language->lang['1_HOUR'], 360 => $language->lang['6_HOURS'], 1440 => $language->lang['1_DAY'], 10080 => $language->lang['7_DAYS'], 20160 => $language->lang['2_WEEKS'], 40320 => $language->lang['1_MONTH'], 524160 => $language->lang['1_YEAR']];
 
 		$ban_options = '';
 		foreach ($ban_text as $length => $text)

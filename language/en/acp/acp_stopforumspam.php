@@ -13,7 +13,7 @@ if (!defined('IN_PHPBB'))
 }
 if (empty($lang) || !is_array($lang))
 {
-	$lang = array();
+	$lang = [];
 }
 
 // DEVELOPERS PLEASE NOTE
@@ -32,7 +32,7 @@ if (empty($lang) || !is_array($lang))
 // ’ » “ ” …
 
 
-$lang = array_merge($lang, array(
+$lang = array_merge($lang, [
 
 	// ACP entries
 	'SFS_SETTINGS'			=> 'Settings',
@@ -67,4 +67,4 @@ $lang = array_merge($lang, array(
 	'SFS_SETTINGS_ERROR'		=> 'There was an error saving your settings. Please submit the back trace with your error report.',
 	'SFS_SETTINGS_SUCCESS'		=> 'The settings were successfully saved.',
 	'SFS_REPORTED_CLEARED' => 'Posts and private messages reported to stop forum spam were reset.',
-));
+]);

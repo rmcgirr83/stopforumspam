@@ -12,6 +12,21 @@
 namespace rmcgirr83\stopforumspam\event;
 
 /**
+* ignore
+*/
+use phpbb\auth\auth;
+use phpbb\cache\service;
+use phpbb\config\config;
+use phpbb\controller\helper;
+use phpbb\language\language;
+use phpbb\log\log;
+use phpbb\request\request;
+use phpbb\template\template;
+use phpbb\user;
+use rmcgirr83\stopforumspam\core\sfsgroups;
+use rmcgirr83\stopforumspam\core\sfsapi;
+
+/**
 * Event listener
 */
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -27,11 +42,11 @@ class main_listener implements EventSubscriberInterface
 	/** @var \phpbb\config\config */
 	protected $config;
 
-	/** @var \phpbb\user */
-	protected $user;
-
 	/** @var \phpbb\controller\helper */
 	protected $helper;
+
+	/** @var \phpbb\language\language */
+	protected $language;
 
 	/** @var \phpbb\log\log */
 	protected $log;
@@ -41,6 +56,9 @@ class main_listener implements EventSubscriberInterface
 
 	/** @var \phpbb\template\template */
 	protected $template;
+
+	/** @var \phpbb\user */
+	protected $user;
 
 	/* @var \rmcgirr83\stopforumspam\core\sfsgroups */
 	protected $sfsgroups;
@@ -58,16 +76,17 @@ class main_listener implements EventSubscriberInterface
 	protected $contactadmin;
 
 	public function __construct(
-		\phpbb\auth\auth $auth,
-		\phpbb\cache\service $cache,
-		\phpbb\config\config $config,
-		\phpbb\user $user,
-		\phpbb\controller\helper $helper,
-		\phpbb\log\log $log,
-		\phpbb\request\request $request,
-		\phpbb\template\template $template,
-		\rmcgirr83\stopforumspam\core\sfsgroups $sfsgroups,
-		\rmcgirr83\stopforumspam\core\sfsapi $sfsapi,
+		auth $auth,
+		service $cache,
+		config $config,
+		helper $helper,
+		language $language,
+		log $log,
+		request $request,
+		template $template,
+		user $user,
+		sfsgroups $sfsgroups,
+		sfsapi $sfsapi,
 		$root_path,
 		$php_ext,
 		\rmcgirr83\contactadmin\controller\main_controller $contactadmin = null)
@@ -75,11 +94,12 @@ class main_listener implements EventSubscriberInterface
 		$this->auth = $auth;
 		$this->cache = $cache;
 		$this->config = $config;
-		$this->user = $user;
 		$this->helper = $helper;
+		$this->language = $language;
 		$this->log = $log;
 		$this->request = $request;
 		$this->template = $template;
+		$this->user = $user;
 		$this->sfsgroups = $sfsgroups;
 		$this->sfsapi = $sfsapi;
 		$this->root_path = $root_path;
@@ -89,7 +109,8 @@ class main_listener implements EventSubscriberInterface
 
 	static public function getSubscribedEvents()
 	{
-		return array(
+		return [
+			'core.user_setup_after'					=> 'user_setup_after',
 			'core.modify_mcp_modules_display_option'	=> 'user_setup',
 			'core.ucp_register_data_after'			=> 'user_sfs_validate_registration',
 			'core.posting_modify_template_vars'		=> 'poster_data_email',
@@ -104,9 +125,20 @@ class main_listener implements EventSubscriberInterface
 			'core.ucp_pm_view_message'				=> 'ucp_pm_view_message',
 			// Custom events for integration with Contact Admin Extension
 			'rmcgirr83.contactadmin.modify_data_and_error'	=> 'user_sfs_validate_registration',
-		);
+		];
 	}
 
+	/**
+	 * Check for and create if needed admins and mods cache
+	 *
+	 * @param object $event The event object
+	 * @return null
+	 * @access public
+	 */
+	public function user_setup_after($event)
+	{
+		$this->sfsgroups->build_adminsmods_cache();
+	}
 	/*
 	* user_setup		add lang vars on user setup
 	*
@@ -116,7 +148,7 @@ class main_listener implements EventSubscriberInterface
 	*/
 	public function user_setup($event)
 	{
-		$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'sfs_mcp');
+		$this->language->add_lang(['sfs_mcp', 'stopforumspam'], 'rmcgirr83/stopforumspam');
 	}
 
 	/*
@@ -132,7 +164,6 @@ class main_listener implements EventSubscriberInterface
 		{
 			return;
 		}
-		$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
 
 		$error_array = $event['error'];
 
@@ -173,10 +204,10 @@ class main_listener implements EventSubscriberInterface
 		if ($this->user->data['user_id'] == ANONYMOUS && $this->config['allow_sfs'])
 		{
 			// Output the data vars to the template
-			$this->template->assign_vars(array(
+			$this->template->assign_vars([
 					'SFS'	=> true,
 					'EMAIL'	=> $this->request->variable('email', ''),
-			));
+			]);
 		}
 	}
 
@@ -189,9 +220,9 @@ class main_listener implements EventSubscriberInterface
 	*/
 	public function poster_modify_message_text($event)
 	{
-		$event['post_data'] = array_merge($event['post_data'], array(
+		$event['post_data'] = array_merge($event['post_data'], [
 			'email'	=> strtolower($this->request->variable('email', '')),
-		));
+		]);
 	}
 
 	/*
@@ -207,8 +238,7 @@ class main_listener implements EventSubscriberInterface
 
 		if ($this->user->data['user_id'] == ANONYMOUS && $this->config['allow_sfs'])
 		{
-			$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
-			$this->user->add_lang('ucp');
+			$this->language->add_lang('ucp');
 
 			if (!function_exists('phpbb_validate_email'))
 			{
@@ -219,7 +249,7 @@ class main_listener implements EventSubscriberInterface
 			$error = $this->validate_email($event['post_data']['email']);
 			if ($error)
 			{
-				$error_array[] = $this->user->lang[$error . '_EMAIL'];
+				$error_array[] = $this->language->lang($error . '_EMAIL');
 			}
 			// I just hate empty usernames for guest posting
 			if (empty($event['post_data']['username']))
@@ -270,15 +300,13 @@ class main_listener implements EventSubscriberInterface
 	/*
 	* viewtopic_before_f_read_check() 	inject lang vars and grab admins and mods
 	* @param 		$event				event object
-	* @return		null
+	* @return		void
 	* @access		public
 	*/
 	public function viewtopic_before_f_read_check($event)
 	{
 		if ($this->config['allow_sfs'])
 		{
-			$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
-
 			if (!empty($this->config['sfs_api_key']))
 			{
 				// get mods and admins
@@ -290,8 +318,8 @@ class main_listener implements EventSubscriberInterface
 	/*
 	* viewtopic_post_rowset_data	add the posters ip into the rowset
 	* @param	$event				event object
-	* @return	string
-	* @access		public
+	* @return	void
+	* @access	public
 	*/
 	public function viewtopic_post_rowset_data($event)
 	{
@@ -308,7 +336,7 @@ class main_listener implements EventSubscriberInterface
 	/*
 	* viewtopic_modify_post_row		show a link to admins and mods to report the spammer
 	* @param 		$event			event object
-	* @return		null
+	* @return		void
 	* @access		public
 	*/
 	public function viewtopic_modify_post_row($event)
@@ -326,31 +354,28 @@ class main_listener implements EventSubscriberInterface
 
 		if ($sfs_report_allowed && in_array($this->user->data['user_id'], $this->sfs_admins_mods) && !in_array((int) $event['poster_id'], $this->sfs_admins_mods))
 		{
-			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_reporttosfs', array('postid' => (int) $row['post_id'], 'posterid' => (int) $event['poster_id']));
+			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_reporttosfs', ['postid' => (int) $row['post_id'], 'posterid' => (int) $event['poster_id']]);
 
-			$event['post_row'] = array_merge($event['post_row'], array(
+			$event['post_row'] = array_merge($event['post_row'], [
 				'SFS_LINK'			=> (!$row['sfs_reported']) ? $reporttosfs_url : '',
-			));
+			]);
 		}
 	}
 
 	/*
 	* ucp_pm_view_message				show a link to report a spammer
 	* @param 	$event					event object
-	* @return	null
+	* @return	void
 	* @access	public
 	*/
 	public function ucp_pm_view_message($event)
 	{
-
 		$user_info = $event['user_info'];
 
 		if (empty($this->config['allow_sfs']) || empty($this->config['sfs_api_key']) || $this->user->data['user_id'] == $user_info['user_id'])
 		{
 			return;
 		}
-
-		$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
 
 		// get mods and admins
 		$this->sfs_admins_mods = $this->sfsgroups->getadminsmods(0);
@@ -363,19 +388,19 @@ class main_listener implements EventSubscriberInterface
 
 		if ($sfs_report_allowed)
 		{
-			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_report_pm_to_sfs', array('msgid' => (int) $message_row['msg_id'], 'authorid' => (int) $user_info['user_id']));
+			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_report_pm_to_sfs', ['msgid' => (int) $message_row['msg_id'], 'authorid' => (int) $user_info['user_id']]);
 
-			$report_link = '<a href="' . $reporttosfs_url . '" title="' . $this->user->lang['REPORT_TO_SFS']. '" data-ajax="report_pm_to_sfs" class="button button-icon-only"><i class="icon fa-exchange fa-fw" aria-hidden="true"></i><span class="sr-only">{L_REPORT_TO_SFS}</span></a>';
+			$report_link = '<a href="' . $reporttosfs_url . '" title="' . $this->language->lang('REPORT_TO_SFS'). '" data-ajax="report_pm_to_sfs" class="button button-icon-only"><i class="icon fa-exchange fa-fw" aria-hidden="true"></i><span class="sr-only">{L_REPORT_TO_SFS}</span></a>';
 
-			$event['msg_data'] = array_merge($event['msg_data'], array(
+			$event['msg_data'] = array_merge($event['msg_data'], [
 				'SFS_LINK'			=> (!$message_row['sfs_reported'] && $this->config['allow_pm_report']) ? $report_link : '',
-			));
+			]);
 		}
 	}
 
 	/*
 	* show_message
-	* @param 		$check 		the type of check we are, uhmmm, checking
+	* @param 		string	$check 		the type of check we are, uhmmm, checking
 	* @return 		string
 	* @access		public
 	*/
@@ -389,16 +414,16 @@ class main_listener implements EventSubscriberInterface
 		{
 			if ($this->contactadmin !== null && !empty($this->config['contactadmin_enable']))
 			{
-				$message = $this->user->lang('NO_SOUP_FOR_YOU', '<a href="' . $this->helper->route('rmcgirr83_contactadmin_displayform') . '">', '</a>');
+				$message = $this->language->lang('NO_SOUP_FOR_YOU', '<a href="' . $this->helper->route('rmcgirr83_contactadmin_displayform') . '">', '</a>');
 			}
 			else if ($this->config['contact_admin_form_enable'])
 			{
 				$link = ($this->config['email_enable']) ? append_sid("{$this->root_path}memberlist.$this->php_ext", 'mode=contactadmin') : 'mailto:' . phpbb_get_board_contact($this->config, $this->php_ext);
-				$message = $this->user->lang('NO_SOUP_FOR_YOU', '<a href="'. $link .'">','</a>');
+				$message = $this->language->lang('NO_SOUP_FOR_YOU', '<a href="'. $link .'">','</a>');
 			}
 			else
 			{
-				$message = $this->user->lang('NO_SOUP_FOR_YOU_NO_CONTACT');
+				$message = $this->language->lang('NO_SOUP_FOR_YOU_NO_CONTACT');
 			}
 			return $message;
 		}
@@ -406,10 +431,10 @@ class main_listener implements EventSubscriberInterface
 
 	/*
 	* stopforumspam_check
-	* @param 	$username 		username from the forum inputs
-	* @param	$ip				the users ip
-	* @param	$email			email from the forum inputs
-	* @return 	bool|string		true if found, false if not, string if other
+	* @param 	string	$username 		username from the forum inputs
+	* @param	string	$ip				the users ip
+	* @param	string	$email			email from the forum inputs
+	* @return 	bool|string				true if found, false if not, string if other
 	* @access	public
 	*/
 	private function stopforumspam_check($username, $ip, $email)
@@ -423,7 +448,7 @@ class main_listener implements EventSubscriberInterface
 		$sfs_threshold = !empty($this->config['sfs_threshold']) ? $this->config['sfs_threshold'] : 1;
 
 		// Query the SFS database and pull the data into script
-		$json = $this->sfsapi->sfsapi('query', $username, $ip, $email, $this->config['sfs_api_key']);
+		$json = $this->sfsapi->sfsapi('query', $username, $ip, $email);
 		$json_decode = json_decode($json, true);
 
 		// Check if user is a spammer, but only if we successfully got the SFS data
@@ -484,34 +509,34 @@ class main_listener implements EventSubscriberInterface
 	}
 
 	/*
-	* log_message			function used in this class to inject messages into the logs
-	* @param 	$mode 		the mode that we are doing for the log either admin or user
-	* @param	$username	the users name
-	* @param	$ip			the users ip
-	* @param	$message	the message we are injecting
-	* @param	$email		email from the forum inputs
-	* @return 	null
+	* log_message					function used in this class to inject messages into the logs
+	* @param 	string	$mode 		the mode that we are doing for the log either admin or user
+	* @param	string	$username	the users name
+	* @param	string	$ip			the users ip
+	* @param	string	$message	the message we are injecting
+	* @param	string	$email		email from the forum inputs
+	* @return 	void
 	* @access	public
 	*/
 	private function log_message($mode, $username, $ip, $message, $email)
 	{
-		$sfs_ip_check = $this->user->lang('SFS_IP_STOPPED', $ip);
-		$sfs_username_check = $this->user->lang('SFS_USERNAME_STOPPED', $username);
-		$sfs_email_check = $this->user->lang('SFS_EMAIL_STOPPED', $email);
+		$sfs_ip_check = $this->language->lang('SFS_IP_STOPPED', $ip);
+		$sfs_username_check = $this->language->lang('SFS_USERNAME_STOPPED', $username);
+		$sfs_email_check = $this->language->lang('SFS_EMAIL_STOPPED', $email);
 
 		if ($mode === 'admin')
 		{
-			$this->log->add('admin', $this->user->data['user_id'], $ip, $message, false, array($sfs_username_check, $sfs_ip_check, $sfs_email_check));
+			$this->log->add('admin', $this->user->data['user_id'], $ip, $message, false, [$sfs_username_check, $sfs_ip_check, $sfs_email_check]);
 		}
 		else
 		{
-			$this->log->add('user', $this->user->data['user_id'], $ip, $message, false, array('reportee_id' => $this->user->data['user_id'], $sfs_username_check, $sfs_ip_check, $sfs_email_check));
+			$this->log->add('user', $this->user->data['user_id'], $ip, $message, false, ['reportee_id' => $this->user->data['user_id'], $sfs_username_check, $sfs_ip_check, $sfs_email_check]);
 		}
 	}
 
 	/*
-	* validate_email		function used in this class to validate a guest posters email address
-	* @param	$email		email from the forum inputs
+	* validate_email			function used in this class to validate a guest posters email address
+	* @param	string	$email	email from the forum inputs
 	* @return 	string
 	* @access	public
 	*/
@@ -524,22 +549,22 @@ class main_listener implements EventSubscriberInterface
 
 	/*
 	* validate_username		function used in this class to validate a guest posters username
-	* @param	$username	username from the forum inputs
-	* @return 	string
+	* @param	string	$username	username from the forum inputs
+	* @return 	array
 	* @access	public
 	*/
 	private function validate_username($username)
 	{
-		$error = array();
+		$error = [];
 		if (($result = validate_username($username)) !== false)
 		{
-			$error[] = $this->user->lang[$result . '_USERNAME'];
+			$error[] = $this->language->lang[$result . '_USERNAME'];
 		}
 
 		if (($result = validate_string($username, false, $this->config['min_name_chars'], $this->config['max_name_chars'])) !== false)
 		{
 			$min_max_amount = ($result == 'TOO_SHORT') ? $this->config['min_name_chars'] : $this->config['max_name_chars'];
-			$error[] = $this->user->lang('FIELD_' . $result, $min_max_amount, $this->user->lang['USERNAME']);
+			$error[] = $this->language->lang('FIELD_' . $result, $min_max_amount, $this->language->lang('USERNAME'));
 		}
 
 		return $error;

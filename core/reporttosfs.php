@@ -10,9 +10,23 @@
 
 namespace rmcgirr83\stopforumspam\core;
 
+/**
+* ignore
+**/
+use phpbb\auth\auth;
+use phpbb\config\config;
+use phpbb\db\driver\driver_interface;
+use phpbb\language\language;
+use phpbb\log\log;
+use phpbb\request\request;
+use phpbb\user;
+use rmcgirr83\stopforumspam\core\sfsgroups;
+use rmcgirr83\stopforumspam\core\sfsapi;
+use phpbb\exception\http_exception;
+
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use phpbb\exception\http_exception;
+
 
 class reporttosfs
 {
@@ -27,6 +41,9 @@ class reporttosfs
 
 	/** @var \phpbb\db\driver\driver_interface */
 	protected $db;
+
+	/** @var \phpbb\language\language */
+	protected $language;
 
 	/** @var \phpbb\log\log */
 	protected $log;
@@ -44,20 +61,22 @@ class reporttosfs
 	protected $sfsapi;
 
 	public function __construct(
-			\phpbb\auth\auth $auth,
-			\phpbb\config\config $config,
+			auth $auth,
+			config $config,
 			ContainerInterface $container,
-			\phpbb\db\driver\driver_interface $db,
-			\phpbb\log\log $log,
-			\phpbb\request\request $request,
-			\phpbb\user $user,
-			\rmcgirr83\stopforumspam\core\sfsgroups $sfsgroups,
-			\rmcgirr83\stopforumspam\core\sfsapi $sfsapi)
+			driver_interface $db,
+			language $language,
+			log $log,
+			request $request,
+			user $user,
+			sfsgroups $sfsgroups,
+			sfsapi $sfsapi)
 	{
 		$this->auth = $auth;
 		$this->config = $config;
 		$this->container = $container;
 		$this->db = $db;
+		$this->language = $language;
 		$this->log = $log;
 		$this->request = $request;
 		$this->user = $user;
@@ -67,16 +86,14 @@ class reporttosfs
 
 	/*
 	* reporttosfs			reporting of post to stopforum database
-	* @param	$postid		postid of the post
-	* @param	$posterid	posterid that made the post
+	* @param	int	$postid		postid of the post
+	* @param	int	$posterid	posterid that made the post
 	* @return 	json response
 	*/
 	public function reporttosfs($postid, $posterid)
 	{
 		$postid = (int) $postid;
 		$posterid = (int) $posterid;
-
-		$this->user->add_lang_ext('rmcgirr83/stopforumspam', 'stopforumspam');
 
 		// don't allow banning of anonymous user
 		if ($posterid == ANONYMOUS)
@@ -136,11 +153,11 @@ class reporttosfs
 
 			if (!$response)
 			{
-				$data = array(
-					'MESSAGE_TITLE'	=> $this->user->lang('ERROR'),
-					'MESSAGE_TEXT'	=> $this->user->lang('SFS_ERROR_MESSAGE'),
+				$data = [
+					'MESSAGE_TITLE'	=> $this->language->lang('ERROR'),
+					'MESSAGE_TEXT'	=> $this->language->lang('SFS_ERROR_MESSAGE'),
 					'success'	=> false,
-				);
+				];
 				return new JsonResponse($data);
 			}
 
@@ -155,18 +172,18 @@ class reporttosfs
 				WHERE post_id = ' . (int) $postid;
 			$this->db->sql_query($sql);
 
-			$sfs_username = $this->user->lang('SFS_USERNAME_STOPPED', $username);
+			$sfs_username = $this->language->lang('SFS_USERNAME_STOPPED', $username);
 
 			$this->sfsapi->sfs_ban('user', $username);
 
-			$this->log->add('mod', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_REPORTED', false, array($sfs_username, 'forum_id' => $this->forumid, 'topic_id' => $this->topicid, 'post_id'  => $postid));
+			$this->log->add('mod', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_REPORTED', false, [$sfs_username, 'forum_id' => $this->forumid, 'topic_id' => $this->topicid, 'post_id'  => $postid]);
 
-			$data = array(
-				'MESSAGE_TITLE'	=> $this->user->lang('SUCCESS'),
-				'MESSAGE_TEXT'	=> $this->user->lang('SFS_SUCCESS_MESSAGE'),
+			$data = [
+				'MESSAGE_TITLE'	=> $this->language->lang('SUCCESS'),
+				'MESSAGE_TEXT'	=> $this->language->lang('SFS_SUCCESS_MESSAGE'),
 				'success'	=> true,
 				'postid'	=> $postid,
-			);
+			];
 			return new JsonResponse($data);
 		}
 		throw new http_exception(403, 'CANNOT_BAN_ADMINS_MODS');
@@ -189,11 +206,11 @@ class reporttosfs
 
 		if (!$report_data)
 		{
-			$data = array(
-				'MESSAGE_TITLE'	=> $this->user->lang('ERROR'),
-				'MESSAGE_TEXT'	=> $this->user->lang('POST_NOT_EXIST'),
+			$data = [
+				'MESSAGE_TITLE'	=> $this->language->lang('ERROR'),
+				'MESSAGE_TEXT'	=> $this->language->lang('POST_NOT_EXIST'),
 				'success'	=> false,
-			);
+			];
 			return new JsonResponse($data);
 		}
 
@@ -201,7 +218,7 @@ class reporttosfs
 		if (!$report_data['post_reported'])
 		{
 			$report_name = 'other';
-			$report_text = $this->user->lang('SFS_WAS_REPORTED');
+			$report_text = $this->language->lang('SFS_WAS_REPORTED');
 
 			$sql = 'SELECT *
 				FROM ' . REPORTS_REASONS_TABLE . "

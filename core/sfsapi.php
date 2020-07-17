@@ -10,10 +10,21 @@
 
 namespace rmcgirr83\stopforumspam\core;
 
+/**
+* ignore
+**/
+use phpbb\config\config;
+use phpbb\language\language;
+use phpbb\log\log;
+use phpbb\user;
+
 class sfsapi
 {
 	/** @var \phpbb\config\config */
 	protected $config;
+
+	/** @var \phpbb\language\language */
+	protected $language;
 
 	/** @var \phpbb\log\log */
 	protected $log;
@@ -27,9 +38,16 @@ class sfsapi
 	/** @var string phpEx */
 	protected $php_ext;
 
-	public function __construct(\phpbb\config\config $config, \phpbb\log\log $log, \phpbb\user $user, $root_path, $php_ext)
+	public function __construct(
+		config $config,
+		language $language,
+		log $log,
+		user $user,
+		$root_path,
+		$php_ext)
 	{
 		$this->config = $config;
+		$this->language = $language;
 		$this->log = $log;
 		$this->user = $user;
 		$this->root_path = $root_path;
@@ -61,40 +79,45 @@ class sfsapi
 		if ($type == 'add')
 		{
 			$url = 'http://www.stopforumspam.com/add.php';
-			$data = array(
+			$data = [
 				'username' => $username,
 				'ip' => $userip,
 				'email' => $useremail,
 				'api_key' => $apikey
-			);
+			];
 
 			$data = http_build_query($data);
 		}
 		else
 		{
 			$url = 'http://www.stopforumspam.com/api';
-			$data = array(
+			$data = [
 				'username' => $username,
 				'email' => $useremail,
 				'ip' => $userip
-			);
+			];
 
 			$data = http_build_query($data);
 			$data = $data . '&nobadusername&json';
 		}
 
 		$ch = curl_init($url);
-		curl_setopt($ch, CURLOPT_POST, 1);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+
+		curl_setopt_array($ch, [
+			CURLOPT_POST => 1,
+			CURLOPT_POSTFIELDS => $data,
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_TIMEOUT => 5,
+			CURLOPT_CONNECTTIMEOUT => 5
+		]);
+
 		$contents = curl_exec($ch);
+		$err = curl_error($ch);
 		$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 		curl_close($ch);
 
 		// if nothing is returned (SFS is down)
-		if ($httpcode != 200)
+		if ($httpcode != 200 || !empty($err))
 		{
 			return false;
 		}
@@ -117,7 +140,7 @@ class sfsapi
 
 		if ($this->config['sfs_ban_ip'])
 		{
-			$lang_display = ($type == 'user') ? $this->user->lang['SFS_USER_BANNED'] : $this->user->lang['SFS_BANNED'];
+			$lang_display = ($type == 'user') ? $this->language->lang['SFS_USER_BANNED'] : $this->language->lang['SFS_BANNED'];
 			$ban_reason = (!empty($this->config['sfs_ban_reason'])) ? $lang_display : '';
 			// ban the nub
 			user_ban($type, $user_info, (int) $this->config['sfs_ban_time'], 0, false, $lang_display, $ban_reason);

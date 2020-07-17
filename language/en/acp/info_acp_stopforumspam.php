@@ -13,7 +13,7 @@ if (!defined('IN_PHPBB'))
 }
 if (empty($lang) || !is_array($lang))
 {
-	$lang = array();
+	$lang = [];
 }
 
 // DEVELOPERS PLEASE NOTE
@@ -32,7 +32,7 @@ if (empty($lang) || !is_array($lang))
 // ’ » “ ” …
 
 
-$lang = array_merge($lang, array(
+$lang = array_merge($lang, [
 
 	// ACP entries
 	'ACP_SFS_TITLE'			=> 'Stop Forum Spam',
@@ -47,4 +47,4 @@ $lang = array_merge($lang, array(
 	'LOG_SFS_PM_REPORTED'	=> '<strong>Users PM was reported to Stop Forum Spam</strong><br>» %1$s',
 	'LOG_SFS_REPORTED_CLEARED'	=> 'Reported posts and private messages to stop forum spam were cleared',
 	'LOG_ADMINSMODS_CACHE_BUILT'	=> 'Stop forum spam Admins and Mods cache was built',
-));
+]);

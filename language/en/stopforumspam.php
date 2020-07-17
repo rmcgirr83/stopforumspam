@@ -18,7 +18,7 @@ if (!defined('IN_PHPBB'))
 
 if (empty($lang) || !is_array($lang))
 {
-	$lang = array();
+	$lang = [];
 }
 
 // DEVELOPERS PLEASE NOTE
@@ -35,7 +35,7 @@ if (empty($lang) || !is_array($lang))
 // Some characters you may want to copy&paste:
 // ’ » “ ” …
 
-$lang = array_merge($lang, array(
+$lang = array_merge($lang, [
 	'CANNOT_BAN_ANONYMOUS'	=> 'You are not allowed to ban the anonymous account.',
 	'CANNOT_BAN_ADMINS_MODS'	=> 'You can’t ban admins or mods of this forum.',
 	'FORUM_NOT_EXIST'		=> 'The forum selected does not exist.',
@@ -61,4 +61,5 @@ $lang = array_merge($lang, array(
 	'SFS_PM_REPORT_NOT_ALLOWED'	=> 'Reporting is not allowed',
 	'SFS_NEED_CURL'	=> 'The extension requires cURL which doesn’t seem to be installed',
 	'LOG_SFS_REPORTED' => '<strong>User was reported to Stop Forum Spam</strong><br>» %1$s',
-));
+	'EXTENSION_REQUIREMENTS' => 'Extension requires at least phpBB version %1$s. You need to update your version of phpBB to utilize this extension.',
+]);

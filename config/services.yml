@@ -5,11 +5,12 @@ services:
             - '@auth'
             - '@cache'
             - '@config'
-            - '@user'
             - '@controller.helper'
+            - '@language'
             - '@log'
             - '@request'
             - '@template'
+            - '@user'
             - '@rmcgirr83.stopforumspam.core.sfsgroups'
             - '@rmcgirr83.stopforumspam.core.sfsapi'
             - '%core.root_path%'
@@ -25,6 +26,7 @@ services:
             - '@config'
             - '@service_container'
             - '@dbal.conn'
+            - '@language'
             - '@log'
             - '@request'
             - '@user'
@@ -37,11 +39,12 @@ services:
             - '@config'
             - '@service_container'
             - '@dbal.conn'
+            - '@language'
             - '@log'
             - '@request'
             - '@user'
             - '@rmcgirr83.stopforumspam.core.sfsgroups'
-            - '@rmcgirr83.stopforumspam.core.sfsapi'            
+            - '@rmcgirr83.stopforumspam.core.sfsapi'
 
     rmcgirr83.stopforumspam.core.sfsgroups:
         class: rmcgirr83\stopforumspam\core\sfsgroups
@@ -53,6 +56,7 @@ services:
         class: rmcgirr83\stopforumspam\core\sfsapi
         arguments:
             - '@config'
+            - '@language'
             - '@log'
             - '@user'
             - '%core.root_path%'

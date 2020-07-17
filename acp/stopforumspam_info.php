@@ -15,13 +15,13 @@ class stopforumspam_info
 {
 	function module()
 	{
-		return array(
+		return [
 			'filename'	=> '\rmcgirr83\stopforumspam\acp\stopforumspam_module',
 			'title'	=> 'SFS_CONTROL',
 			'version'	=> '1.1.0',
-			'modes'	=> array(
-				'settings'	=> array('title' => 'SFS_CONTROL', 'auth' => 'ext_rmcgirr83/stopforumspam && acl_a_board', 'cat' => array('SFS_CONTROL')),
-			),
-		);
+			'modes'	=> [
+				'settings'	=> ['title' => 'SFS_CONTROL', 'auth' => 'ext_rmcgirr83/stopforumspam && acl_a_board', 'cat' => array('SFS_CONTROL')],
+			],
+		];
 	}
 }
