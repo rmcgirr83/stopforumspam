@@ -16,7 +16,7 @@ use phpbb\cache\service as cache_service;
 use phpbb\config\config;
 use phpbb\db\driver\driver_interface;
 use phpbb\language\language;
-use phpbb\log\log;
+use phpbb\log\log_interface;
 use phpbb\request\request;
 use phpbb\template\template;
 use phpbb\user;
@@ -40,7 +40,7 @@ class admin_controller implements admin_interface
 	/** @var \phpbb\language\language */
 	protected $language;
 
-	/** @var \phpbb\log\log */
+	/** @var \phpbb\log\log_interface */
 	protected $log;
 
 	/** @var \phpbb\request\request */
@@ -71,7 +71,7 @@ class admin_controller implements admin_interface
 	* @param \phpbb\config\config					$config				Config object
 	* @param \phpbb\db\driver\driver_interface		$db					Database object
 	* @param \phpbb\language\language				$language			Language object
-	* @param \phpbb\log\log							$log				Log object
+	* @param \phpbb\log\log_interface				$log				Log object
 	* @param \phpbb\request\request					$request			Request object
 	* @param \phpbb\template\template				$template			Template object
 	* @param \phpbb\user							$user				User object
@@ -87,7 +87,7 @@ class admin_controller implements admin_interface
 			config $config,
 			driver_interface $db,
 			language $language,
-			log $log,
+			log_interface $log,
 			request $request,
 			template $template,
 			user $user,
