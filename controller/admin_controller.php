@@ -8,6 +8,7 @@
 */
 
 namespace rmcgirr83\stopforumspam\controller;
+
 /*
 * @ignore
 */
