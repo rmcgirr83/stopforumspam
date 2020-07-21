@@ -78,7 +78,7 @@ class sfsapi
 
 		if ($type == 'add')
 		{
-			$url = 'http://www.stopforumspam.com/add.php';
+			$url = 'https://www.stopforumspam.com/add.php';
 			$data = [
 				'username' => $username,
 				'ip' => $userip,
@@ -90,7 +90,7 @@ class sfsapi
 		}
 		else
 		{
-			$url = 'http://www.stopforumspam.com/api';
+			$url = 'https://api.stopforumspam.org/api';
 			$data = [
 				'username' => $username,
 				'email' => $useremail,
@@ -103,23 +103,37 @@ class sfsapi
 
 		$ch = curl_init($url);
 
+		if ($type =='add')
+		{
+			$curl_options = [CURLOPT_CUSTOMREQUEST => "POST"];
+		}
+		else
+		{
+			$curl_options = [CURLOPT_CUSTOMREQUEST => "GET"];
+		}
+
 		curl_setopt_array($ch, [
-			CURLOPT_POST => 1,
 			CURLOPT_POSTFIELDS => $data,
+			CURLOPT_SSL_VERIFYPEER => 0,
+			CURLOPT_SSL_VERIFYHOST => 0,
 			CURLOPT_RETURNTRANSFER => true,
 			CURLOPT_TIMEOUT => 5,
-			CURLOPT_CONNECTTIMEOUT => 5
-		]);
+			CURLOPT_CONNECTTIMEOUT => 5,
+		] + $curl_options);
 
 		$contents = curl_exec($ch);
-		$err = curl_error($ch);
 		$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 		curl_close($ch);
 
 		// if nothing is returned (SFS is down)
-		if ($httpcode != 200 || !empty($err))
+		if ($httpcode != 200)
 		{
 			return false;
+		}
+
+		if ($type == 'add' && $httpcode == 200)
+		{
+			$contents = true;
 		}
 
 		return $contents;
@@ -140,7 +154,7 @@ class sfsapi
 
 		if ($this->config['sfs_ban_ip'])
 		{
-			$lang_display = ($type == 'user') ? $this->language->lang['SFS_USER_BANNED'] : $this->language->lang['SFS_BANNED'];
+			$lang_display = ($type == 'user') ? $this->language->lang('SFS_USER_BANNED') : $this->language->lang('SFS_BANNED');
 			$ban_reason = (!empty($this->config['sfs_ban_reason'])) ? $lang_display : '';
 			// ban the nub
 			user_ban($type, $user_info, (int) $this->config['sfs_ban_time'], 0, false, $lang_display, $ban_reason);

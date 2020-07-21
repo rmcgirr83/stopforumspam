@@ -97,7 +97,7 @@ class reporttosfs
 		// don't allow banning of anonymous user
 		if ($posterid == ANONYMOUS)
 		{
-			throw new http_exception(403, 'CANNOT_BAN_ANONYMOUS');
+			throw new http_exception(403, 'CANNOT_REPORT_ANONYMOUS');
 		}
 
 		// post id must be greater than 0
@@ -108,7 +108,7 @@ class reporttosfs
 
 		$username = $userip = $sfs_reported = $useremail = $forumid = '';
 
-		$sql = 'SELECT p.sfs_reported, p.poster_ip, p.forum_id, u.username, u.user_email
+		$sql = 'SELECT p.sfs_reported, p.poster_ip, p.topic_id, p.forum_id, u.username, u.user_email
 			FROM ' . POSTS_TABLE . ' p
 			LEFT JOIN ' . USERS_TABLE . ' u on p.poster_id = u.user_id
 			WHERE p.post_id = ' . (int) $postid . ' AND p.poster_id = ' . (int) $posterid;
@@ -126,6 +126,7 @@ class reporttosfs
 		$userip = $row['poster_ip'];
 		$useremail = $row['user_email'];
 		$forumid = (int) $row['forum_id'];
+		$topicid = (int) $row['topic_id'];
 		$sfs_reported = (int) $row['sfs_reported'];
 
 		// ensure the IP is something other than 127.0.0.1 which can happen if the anonymised extension is installed
@@ -145,8 +146,13 @@ class reporttosfs
 
 		$admins_mods = $this->sfsgroups->getadminsmods($forumid);
 
+		if (in_array($posterid, $admins_mods))
+		{
+			throw new http_exception(403, 'CANNOT_REPORT_ADMINS_MODS');
+		}
+
 		// only allow this via ajax calls
-		if ($this->request->is_ajax() && in_array($this->user->data['user_id'], $admins_mods) && !in_array($posterid, $admins_mods))
+		if ($this->request->is_ajax() && in_array($this->user->data['user_id'], $admins_mods))
 		{
 			$response = $this->sfsapi->sfsapi('add', $username, $userip, $useremail, $this->config['sfs_api_key']);
 
@@ -175,7 +181,7 @@ class reporttosfs
 
 			$this->sfsapi->sfs_ban('user', $username);
 
-			$this->log->add('mod', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_REPORTED', false, [$sfs_username, 'forum_id' => $this->forumid, 'topic_id' => $this->topicid, 'post_id'  => $postid]);
+			$this->log->add('mod', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_REPORTED', false, [$sfs_username, 'forum_id' => $forumid, 'topic_id' => $topicid, 'post_id'  => $postid]);
 
 			$data = [
 				'MESSAGE_TITLE'	=> $this->language->lang('SUCCESS'),
@@ -185,7 +191,6 @@ class reporttosfs
 			];
 			return new JsonResponse($data);
 		}
-		throw new http_exception(403, 'CANNOT_BAN_ADMINS_MODS');
 	}
 
 	/*

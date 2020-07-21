@@ -111,7 +111,7 @@ class main_listener implements EventSubscriberInterface
 	{
 		return [
 			'core.user_setup_after'					=> 'user_setup_after',
-			'core.modify_mcp_modules_display_option'	=> 'user_setup',
+			'core.user_setup'						=> 'user_setup',
 			'core.ucp_register_data_after'			=> 'user_sfs_validate_registration',
 			'core.posting_modify_template_vars'		=> 'poster_data_email',
 			'core.posting_modify_message_text'		=> 'poster_modify_message_text',

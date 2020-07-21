@@ -59,7 +59,7 @@ class sfsgroups
 
 	/*
 	* build_adminsmods_cache		generate a cache of users who are admins and global mods
-	*								this is used in the listener as well as reporttosfs files
+	*								this is used in the listener as well as reporttosfs/reportpms files
 	* @return 	null
 	* @access	public
 	*/

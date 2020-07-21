@@ -36,8 +36,8 @@ if (empty($lang) || !is_array($lang))
 // ’ » “ ” …
 
 $lang = array_merge($lang, [
-	'CANNOT_BAN_ANONYMOUS'	=> 'You are not allowed to ban the anonymous account.',
-	'CANNOT_BAN_ADMINS_MODS'	=> 'You can’t ban admins or mods of this forum.',
+	'CANNOT_REPORT_ANONYMOUS'	=> 'You are not allowed to report the anonymous account.',
+	'CANNOT_REPORT_ADMINS_MODS'	=> 'You can’t report admins or mods of this forum.',
 	'FORUM_NOT_EXIST'		=> 'The forum selected does not exist.',
 	'INFO_NOT_FOUND'	=> 'The combination of posterid and postid doesn’t exist.',
 	'POST_NOT_EXIST'	=> 'The post you requested does not exist.',
