@@ -71,7 +71,7 @@ class admin_controller implements admin_interface
 	* @param \phpbb\config\config					$config				Config object
 	* @param \phpbb\db\driver\driver_interface		$db					Database object
 	* @param \phpbb\language\language				$language			Language object
-	* @param \phpbb\log\log_interface				$log				Log object
+	* @param \phpbb\log\log							$log				Log object
 	* @param \phpbb\request\request					$request			Request object
 	* @param \phpbb\template\template				$template			Template object
 	* @param \phpbb\user							$user				User object
@@ -87,7 +87,7 @@ class admin_controller implements admin_interface
 			config $config,
 			driver_interface $db,
 			language $language,
-			log_interface $log,
+			log $log,
 			request $request,
 			template $template,
 			user $user,
