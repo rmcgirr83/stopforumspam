@@ -11,9 +11,6 @@
 
 namespace rmcgirr83\stopforumspam\event;
 
-/**
-* ignore
-*/
 use phpbb\auth\auth;
 use phpbb\cache\service;
 use phpbb\config\config;
