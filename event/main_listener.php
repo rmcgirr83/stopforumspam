@@ -22,12 +22,11 @@ use phpbb\template\template;
 use phpbb\user;
 use rmcgirr83\stopforumspam\core\sfsgroups;
 use rmcgirr83\stopforumspam\core\sfsapi;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
 * Event listener
 */
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-
 class main_listener implements EventSubscriberInterface
 {
 	/** @var \phpbb\auth\auth */
