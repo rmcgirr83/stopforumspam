@@ -17,7 +17,7 @@ use phpbb\log\log;
 use phpbb\request\request;
 use phpbb\template\template;
 use phpbb\user;
-use rmcgirr83\stopforumspam\core\sfsgroups;
+use rmcgirr83\stopforumspam\core\sfsgroups as sfsgroups;
 
 /**
 * Admin controller
@@ -49,7 +49,7 @@ class admin_controller implements admin_interface
 	/** @var \phpbb\user */
 	protected $user;
 
-	/** @var \rmcgirr83\stopforumspam\core\sfsgroups */
+	/** @var sfsgroups */
 	protected $sfsgroups;
 
 	/** @var string phpBB root path */
@@ -72,7 +72,7 @@ class admin_controller implements admin_interface
 	* @param \phpbb\request\request					$request			Request object
 	* @param \phpbb\template\template				$template			Template object
 	* @param \phpbb\user							$user				User object
-	* @param rmcgirr83\stopforumspam\core\sfsgroups	$sfsgroups			functions for the controller
+	* @param sfsgroups								$sfsgroups			functions for the controller
 	* @param string                             	$root_path      	phpBB root path
 	* @param string                             	$php_ext        	phpEx
 	*
