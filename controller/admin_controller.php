@@ -12,6 +12,7 @@ namespace rmcgirr83\stopforumspam\controller;
 use phpbb\cache\service as cache_service;
 use phpbb\config\config;
 use phpbb\db\driver\driver_interface;
+use phpbb\json_response;
 use phpbb\language\language;
 use phpbb\log\log;
 use phpbb\request\request;
@@ -318,22 +319,16 @@ class admin_controller implements admin_interface
 
 		$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_REPORTED_CLEARED');
 
-		if ($this->request->is_ajax())
-		{
-			$data = [
-				'REFRESH_DATA'	=> [
-					'url'	=> '',
-					'time'	=> 5,
-				],
-				'MESSAGE_TITLE'	=> $this->language->lang('SUCCESS'),
-				'MESSAGE_TEXT'	=> $this->language->lang('SFS_REPORTED_CLEARED'),
-			];
+		$data = [
+			'REFRESH_DATA'	=> [
+				'url'	=> '',
+				'time'	=> 5,
+			],
+			'MESSAGE_TITLE'	=> $this->language->lang('SUCCESS'),
+			'MESSAGE_TEXT'	=> $this->language->lang('SFS_REPORTED_CLEARED'),
+		];
 
-			$json_response = new \phpbb\json_response;
-			$json_response->send($data);
-		}
-
-		trigger_error($this->language->lang('SFS_REPORTED_CLEARED') . adm_back_link($this->u_action), E_USER_NOTICE);
+		$this->send_json_response($data);
 	}
 
 	/**
@@ -353,17 +348,28 @@ class admin_controller implements admin_interface
 
 		$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_ADMINSMODS_CACHE_BUILT');
 
+		$data = [
+			'MESSAGE_TITLE'	=> $this->language->lang('SUCCESS'),
+			'MESSAGE_TEXT'	=> $this->language->lang('LOG_ADMINSMODS_CACHE_BUILT'),
+		];
+
+		$this->send_json_response($data);
+
+	}
+
+	/**
+	 * Send a JSON response
+	 *
+	 * @param array $data The data of the JSON response (true|false)
+	 * @access protected
+	 */
+	protected function send_json_response($data)
+	{
 		if ($this->request->is_ajax())
 		{
-			$data = [
-				'MESSAGE_TITLE'	=> $this->language->lang('SUCCESS'),
-				'MESSAGE_TEXT'	=> $this->language->lang('LOG_ADMINSMODS_CACHE_BUILT'),
-			];
-			$json_response = new \phpbb\json_response;
+			$json_response = new json_response;
 			$json_response->send($data);
 		}
-
-		trigger_error($this->language->lang('LOG_ADMINSMODS_CACHE_BUILT') . adm_back_link($this->u_action), E_USER_NOTICE);
 	}
 
 	/**

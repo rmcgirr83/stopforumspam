@@ -31,7 +31,7 @@ services:
             - '%core.root_path%'
             - '%core.php_ext%'
             - '@?rmcgirr83.contactadmin.main.controller'
-            - ext/rmcgirr83/stopforumspam/
+
         tags:
             - { name: event.listener }
 

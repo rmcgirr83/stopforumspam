@@ -20,8 +20,8 @@ use phpbb\log\log;
 use phpbb\request\request;
 use phpbb\template\template;
 use phpbb\user;
-use rmcgirr83\stopforumspam\core\sfsgroups;
-use rmcgirr83\stopforumspam\core\sfsapi;
+use rmcgirr83\stopforumspam\core\sfsgroups as sfsgroups;
+use rmcgirr83\stopforumspam\core\sfsapi as sfsapi;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -29,37 +29,37 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 */
 class main_listener implements EventSubscriberInterface
 {
-	/** @var \phpbb\auth\auth */
+	/** @var auth */
 	protected $auth;
 
-	/** @var \phpbb\cache\service */
+	/** @var service */
 	protected $cache;
 
-	/** @var \phpbb\config\config */
+	/** @var config */
 	protected $config;
 
-	/** @var \phpbb\controller\helper */
+	/** @var helper */
 	protected $helper;
 
-	/** @var \phpbb\language\language */
+	/** @var language */
 	protected $language;
 
-	/** @var \phpbb\log\log */
+	/** @var log */
 	protected $log;
 
-	/** @var \phpbb\request\request */
+	/** @var request */
 	protected $request;
 
-	/** @var \phpbb\template\template */
+	/** @var template */
 	protected $template;
 
-	/** @var \phpbb\user */
+	/** @var user */
 	protected $user;
 
-	/* @var \rmcgirr83\stopforumspam\core\sfsgroups */
+	/* @var sfsgroups */
 	protected $sfsgroups;
 
-	/* @var \rmcgirr83\stopforumspam\core\sfsapi */
+	/* @var sfsapi */
 	protected $sfsapi;
 
 	/** @var string phpBB root path */
