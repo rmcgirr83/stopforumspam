@@ -13,6 +13,7 @@ services:
             - '@rmcgirr83.stopforumspam.core.sfsgroups'
             - '%core.root_path%'
             - '%core.php_ext%'
+            - ext/rmcgirr83/stopforumspam/
 
     rmcgirr83.stopforumspam.mainlistener:
         class: rmcgirr83\stopforumspam\event\main_listener
