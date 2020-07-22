@@ -103,23 +103,15 @@ class sfsapi
 
 		$ch = curl_init($url);
 
-		if ($type =='add')
-		{
-			$curl_options = [CURLOPT_CUSTOMREQUEST => "POST"];
-		}
-		else
-		{
-			$curl_options = [CURLOPT_CUSTOMREQUEST => "GET"];
-		}
-
 		curl_setopt_array($ch, [
+			CURLOPT_POST => 1,
 			CURLOPT_POSTFIELDS => $data,
 			CURLOPT_SSL_VERIFYPEER => 0,
 			CURLOPT_SSL_VERIFYHOST => 0,
 			CURLOPT_RETURNTRANSFER => true,
 			CURLOPT_TIMEOUT => 5,
 			CURLOPT_CONNECTTIMEOUT => 5,
-		] + $curl_options);
+		]);
 
 		$contents = curl_exec($ch);
 		$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
