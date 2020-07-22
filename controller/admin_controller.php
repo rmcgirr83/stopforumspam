@@ -9,9 +9,6 @@
 
 namespace rmcgirr83\stopforumspam\controller;
 
-/*
-* @ignore
-*/
 use phpbb\cache\service as cache_service;
 use phpbb\config\config;
 use phpbb\db\driver\driver_interface;
