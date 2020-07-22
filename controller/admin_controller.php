@@ -25,28 +25,28 @@ use rmcgirr83\stopforumspam\core\sfsgroups as sfsgroups;
 class admin_controller implements admin_interface
 {
 
-	/** @var \phpbb\cache\service */
+	/** @var cache_service */
 	protected $cache;
 
-	/** @var \phpbb\config\config */
+	/** @var config */
 	protected $config;
 
-	/** @var \phpbb\db\driver\driver_interface */
+	/** @var driver_interface */
 	protected $db;
 
-	/** @var \phpbb\language\language */
+	/** @var language */
 	protected $language;
 
-	/** @var \phpbb\log\log */
+	/** @var log */
 	protected $log;
 
-	/** @var \phpbb\request\request */
+	/** @var request */
 	protected $request;
 
-	/** @var \phpbb\template\template */
+	/** @var template */
 	protected $template;
 
-	/** @var \phpbb\user */
+	/** @var user */
 	protected $user;
 
 	/** @var sfsgroups */
@@ -64,17 +64,17 @@ class admin_controller implements admin_interface
 	/**
 	* Constructor
 	*
-	* @param \phpbb\cache\service					$cache				Cache object
-	* @param \phpbb\config\config					$config				Config object
-	* @param \phpbb\db\driver\driver_interface		$db					Database object
-	* @param \phpbb\language\language				$language			Language object
-	* @param \phpbb\log\log							$log				Log object
-	* @param \phpbb\request\request					$request			Request object
-	* @param \phpbb\template\template				$template			Template object
-	* @param \phpbb\user							$user				User object
-	* @param sfsgroups								$sfsgroups			functions for the controller
-	* @param string                             	$root_path      	phpBB root path
-	* @param string                             	$php_ext        	phpEx
+	* @param cache_service			$cache				Cache object
+	* @param config					$config				Config object
+	* @param driver_interface		$db					Database object
+	* @param language				$language			Language object
+	* @param log					$log				Log object
+	* @param request				$request			Request object
+	* @param template				$template			Template object
+	* @param user					$user				User object
+	* @param sfsgroups				$sfsgroups			functions for the controller
+	* @param string                 $root_path      	phpBB root path
+	* @param string                 $php_ext        	phpEx
 	*
 	* @return \rmcgirr83\stopforumspam\controller\admin_controller
 	* @access public
