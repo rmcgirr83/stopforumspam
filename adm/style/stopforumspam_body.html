@@ -1,7 +1,13 @@
 <!-- INCLUDE overall_header.html -->
 
 <h1>{L_SFS_CONTROL}</h1>
-
+<fieldset>
+	<legend>{{ lang('BUY_ME_A_BEER') }}</legend>
+	<dl>
+		<dt><label>{{ lang('BUY ME A BEER_SHORT') }}{{ lang('COLON') }}</label><br /><span>{{ L_BUY_ME_A_BEER_EXPLAIN }}</span></dt>
+		<dd><a href="{{ lang('BUY_ME_A_BEER_URL') }}" target="_blank" rel=”noreferrer noopener”><img src="{{ lang('PAYPAL_IMAGE_URL') }}" border="0" alt="{{ lang('PAYPAL_ALT') }}" style="cursor:pointer;margin-top:15px;"></a></dd>
+	</dl>
+</fieldset>
 <!-- IF CURL_ACTIVE -->
 	<div class="errorbox"><h3>{L_WARNING}</h3>
 		<p>{CURL_ACTIVE}</p>
