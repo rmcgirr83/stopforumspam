@@ -1,105 +1,105 @@
-<!-- INCLUDE overall_header.html -->
+{% INCLUDE 'overall_header.html' %}
 
-<h1>{L_SFS_CONTROL}</h1>
+<h1>{{ lang('SFS_CONTROL') }}</h1>
 <fieldset>
 	<legend>{{ lang('BUY_ME_A_BEER') }}</legend>
 	<dl>
 		<dt><label>{{ lang('BUY ME A BEER_SHORT') }}{{ lang('COLON') }}</label><br /><span>{{ L_BUY_ME_A_BEER_EXPLAIN }}</span></dt>
-		<dd><a href="{{ lang('BUY_ME_A_BEER_URL') }}" target="_blank" rel=”noreferrer noopener”><img src="{{ lang('PAYPAL_IMAGE_URL') }}" border="0" alt="{{ lang('PAYPAL_ALT') }}" style="cursor:pointer;margin-top:15px;"></a></dd>
+		<dd><a href="{{ lang('BUY_ME_A_BEER_URL') }}" target="_blank" rel=â€noreferrer noopenerâ€><img src="{{ lang('PAYPAL_IMAGE_URL') }}" border="0" alt="{{ lang('PAYPAL_ALT') }}" style="cursor:pointer;margin-top:15px;"></a></dd>
 	</dl>
 </fieldset>
-<!-- IF CURL_ACTIVE -->
-	<div class="errorbox"><h3>{L_WARNING}</h3>
-		<p>{CURL_ACTIVE}</p>
+{% if CURL_ACTIVE %}
+	<div class="errorbox"><h3>{{ lang('WARNING') }}</h3>
+		<p>{{ CURL_ACTIVE }}</p>
 	</div>
-<!-- ENDIF -->
-<!-- IF NOTICE -->
+{% endif %}
+{% if NOTICE %}
 	<div class="errorbox notice" id="sfs_notice">
-		<p>{NOTICE}</p>
+		<p>{{ NOTICE }}</p>
 	</div>
-<!-- ENDIF -->
-<!-- IF ERROR -->
-	<div class="errorbox"><h3>{L_WARNING}</h3>
-		<p>{ERROR}</p>
+{% endif %}
+{% if ERROR %}
+	<div class="errorbox"><h3>{{ lang('WARNING') }}</h3>
+		<p>{{ ERROR }}</p>
 	</div>
-<!-- ENDIF -->
+{% endif %}
 
 <fieldset>
-	<form id="acp_stopforumspam" method="post" action="{U_ACTION}">
+	<form id="acp_stopforumspam" method="post" action="{{ U_ACTION }}">
 		<dl>
-			<dt><label for="sfs_enabled">{L_SFS_ENABLED}{L_COLON}</label></dt>
-			<dd><input type="radio" class="radio" name="allow_sfs" value="1" <!-- IF ALLOW_SFS -->id="sfs_enabled" checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
-				<input type="radio" class="radio" name="allow_sfs" value="0" <!-- IF not ALLOW_SFS -->id="sfs_enabled"  checked="checked"<!-- ENDIF --> /> {L_NO}</dd>
+			<dt><label for="sfs_enabled">{{ lang('SFS_ENABLED') }}{{ lang('COLON') }}</label></dt>
+			<dd><input type="radio" class="radio" name="allow_sfs" value="1" {% if ALLOW_SFS %}id="sfs_enabled" checked="checked"{% endif %}/> {{ lang('YES') }} &nbsp;
+				<input type="radio" class="radio" name="allow_sfs" value="0" {% if not ALLOW_SFS %}id="sfs_enabled"  checked="checked"{% endif %} /> {{ lang('NO') }}</dd>
 		</dl>
 		<dl>
-			<dt><label for="sfs_by_name">{L_SFS_BY_NAME}{L_COLON}</label></dt>
-			<dd><input type="radio" class="radio" name="sfs_by_name" value="1" <!-- IF SFS_BY_NAME -->id="sfs_by_name"  checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
-				<input type="radio" class="radio" name="sfs_by_name" value="0" <!-- IF not SFS_BY_NAME -->id="sfs_by_name" checked="checked"<!-- ENDIF --> /> {L_NO}</dd>
+			<dt><label for="sfs_by_name">{{ lang('SFS_BY_NAME') }}{{ lang('COLON') }}</label></dt>
+			<dd><input type="radio" class="radio" name="sfs_by_name" value="1" {% if SFS_BY_NAME %}id="sfs_by_name"  checked="checked"{% endif %}/> {{ lang('YES') }} &nbsp;
+				<input type="radio" class="radio" name="sfs_by_name" value="0" {% if not SFS_BY_NAME %}id="sfs_by_name" checked="checked"{% endif %} /> {{ lang('NO') }}</dd>
 		</dl>
 		<dl>
-			<dt><label for="sfs_by_email">{L_SFS_BY_EMAIL}{L_COLON}</label></dt>
-			<dd><input type="radio" class="radio" name="sfs_by_email" value="1" <!-- IF SFS_BY_EMAIL -->id="sfs_by_email" checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
-				<input type="radio" class="radio" name="sfs_by_email" value="0" <!-- IF not SFS_BY_EMAIL -->id="sfs_by_email" checked="checked"<!-- ENDIF --> /> {L_NO}</dd>
+			<dt><label for="sfs_by_email">{{ lang('SFS_BY_EMAIL') }}{{ lang('COLON') }}</label></dt>
+			<dd><input type="radio" class="radio" name="sfs_by_email" value="1" {% if SFS_BY_EMAIL %}id="sfs_by_email" checked="checked"{% endif %}/> {{ lang('YES') }} &nbsp;
+				<input type="radio" class="radio" name="sfs_by_email" value="0" {% if not SFS_BY_EMAIL %}id="sfs_by_email" checked="checked"{% endif %} /> {{ lang('NO') }}</dd>
 		</dl>
 		<dl>
-			<dt><label for="sfs_by_ip">{L_SFS_BY_IP}{L_COLON}</label></dt>
-			<dd><input type="radio" class="radio" name="sfs_by_ip" value="1" <!-- IF SFS_BY_IP -->id="sfs_by_ip" checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
-				<input type="radio" class="radio" name="sfs_by_ip" value="0" <!-- IF not SFS_BY_IP -->id="sfs_by_ip" checked="checked"<!-- ENDIF --> /> {L_NO}</dd>
+			<dt><label for="sfs_by_ip">{{ lang('SFS_BY_IP') }}{{ lang('COLON') }}</label></dt>
+			<dd><input type="radio" class="radio" name="sfs_by_ip" value="1" {% if SFS_BY_IP %}id="sfs_by_ip" checked="checked"{% endif %}/> {{ lang('YES') }} &nbsp;
+				<input type="radio" class="radio" name="sfs_by_ip" value="0" {% if not SFS_BY_IP %}id="sfs_by_ip" checked="checked"{% endif %} /> {{ lang('NO') }}</dd>
 		</dl>
 		<dl>
-			<dt><label for="sfs_threshold">{L_SFS_THRESHOLD_SCORE}{L_COLON}</label><br />{L_SFS_THRESHOLD_SCORE_EXPLAIN}</dt>
-			<dd><input type="text" name="sfs_threshold" id="sfs_threshold" size="10" value="{SFS_THRESHOLD}" /></dd>
+			<dt><label for="sfs_threshold">{{ lang('SFS_THRESHOLD_SCORE') }}{{ lang('COLON') }}</label><br />{{ lang('SFS_THRESHOLD_SCORE_EXPLAIN') }}</dt>
+			<dd><input type="text" name="sfs_threshold" id="sfs_threshold" size="10" value="{{ SFS_THRESHOLD }}" /></dd>
 		</dl>
 		<dl>
-			<dt><label for="sfs_ban_ip">{L_SFS_BAN_IP}{L_COLON}</label><br>{L_SFS_BAN_IP_EXPLAIN}</dt>
-			<dd><input type="radio" class="radio" name="sfs_ban_ip" value="1" <!-- IF SFS_BAN_IP -->id="sfs_ban_ip" checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
-				<input type="radio" class="radio" name="sfs_ban_ip" value="0" <!-- IF not SFS_BAN_IP -->id="sfs_ban_ip" checked="checked"<!-- ENDIF --> /> {L_NO}</dd>
+			<dt><label for="sfs_ban_ip">{{ lang('SFS_BAN_IP') }}{{ lang('COLON') }}</label><br>{{ lang('SFS_BAN_IP_EXPLAIN') }}</dt>
+			<dd><input type="radio" class="radio" name="sfs_ban_ip" value="1" {% if SFS_BAN_IP %}id="sfs_ban_ip" checked="checked"{% endif %}/> {{ lang('YES') }} &nbsp;
+				<input type="radio" class="radio" name="sfs_ban_ip" value="0" {% if not SFS_BAN_IP %}id="sfs_ban_ip" checked="checked"{% endif %} /> {{ lang('NO') }}</dd>
 		</dl>
 		<dl>
-			<dt><label for="sfs_ban_time">{L_BAN_LENGTH}{L_COLON}</label></dt>
-			<dd><select name="sfs_ban_time" id="sfs_ban_time">{SFS_BAN_TIME}</select></dd>
+			<dt><label for="sfs_ban_time">{{ lang('BAN_LENGTH') }}{{ lang('COLON') }}</label></dt>
+			<dd><select name="sfs_ban_time" id="sfs_ban_time">{{ SFS_BAN_TIME }}</select></dd>
 		</dl>
 		<dl>
-			<dt><label for="sfs_ban_reason">{L_SFS_BAN_REASON}{L_COLON}</label><br>{L_SFS_BAN_REASON_EXPLAIN}</dt>
-			<dd><input type="radio" class="radio" name="sfs_ban_reason" value="1" <!-- IF SFS_BAN_REASON -->id="sfs_ban_reason" checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
-				<input type="radio" class="radio" name="sfs_ban_reason" value="0" <!-- IF not SFS_BAN_REASON -->id="sfs_ban_reason" checked="checked"<!-- ENDIF --> /> {L_NO}</dd>
+			<dt><label for="sfs_ban_reason">{{ lang('SFS_BAN_REASON') }}{{ lang('COLON') }}</label><br>{{ lang('SFS_BAN_REASON_EXPLAIN') }}</dt>
+			<dd><input type="radio" class="radio" name="sfs_ban_reason" value="1" {% if SFS_BAN_REASON %}id="sfs_ban_reason" checked="checked"{% endif %}/> {{ lang('YES') }} &nbsp;
+				<input type="radio" class="radio" name="sfs_ban_reason" value="0" {% if not SFS_BAN_REASON %}id="sfs_ban_reason" checked="checked"{% endif %} /> {{ lang('NO') }}</dd>
 		</dl>
 		<dl>
-			<dt><label for="sfs_log_message">{L_SFS_LOG_MESSAGE}{L_COLON}</label><br>{L_SFS_LOG_MESSAGE_EXPLAIN}</dt>
-			<dd><input type="radio" class="radio" name="sfs_log_message" value="1" <!-- IF SFS_LOG_MESSAGE -->id="sfs_log_message" checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
-				<input type="radio" class="radio" name="sfs_log_message" value="0" <!-- IF not SFS_LOG_MESSAGE -->id="sfs_log_message" checked="checked"<!-- ENDIF --> /> {L_NO}</dd>
+			<dt><label for="sfs_log_message">{{ lang('SFS_LOG_MESSAGE') }}{{ lang('COLON') }}</label><br>{{ lang('SFS_LOG_MESSAGE_EXPLAIN') }}</dt>
+			<dd><input type="radio" class="radio" name="sfs_log_message" value="1" {% if SFS_LOG_MESSAGE %}id="sfs_log_message" checked="checked"{% endif %}/> {{ lang('YES') }} &nbsp;
+				<input type="radio" class="radio" name="sfs_log_message" value="0" {% if not SFS_LOG_MESSAGE %}id="sfs_log_message" checked="checked"{% endif %} /> {{ lang('NO') }}</dd>
 		</dl>
 		<dl>
-			<dt><label for="sfs_down">{L_SFS_DOWN}{L_COLON}</label><br>{L_SFS_DOWN_EXPLAIN}</dt>
-			<dd><input type="radio" class="radio" name="sfs_down" value="1" <!-- IF SFS_DOWN -->id="sfs_down" checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
-				<input type="radio" class="radio" name="sfs_down" value="0" <!-- IF not SFS_DOWN -->id="sfs_down" checked="checked"<!-- ENDIF --> /> {L_NO}</dd>
+			<dt><label for="sfs_down">{{ lang('SFS_DOWN') }}{{ lang('COLON') }}</label><br>{{ lang('SFS_DOWN_EXPLAIN') }}</dt>
+			<dd><input type="radio" class="radio" name="sfs_down" value="1" {% if SFS_DOWN %}id="sfs_down" checked="checked"{% endif %}/> {{ lang('YES') }} &nbsp;
+				<input type="radio" class="radio" name="sfs_down" value="0" {% if not SFS_DOWN %}id="sfs_down" checked="checked"{% endif %} /> {{ lang('NO') }}</dd>
 		</dl>
 		<dl>
-			<dt><label for="sfs_api_key">{L_SFS_API_KEY}{L_COLON}</label><br />{L_SFS_API_KEY_EXPLAIN}</dt>
-			<dd><input type="text" name="sfs_api_key" id="sfs_api_key" class="input" value="{SFS_API_KEY}" /></dd>
+			<dt><label for="sfs_api_key">{{ lang('SFS_API_KEY') }}{{ lang('COLON') }}</label><br />{{ lang('SFS_API_KEY_EXPLAIN') }}</dt>
+			<dd><input type="text" name="sfs_api_key" id="sfs_api_key" class="input" value="{{ SFS_API_KEY }}" /></dd>
 		</dl>
 		<dl>
-			<dt><label for="sfs_notify">{L_SFS_NOTIFY}{L_COLON}</label><br />{L_SFS_NOTIFY_EXPLAIN}</dt>
-			<dd><input type="radio" class="radio" name="sfs_notify" value="1" <!-- IF SFS_NOTIFY -->id="sfs_notify" checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
-				<input type="radio" class="radio" name="sfs_notify" value="0" <!-- IF not SFS_NOTIFY -->id="sfs_notify" checked="checked"<!-- ENDIF --> /> {L_NO}</dd>
+			<dt><label for="sfs_notify">{{ lang('SFS_NOTIFY') }}{{ lang('COLON') }}</label><br />{{ lang('SFS_NOTIFY_EXPLAIN') }}</dt>
+			<dd><input type="radio" class="radio" name="sfs_notify" value="1" {% if SFS_NOTIFY %}id="sfs_notify" checked="checked"{% endif %}/> {{ lang('YES') }} &nbsp;
+				<input type="radio" class="radio" name="sfs_notify" value="0" {% if not SFS_NOTIFY %}id="sfs_notify" checked="checked"{% endif %} /> {{ lang('NO') }}</dd>
 		</dl>
 		<p class="submit-buttons">
-			<input class="button1" type="submit" id="submit" name="submit" value="{L_SUBMIT}" />&nbsp;
-			<input class="button2" type="reset" id="reset" name="reset" value="{L_RESET}" />
+			<input class="button1" type="submit" id="submit" name="submit" value="{{ lang('SUBMIT') }}" />&nbsp;
+			<input class="button2" type="reset" id="reset" name="reset" value="{{ lang('RESET') }}" />
 		</p>
-		{S_FORM_TOKEN}
+		{{ S_FORM_TOKEN }}
 	</form>
 </fieldset>
 <fieldset>
 		{% if SFS_POSTS_PMS_COUNT %}
 		<dl>
-			<dt><label>{L_SFS_CLEAR}</label><br /><span>{L_SFS_CLEAR_EXPLAIN}</span></dt>
-			<dd><a class="button1" style="padding: 0px 8px;" href="{U_CLR_REPORTS}" data-ajax="true" data-refresh="true">{L_RUN}</a></dd>
+			<dt><label>{{ lang('SFS_CLEAR') }}</label><br /><span>{{ lang('SFS_CLEAR_EXPLAIN') }}</span></dt>
+			<dd><a class="button1" style="padding: 0px 8px;" href="{{ U_CLR_REPORTS }}" data-ajax="true" data-refresh="true">{{ lang('RUN') }}</a></dd>
 		</dl>
 		{% endif %}
 		<dl>
-			<dt><label>{L_SFS_BUILD}</label><br /><span>{L_SFS_BUILD_EXPLAIN}</span></dt>
-			<dd><a class="button1" style="padding: 0px 8px;" href="{U_BUILD_CACHE}" data-ajax="true">{L_RUN}</a></dd>
+			<dt><label>{{ lang('SFS_BUILD') }}</label><br /><span>{{ lang('SFS_BUILD_EXPLAIN') }}</span></dt>
+			<dd><a class="button1" style="padding: 0px 8px;" href="{{ U_BUILD_CACHE }}" data-ajax="true">{{ lang('RUN') }}</a></dd>
 		</dl>
 </fieldset>
-<!-- INCLUDE overall_footer.html -->
+{% INCLUDE 'overall_footer.html' %}
