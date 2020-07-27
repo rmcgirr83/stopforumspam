@@ -20,7 +20,7 @@ class stopforumspam_info
 			'title'	=> 'SFS_CONTROL',
 			'version'	=> '1.1.0',
 			'modes'	=> [
-				'settings'	=> ['title' => 'SFS_CONTROL', 'auth' => 'ext_rmcgirr83/stopforumspam && acl_a_board', 'cat' => array('SFS_CONTROL')],
+				'settings'	=> ['title' => 'SFS_CONTROL', 'auth' => 'ext_rmcgirr83/stopforumspam && acl_a_board', 'cat' => ['SFS_CONTROL']],
 			],
 		];
 	}

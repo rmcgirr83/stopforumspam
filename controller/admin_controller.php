@@ -192,7 +192,7 @@ class admin_controller implements admin_interface
 			$has_api_key = $this->request->variable('sfs_api_key', '', true);
 
 			$check_row = ['sfs_threshold' => $this->request->variable('sfs_threshold', 0)];
-			$validate_row = ['sfs_threshold' => array('num', false, 1, 99)];
+			$validate_row = ['sfs_threshold' => ['num', false, 1, 99]];
 			$error = validate_data($check_row, $validate_row);
 
 			if (!sizeof($error))

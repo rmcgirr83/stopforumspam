@@ -27,7 +27,7 @@ class version_120 extends \phpbb\db\migration\migration
 		return [
 			'add_columns'	=> [
 				$this->table_prefix . 'privmsgs'        => [
-					'sfs_reported'	=> array('BOOL', 0),
+					'sfs_reported'	=> ['BOOL', 0],
 				],
 			],
 		];
