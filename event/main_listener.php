@@ -62,6 +62,9 @@ class main_listener implements EventSubscriberInterface
 	/* @var sfsapi */
 	protected $sfsapi;
 
+	/* @var sfs_admins_mods */
+	protected $sfs_admins_mods;
+
 	/** @var string phpBB root path */
 	protected $root_path;
 
@@ -83,6 +86,7 @@ class main_listener implements EventSubscriberInterface
 		user $user,
 		sfsgroups $sfsgroups,
 		sfsapi $sfsapi,
+		sfs_admins_mods $sfs_admins_mods,
 		$root_path,
 		$php_ext,
 		\rmcgirr83\contactadmin\controller\main_controller $contactadmin = null)
@@ -98,6 +102,7 @@ class main_listener implements EventSubscriberInterface
 		$this->user = $user;
 		$this->sfsgroups = $sfsgroups;
 		$this->sfsapi = $sfsapi;
+		$this->sfs_admins_mods = $sfs_admins_mods;
 		$this->root_path = $root_path;
 		$this->php_ext = $php_ext;
 		$this->contactadmin = $contactadmin;
@@ -107,7 +112,6 @@ class main_listener implements EventSubscriberInterface
 	{
 		return [
 			'core.user_setup_after'					=> 'user_setup_after',
-			'core.user_setup'						=> 'user_setup',
 			'core.ucp_register_data_after'			=> 'user_sfs_validate_registration',
 			'core.posting_modify_template_vars'		=> 'poster_data_email',
 			'core.posting_modify_message_text'		=> 'poster_modify_message_text',
@@ -133,18 +137,8 @@ class main_listener implements EventSubscriberInterface
 	 */
 	public function user_setup_after($event)
 	{
-		$this->sfsgroups->build_adminsmods_cache();
-	}
-	/*
-	* user_setup		add lang vars on user setup
-	*
-	* @param	$event	the event object
-	* @return 	null
-	* @access	public
-	*/
-	public function user_setup($event)
-	{
 		$this->language->add_lang(['sfs_mcp', 'stopforumspam'], 'rmcgirr83/stopforumspam');
+		$this->sfsgroups->build_adminsmods_cache();
 	}
 
 	/*
@@ -386,7 +380,7 @@ class main_listener implements EventSubscriberInterface
 		{
 			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_report_pm_to_sfs', ['msgid' => (int) $message_row['msg_id'], 'authorid' => (int) $user_info['user_id']]);
 
-			$report_link = '<a href="' . $reporttosfs_url . '" title="' . $this->language->lang('REPORT_TO_SFS'). '" data-ajax="report_pm_to_sfs" class="button button-icon-only"><i class="icon fa-exchange fa-fw" aria-hidden="true"></i><span class="sr-only">{L_REPORT_TO_SFS}</span></a>';
+			$report_link = '<a href="' . $reporttosfs_url . '" title="' . $this->language->lang('REPORT_TO_SFS'). '" data-ajax="report_pm_to_sfs" class="button button-icon-only"><i class="icon fa-exchange fa-fw" aria-hidden="true"></i><span class="sr-only">' . $this->language->lang('REPORT_TO_SFS'). '</span></a>';
 
 			$event['msg_data'] = array_merge($event['msg_data'], [
 				'SFS_LINK'			=> (!$message_row['sfs_reported'] && $this->config['allow_pm_report']) ? $report_link : '',
@@ -435,8 +429,6 @@ class main_listener implements EventSubscriberInterface
 	*/
 	private function stopforumspam_check($username, $ip, $email)
 	{
-		// Default value
-		$spam_score = 0;
 
 		$sfs_log_message = !empty($this->config['sfs_log_message']) ? $this->config['sfs_log_message'] : false;
 
@@ -554,7 +546,7 @@ class main_listener implements EventSubscriberInterface
 		$error = [];
 		if (($result = validate_username($username)) !== false)
 		{
-			$error[] = $this->language->lang[$result . '_USERNAME'];
+			$error[] = $this->language->lang($result . '_USERNAME');
 		}
 
 		if (($result = validate_string($username, false, $this->config['min_name_chars'], $this->config['max_name_chars'])) !== false)

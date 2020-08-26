@@ -108,8 +108,6 @@ class report_pm_to_sfs
 			throw new http_exception(403, 'PM_NOT_EXIST');
 		}
 
-		$username = $userip = $sfs_reported = $useremail = '';
-
 		$sql = 'SELECT pm.sfs_reported, pm.author_id, pm.author_ip, u.username, u.user_email
 			FROM ' . PRIVMSGS_TABLE . ' pm
 			LEFT JOIN ' . USERS_TABLE . ' u on pm.author_id = u.user_id

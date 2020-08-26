@@ -106,8 +106,6 @@ class sfsapi
 		curl_setopt_array($ch, [
 			CURLOPT_POST => 1,
 			CURLOPT_POSTFIELDS => $data,
-			CURLOPT_SSL_VERIFYPEER => 0,
-			CURLOPT_SSL_VERIFYHOST => 0,
 			CURLOPT_RETURNTRANSFER => true,
 			CURLOPT_TIMEOUT => 5,
 			CURLOPT_CONNECTTIMEOUT => 5,

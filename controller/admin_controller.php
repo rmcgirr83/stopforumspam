@@ -321,12 +321,12 @@ class admin_controller implements admin_interface
 		$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_REPORTED_CLEARED');
 
 		$data = [
+			'MESSAGE_TITLE'	=> $this->language->lang('SUCCESS'),
+			'MESSAGE_TEXT'	=> $this->language->lang('SFS_REPORTED_CLEARED'),
 			'REFRESH_DATA'	=> [
 				'url'	=> '',
 				'time'	=> 5,
 			],
-			'MESSAGE_TITLE'	=> $this->language->lang('SUCCESS'),
-			'MESSAGE_TEXT'	=> $this->language->lang('SFS_REPORTED_CLEARED'),
 		];
 
 		$this->send_json_response($data);
