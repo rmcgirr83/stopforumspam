@@ -86,7 +86,6 @@ class main_listener implements EventSubscriberInterface
 		user $user,
 		sfsgroups $sfsgroups,
 		sfsapi $sfsapi,
-		sfs_admins_mods $sfs_admins_mods,
 		$root_path,
 		$php_ext,
 		\rmcgirr83\contactadmin\controller\main_controller $contactadmin = null)
@@ -102,7 +101,6 @@ class main_listener implements EventSubscriberInterface
 		$this->user = $user;
 		$this->sfsgroups = $sfsgroups;
 		$this->sfsapi = $sfsapi;
-		$this->sfs_admins_mods = $sfs_admins_mods;
 		$this->root_path = $root_path;
 		$this->php_ext = $php_ext;
 		$this->contactadmin = $contactadmin;
