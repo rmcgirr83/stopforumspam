@@ -229,7 +229,6 @@ class admin_controller implements admin_interface
 			'SFS_POSTS_PMS_COUNT'	=> $sfs_posts_pms_count,
 			'NOTICE'	=> $cache_built,
 			'L_SFS_CLEAR_EXPLAIN'	=> $this->language->lang('SFS_CLEAR_EXPLAIN', (int) $posts_reported, (int) $pms_reported),
-			'L_BUY_ME_A_BEER_EXPLAIN'		=> $this->language->lang('BUY ME A BEER_EXPLAIN', '<a href="' . $this->language->lang('BUY_ME_A_BEER_URL') . '" target="_blank" rel=”noreferrer noopener”>', '</a>'),
 
 			'U_BUILD_CACHE'	=> $this->u_action . '&amp;action=build_adminsmods',
 			'U_CLR_REPORTS'	=> $this->u_action . '&amp;action=clr_reports',
