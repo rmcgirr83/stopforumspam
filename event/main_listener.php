@@ -396,7 +396,7 @@ class main_listener implements EventSubscriberInterface
 	{
 		if ($check === 'sfs_down')
 		{
-			return $this->user->lang['SFS_ERROR_MESSAGE'];
+			return $this->language->lang('SFS_ERROR_MESSAGE');
 		}
 		else
 		{
