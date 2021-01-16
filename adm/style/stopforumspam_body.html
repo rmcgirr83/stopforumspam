@@ -79,6 +79,11 @@
 			<dd><input type="text" name="sfs_api_key" id="sfs_api_key" class="input" value="{{ SFS_API_KEY }}" /></dd>
 		</dl>
 		<dl>
+			<dt><label for="sfs_report_pm">{{ lang('SFS_ALLOW_PM_REPORT') }}{{ lang('COLON') }}</label><br />{{ lang('SFS_PM_REPORT_EXPLAIN') }}</dt>
+			<dd><input type="radio" class="radio" name="sfs_report_pm" value="1" {% if SFS_REPORT_PM %}id="sfs_report_pm"  checked="checked"{% endif %}/> {{ lang('YES') }} &nbsp;
+				<input type="radio" class="radio" name="sfs_report_pm" value="0" {% if not SFS_REPORT_PM %}id="sfs_report_pm" checked="checked"{% endif %} /> {{ lang('NO') }}</dd>
+		</dl>
+		<dl>
 			<dt><label for="sfs_notify">{{ lang('SFS_NOTIFY') }}{{ lang('COLON') }}</label><br />{{ lang('SFS_NOTIFY_EXPLAIN') }}</dt>
 			<dd><input type="radio" class="radio" name="sfs_notify" value="1" {% if SFS_NOTIFY %}id="sfs_notify" checked="checked"{% endif %}/> {{ lang('YES') }} &nbsp;
 				<input type="radio" class="radio" name="sfs_notify" value="0" {% if not SFS_NOTIFY %}id="sfs_notify" checked="checked"{% endif %} /> {{ lang('NO') }}</dd>
@@ -93,7 +98,7 @@
 <fieldset>
 		{% if SFS_POSTS_PMS_COUNT %}
 		<dl>
-			<dt><label>{{ lang('SFS_CLEAR') }}</label><br /><span>{{ lang('SFS_CLEAR_EXPLAIN') }}</span></dt>
+			<dt><label>{{ lang('SFS_CLEAR') }}</label><br /><span>{{ lang('SFS_CLEAR_EXPLAIN', POSTS_REPORTED, PMS_REPORTED) }}</span></dt>
 			<dd><a class="button1" style="padding: 0px 8px;" href="{{ U_CLR_REPORTS }}" data-ajax="true" data-refresh="true">{{ lang('RUN') }}</a></dd>
 		</dl>
 		{% endif %}

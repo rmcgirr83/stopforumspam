@@ -12,7 +12,7 @@
 namespace rmcgirr83\stopforumspam\event;
 
 use phpbb\auth\auth;
-use phpbb\cache\service;
+use phpbb\cache\service as cache;
 use phpbb\config\config;
 use phpbb\controller\helper;
 use phpbb\language\language;
@@ -62,9 +62,6 @@ class main_listener implements EventSubscriberInterface
 	/* @var sfsapi */
 	protected $sfsapi;
 
-	/* @var sfs_admins_mods */
-	protected $sfs_admins_mods;
-
 	/** @var string phpBB root path */
 	protected $root_path;
 
@@ -76,7 +73,7 @@ class main_listener implements EventSubscriberInterface
 
 	public function __construct(
 		auth $auth,
-		service $cache,
+		cache $cache,
 		config $config,
 		helper $helper,
 		language $language,
@@ -360,7 +357,9 @@ class main_listener implements EventSubscriberInterface
 	{
 		$user_info = $event['user_info'];
 
-		if (empty($this->config['allow_sfs']) || empty($this->config['sfs_api_key']) || $this->user->data['user_id'] == $user_info['user_id'])
+		$allowed = ($this->config['allow_sfs'] && !empty($this->config['sfs_api_key']) && $this->config['sfs_report_pm']) ? true : false;
+
+		if (!$allowed || $this->user->data['user_id'] == $user_info['user_id'])
 		{
 			return;
 		}

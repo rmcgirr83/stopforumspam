@@ -139,7 +139,7 @@ class reporttosfs
 
 		if (empty($this->config['allow_sfs']) || empty($this->config['sfs_api_key']) || empty($useremail) || empty($userip))
 		{
-			return false;
+			throw new http_exception(403, 'SFS_MISSING_DATA');
 		}
 
 		$admins_mods = $this->sfsgroups->getadminsmods($forumid);
@@ -149,12 +149,11 @@ class reporttosfs
 			throw new http_exception(403, 'CANNOT_REPORT_ADMINS_MODS');
 		}
 
-		// only allow this via ajax calls
-		if ($this->request->is_ajax() && in_array($this->user->data['user_id'], $admins_mods))
+		if (in_array($this->user->data['user_id'], $admins_mods))
 		{
 			$response = $this->sfsapi->sfsapi('add', $username, $userip, $useremail, $this->config['sfs_api_key']);
 
-			if (!$response)
+			if (!$response && $this->request->is_ajax())
 			{
 				$data = [
 					'MESSAGE_TITLE'	=> $this->language->lang('ERROR'),
@@ -162,6 +161,10 @@ class reporttosfs
 					'success'	=> false,
 				];
 				return new JsonResponse($data);
+			}
+			else if (!$response)
+			{
+				throw new http_exception(403, 'SFS_ERROR_MESSAGE');
 			}
 
 			// Report the uhmmm reported?
@@ -181,13 +184,21 @@ class reporttosfs
 
 			$this->log->add('mod', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_REPORTED', false, [$sfs_username, 'forum_id' => $forumid, 'topic_id' => $topicid, 'post_id'  => $postid]);
 
-			$data = [
-				'MESSAGE_TITLE'	=> $this->language->lang('SUCCESS'),
-				'MESSAGE_TEXT'	=> $this->language->lang('SFS_SUCCESS_MESSAGE'),
-				'success'	=> true,
-				'postid'	=> $postid,
-			];
-			return new JsonResponse($data);
+			if ($this->request->is_ajax())
+			{
+				$data = [
+					'MESSAGE_TITLE'	=> $this->language->lang('SUCCESS'),
+					'MESSAGE_TEXT'	=> $this->language->lang('SFS_SUCCESS_MESSAGE'),
+					'success'	=> true,
+					'postid'	=> $postid,
+				];
+				return new JsonResponse($data);
+			}
+			else
+			{
+				throw new http_exception(200, 'SFS_SUCCESS_MESSAGE');
+			}
+
 		}
 	}
 
