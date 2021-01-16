@@ -15,7 +15,7 @@ namespace rmcgirr83\stopforumspam\core;
 **/
 use phpbb\auth\auth;
 use phpbb\config\config;
-use phpbb\db\driver\driver_interface;
+use phpbb\db\driver\driver_interface as db;
 use phpbb\language\language;
 use phpbb\log\log;
 use phpbb\request\request;
@@ -29,41 +29,41 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class reporttosfs
 {
-	/** @var \phpbb\auth\auth */
+	/** @var auth $auth */
 	protected $auth;
 
-	/** @var \phpbb\config\config */
+	/** @var config $config */
 	protected $config;
 
 	/** @var ContainerInterface */
 	protected $container;
 
-	/** @var \phpbb\db\driver\driver_interface */
+	/** @var db $db */
 	protected $db;
 
-	/** @var \phpbb\language\language */
+	/** @var language $language */
 	protected $language;
 
-	/** @var \phpbb\log\log */
+	/** @var log $log */
 	protected $log;
 
-	/** @var \phpbb\request\request */
+	/** @var request $request */
 	protected $request;
 
-	/** @var \phpbb\user */
+	/** @var user $user */
 	protected $user;
 
-	/* @var \rmcgirr83\stopforumspam\core\sfsgroups */
+	/* @var sfsgroups $sfsgroups */
 	protected $sfsgroups;
 
-	/* @var \rmcgirr83\stopforumspam\core\sfsapi */
+	/* @var sfsapi $sfsapi */
 	protected $sfsapi;
 
 	public function __construct(
 			auth $auth,
 			config $config,
 			ContainerInterface $container,
-			driver_interface $db,
+			db $db,
 			language $language,
 			log $log,
 			request $request,

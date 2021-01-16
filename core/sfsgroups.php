@@ -18,10 +18,10 @@ use phpbb\cache\service as cache;
 
 class sfsgroups
 {
-	/** @var \phpbb\auth\auth */
+	/** @var auth $auth */
 	protected $auth;
 
-	/** @var \phpbb\cache\service */
+	/** @var cache $cache */
 	protected $cache;
 
 	public function __construct(

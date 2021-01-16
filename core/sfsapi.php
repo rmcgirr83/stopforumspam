@@ -20,22 +20,22 @@ use phpbb\user;
 
 class sfsapi
 {
-	/** @var \phpbb\config\config */
+	/** @var config $config */
 	protected $config;
 
-	/** @var \phpbb\language\language */
+	/** @var language $language */
 	protected $language;
 
-	/** @var \phpbb\log\log */
+	/** @var log $log */
 	protected $log;
 
-	/** @var \phpbb\user */
+	/** @var user $user */
 	protected $user;
 
-	/** @var string phpBB root path */
+	/** @var string root_path */
 	protected $root_path;
 
-	/** @var string phpEx */
+	/** @var string php_ext */
 	protected $php_ext;
 
 	public function __construct(
