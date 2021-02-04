@@ -16,16 +16,19 @@ namespace rmcgirr83\stopforumspam\core;
 use phpbb\auth\auth;
 use phpbb\config\config;
 use phpbb\db\driver\driver_interface as db;
+use phpbb\controller\helper;
 use phpbb\language\language;
 use phpbb\log\log;
 use phpbb\request\request;
+use phpbb\template\template;
 use phpbb\user;
 use rmcgirr83\stopforumspam\core\sfsgroups;
 use rmcgirr83\stopforumspam\core\sfsapi;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+
 use phpbb\exception\http_exception;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class reporttosfs
 {
@@ -35,11 +38,11 @@ class reporttosfs
 	/** @var config $config */
 	protected $config;
 
-	/** @var ContainerInterface */
-	protected $container;
-
 	/** @var db $db */
 	protected $db;
+
+	/** @var helper $helper */
+	protected $helper;
 
 	/** @var language $language */
 	protected $language;
@@ -50,6 +53,9 @@ class reporttosfs
 	/** @var request $request */
 	protected $request;
 
+	/** @var template $template */
+	protected $template;
+
 	/** @var user $user */
 	protected $user;
 
@@ -59,32 +65,39 @@ class reporttosfs
 	/* @var sfsapi $sfsapi */
 	protected $sfsapi;
 
+	/** @var ContainerInterface */
+	protected $container;
+
 	public function __construct(
 			auth $auth,
 			config $config,
-			ContainerInterface $container,
 			db $db,
+			helper $helper,
 			language $language,
 			log $log,
 			request $request,
+			template $template,
 			user $user,
 			sfsgroups $sfsgroups,
-			sfsapi $sfsapi)
+			sfsapi $sfsapi,
+			ContainerInterface $container)
 	{
 		$this->auth = $auth;
 		$this->config = $config;
-		$this->container = $container;
+		$this->helper = $helper;
 		$this->db = $db;
 		$this->language = $language;
 		$this->log = $log;
 		$this->request = $request;
+		$this->template = $template;
 		$this->user = $user;
 		$this->sfsgroups = $sfsgroups;
 		$this->sfsapi = $sfsapi;
+		$this->container = $container;
 	}
 
 	/*
-	* reporttosfs			reporting of post to stopforum database
+	* reporttosfs				reporting of post to stopforum database
 	* @param	int	$postid		postid of the post
 	* @param	int	$posterid	posterid that made the post
 	* @return 	json response
@@ -128,7 +141,7 @@ class reporttosfs
 		$sfs_reported = (int) $row['sfs_reported'];
 
 		// ensure the IP is something other than 127.0.0.1 which can happen if the anonymised extension is installed
-		if ($userip == '127.0.0.1')
+		if (filter_var($userip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RANGE) === false)
 		{
 			throw new http_exception(403, 'SFS_ANONYMIZED_IP');
 		}
@@ -149,54 +162,90 @@ class reporttosfs
 			throw new http_exception(403, 'CANNOT_REPORT_ADMINS_MODS');
 		}
 
-		if (in_array($this->user->data['user_id'], $admins_mods))
+		if (confirm_box(true))
 		{
-			$response = $this->sfsapi->sfsapi('add', $username, $userip, $useremail, $this->config['sfs_api_key']);
-
-			if (!$response && $this->request->is_ajax())
+			if (in_array($this->user->data['user_id'], $admins_mods))
 			{
-				$data = [
-					'MESSAGE_TITLE'	=> $this->language->lang('ERROR'),
-					'MESSAGE_TEXT'	=> $this->language->lang('SFS_ERROR_MESSAGE'),
-					'success'	=> false,
-				];
-				return new JsonResponse($data);
+				$response = $this->sfsapi->sfsapi('add', $username, $userip, $useremail, $this->config['sfs_api_key']);
+
+				if (!$response && $this->request->is_ajax())
+				{
+					$data = [
+						'MESSAGE_TITLE'	=> $this->language->lang('ERROR'),
+						'MESSAGE_TEXT'	=> $this->language->lang('SFS_ERROR_MESSAGE'),
+						'success'	=> false,
+					];
+					return new JsonResponse($data);
+				}
+				else if (!$response)
+				{
+					$this->template->assign_vars([
+						'MESSAGE_TITLE' => $this->language->lang('ERROR'),
+						'MESSAGE_TEXT'	=> $this->language->lang('SFS_ERROR_MESSAGE')
+					]);
+
+					return $this->helper->render('message_body.html');
+				}
+
+				// Report the uhmmm reported?
+				if ($this->config['sfs_notify'])
+				{
+					$this->check_report($postid);
+				}
+
+				$sql = 'UPDATE ' . POSTS_TABLE . '
+					SET sfs_reported = 1
+					WHERE post_id = ' . (int) $postid;
+				$this->db->sql_query($sql);
+
+				$sfs_username = $this->language->lang('SFS_USERNAME_STOPPED', $username);
+
+				$this->sfsapi->sfs_ban('user', $username);
+
+				$this->log->add('mod', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_REPORTED', false, [$sfs_username, 'forum_id' => $forumid, 'topic_id' => $topicid, 'post_id'  => $postid]);
+
+				if ($this->request->is_ajax())
+				{
+					$data = [
+						'MESSAGE_TITLE'	=> $this->language->lang('SFS_SUCCESS'),
+						'MESSAGE_TEXT'	=> $this->language->lang('SFS_SUCCESS_MESSAGE'),
+						'success'	=> true,
+						'postid'	=> $postid,
+					];
+					return new JsonResponse($data);
+				}
+				else
+				{
+					$this->template->assign_vars([
+						'MESSAGE_TITLE' => $this->language->lang('SFS_SUCCESS'),
+						'MESSAGE_TEXT'	=> $this->language->lang('SFS_SUCCESS_MESSAGE')
+					]);
+
+					return $this->helper->render('message_body.html');
+				}
 			}
-			else if (!$response)
-			{
-				throw new http_exception(403, 'SFS_ERROR_MESSAGE');
-			}
-
-			// Report the uhmmm reported?
-			if ($this->config['sfs_notify'])
-			{
-				$this->check_report($postid);
-			}
-
-			$sql = 'UPDATE ' . POSTS_TABLE . '
-				SET sfs_reported = 1
-				WHERE post_id = ' . (int) $postid;
-			$this->db->sql_query($sql);
-
-			$sfs_username = $this->language->lang('SFS_USERNAME_STOPPED', $username);
-
-			$this->sfsapi->sfs_ban('user', $username);
-
-			$this->log->add('mod', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_REPORTED', false, [$sfs_username, 'forum_id' => $forumid, 'topic_id' => $topicid, 'post_id'  => $postid]);
-
+		}
+		else
+		{
 			if ($this->request->is_ajax())
 			{
-				$data = [
-					'MESSAGE_TITLE'	=> $this->language->lang('SUCCESS'),
-					'MESSAGE_TEXT'	=> $this->language->lang('SFS_SUCCESS_MESSAGE'),
-					'success'	=> true,
-					'postid'	=> $postid,
-				];
-				return new JsonResponse($data);
+				confirm_box(
+					false,
+					$this->language->lang('SFS_CONFIRM'),
+					'',
+					'confirm_body.html',
+					$this->helper->route(
+						'rmcgirr83_stopforumspam_core_reporttosfs',
+						[
+							'postid' => $postid,
+							'posterid' => $posterid,
+						]
+					),
+				);
 			}
 			else
 			{
-				throw new http_exception(200, 'SFS_SUCCESS_MESSAGE');
+				confirm_box(false, $this->language->lang('SFS_CONFIRM'));
 			}
 
 		}

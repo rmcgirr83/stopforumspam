@@ -63,4 +63,7 @@ $lang = array_merge($lang, [
 	'SFS_NEED_CURL'	=> 'The extension requires cURL which doesn’t seem to be installed',
 	'LOG_SFS_REPORTED' => '<strong>User was reported to Stop Forum Spam</strong><br>» %1$s',
 	'EXTENSION_REQUIREMENTS' => 'Extension requires at least phpBB version %1$s. You need to update your version of phpBB to utilize this extension.',
+	'INVALID_IP_ADDRESS'	=> 'Invalid IP address',
+	'SFS_CONFIRM'	=> 'Report to stop forum database?',
+	'SFS_SUCCESS'	=> 'Stop forum spam successful',
 ]);

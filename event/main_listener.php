@@ -22,6 +22,7 @@ use phpbb\template\template;
 use phpbb\user;
 use rmcgirr83\stopforumspam\core\sfsgroups as sfsgroups;
 use rmcgirr83\stopforumspam\core\sfsapi as sfsapi;
+use rmcgirr83\contactadmin\controller\main_controller as contactadmin;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -62,13 +63,13 @@ class main_listener implements EventSubscriberInterface
 	/* @var sfsapi */
 	protected $sfsapi;
 
-	/** @var string phpBB root path */
+	/** @var string root_path */
 	protected $root_path;
 
-	/** @var string phpEx */
+	/** @var string php_ext */
 	protected $php_ext;
 
-	/* @var \rmcgirr83\contactadmin\controller\main_controller */
+	/* @var contactadmin $contactadmin */
 	protected $contactadmin;
 
 	public function __construct(
@@ -83,9 +84,9 @@ class main_listener implements EventSubscriberInterface
 		user $user,
 		sfsgroups $sfsgroups,
 		sfsapi $sfsapi,
-		$root_path,
-		$php_ext,
-		\rmcgirr83\contactadmin\controller\main_controller $contactadmin = null)
+		string $root_path,
+		string $php_ext,
+		contactadmin $contactadmin = null)
 	{
 		$this->auth = $auth;
 		$this->cache = $cache;
@@ -152,9 +153,15 @@ class main_listener implements EventSubscriberInterface
 
 		$error_array = $event['error'];
 
+		// validate the user ip
+		$userip_error = $this->validate_ip($this->user->ip);
+		if ($userip_error)
+		{
+			$error_array[] = $userip_error;
+		}
+
 		/* On registration and only when all errors have cleared
 		 * do not want the admin message area to fill up
-		 * stopforumspam only works with IPv4 not IPv6
 		*/
 		if (!sizeof($error_array))
 		{
@@ -246,6 +253,13 @@ class main_listener implements EventSubscriberInterface
 				}
 			}
 
+			// validate the user ip
+			$userip_error = $this->validate_ip($event['post_data']['user_ip']);
+			if ($userip_error)
+			{
+				$error_array[] = $userip_error;
+			}
+
 			if (!sizeof($error_array))
 			{
 				$check = $this->stopforumspam_check($event['post_data']['username'], $this->user->ip, $event['post_data']['email']);
@@ -335,15 +349,18 @@ class main_listener implements EventSubscriberInterface
 
 		// ensure we have an IP and email address..this may happen if users have "post" bots on the forum
 		// also ensure the IP is something other than 127.0.0.1 which can happen if the anonymised extension is installed
-		$sfs_report_allowed = (!empty($row['poster_ip'] && $row['poster_ip'] != '127.0.0.1') && !empty($row['user_email']) && $event['poster_id'] != ANONYMOUS) ? true : false;
-
-		if ($sfs_report_allowed && in_array($this->user->data['user_id'], $this->sfs_admins_mods) && !in_array((int) $event['poster_id'], $this->sfs_admins_mods))
+		if (empty($this->validate_ip($row['poster_ip'])) && filter_var($row['poster_ip'], FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RANGE))
 		{
-			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_reporttosfs', ['postid' => (int) $row['post_id'], 'posterid' => (int) $event['poster_id']]);
+			$sfs_report_allowed = (!empty($row['user_email']) && $event['poster_id'] != ANONYMOUS && !$row['sfs_reported']) ? true : false;
 
-			$event['post_row'] = array_merge($event['post_row'], [
-				'SFS_LINK'			=> (!$row['sfs_reported']) ? $reporttosfs_url : '',
-			]);
+			if ($sfs_report_allowed && in_array($this->user->data['user_id'], $this->sfs_admins_mods) && !in_array((int) $event['poster_id'], $this->sfs_admins_mods))
+			{
+				$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_reporttosfs', ['postid' => (int) $row['post_id'], 'posterid' => (int) $event['poster_id']]);
+				$event['post_row'] = array_merge($event['post_row'], [
+					'S_SFS'	=> true,
+					'U_SFS'	=> $reporttosfs_url,
+				]);
+			}
 		}
 	}
 
@@ -357,7 +374,7 @@ class main_listener implements EventSubscriberInterface
 	{
 		$user_info = $event['user_info'];
 
-		$allowed = ($this->config['allow_sfs'] && !empty($this->config['sfs_api_key']) && $this->config['sfs_report_pm']) ? true : false;
+		$allowed = ($this->config['allow_sfs'] && $this->config['allow_pm_report'] && !empty($this->config['sfs_api_key']) && $this->config['sfs_report_pm']) ? true : false;
 
 		if (!$allowed || $this->user->data['user_id'] == $user_info['user_id'])
 		{
@@ -367,21 +384,28 @@ class main_listener implements EventSubscriberInterface
 		// get mods and admins
 		$this->sfs_admins_mods = $this->sfsgroups->getadminsmods(0);
 
+		if (in_array((int) $user_info['user_id'], $this->sfs_admins_mods))
+		{
+			return;
+		}
+
 		$message_row = $event['message_row'];
 
 		// ensure we have an IP and email address..this may happen if users have "post" bots on the forum
 		// also ensure the IP is something other than 127.0.0.1 which can happen if the anonymised extension is installed
-		$sfs_report_allowed = (!empty($user_info['author_ip'] && $user_info['author_ip'] != '127.0.0.1') && !empty($user_info['user_email']) && !in_array((int) $user_info['user_id'], $this->sfs_admins_mods)) ? true : false;
-
-		if ($sfs_report_allowed)
+		if (empty($this->validate_ip($user_info['author_ip'])) && filter_var($user_info['author_ip'], FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RANGE))
 		{
-			$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_report_pm_to_sfs', ['msgid' => (int) $message_row['msg_id'], 'authorid' => (int) $user_info['user_id']]);
+			$sfs_report_allowed = (!empty($user_info['user_email'])) ? true : false;
 
-			$report_link = '<a href="' . $reporttosfs_url . '" title="' . $this->language->lang('REPORT_TO_SFS'). '" data-ajax="report_pm_to_sfs" class="button button-icon-only"><i class="icon fa-exchange fa-fw" aria-hidden="true"></i><span class="sr-only">' . $this->language->lang('REPORT_TO_SFS'). '</span></a>';
+			if ($sfs_report_allowed && !$message_row['sfs_reported'] )
+			{
+				$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_report_pm_to_sfs', ['postid' => (int) $message_row['msg_id'], 'posterid' => (int) $user_info['user_id']]);
 
-			$event['msg_data'] = array_merge($event['msg_data'], [
-				'SFS_LINK'			=> (!$message_row['sfs_reported'] && $this->config['allow_pm_report']) ? $report_link : '',
-			]);
+				$event['msg_data'] = array_merge($event['msg_data'], [
+					'S_SFS'		=> true,
+					'U_SFS'		=> $reporttosfs_url,
+				]);
+			}
 		}
 	}
 
@@ -550,6 +574,24 @@ class main_listener implements EventSubscriberInterface
 		{
 			$min_max_amount = ($result == 'TOO_SHORT') ? $this->config['min_name_chars'] : $this->config['max_name_chars'];
 			$error[] = $this->language->lang('FIELD_' . $result, $min_max_amount, $this->language->lang('USERNAME'));
+		}
+
+		return $error;
+	}
+
+	/*
+	* validate_ip		function used in this class to validate an ip address
+	* @param	string	$ip		the users ip
+	* @return 	array
+	* @access	public
+	*/
+	private function validate_ip($ip)
+	{
+		$error = '';
+
+		if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6) === false)
+		{
+			$error = $this->language->lang('INVALID_IP_ADDRESS');
 		}
 
 		return $error;
