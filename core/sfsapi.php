@@ -43,8 +43,8 @@ class sfsapi
 		language $language,
 		log $log,
 		user $user,
-		$root_path,
-		$php_ext)
+		string $root_path,
+		string $php_ext)
 	{
 		$this->config = $config;
 		$this->language = $language;

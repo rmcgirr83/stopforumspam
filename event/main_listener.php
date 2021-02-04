@@ -413,7 +413,7 @@ class main_listener implements EventSubscriberInterface
 	* show_message
 	* @param 		string	$check 		the type of check we are, uhmmm, checking
 	* @return 		string
-	* @access		public
+	* @access		private
 	*/
 	private function show_message($check = '')
 	{
@@ -446,7 +446,7 @@ class main_listener implements EventSubscriberInterface
 	* @param	string	$ip				the users ip
 	* @param	string	$email			email from the forum inputs
 	* @return 	bool|string				true if found, false if not, string if other
-	* @access	public
+	* @access	private
 	*/
 	private function stopforumspam_check($username, $ip, $email)
 	{
@@ -525,7 +525,7 @@ class main_listener implements EventSubscriberInterface
 	* @param	string	$message	the message we are injecting
 	* @param	string	$email		email from the forum inputs
 	* @return 	void
-	* @access	public
+	* @access	private
 	*/
 	private function log_message($mode, $username, $ip, $message, $email)
 	{
@@ -547,7 +547,7 @@ class main_listener implements EventSubscriberInterface
 	* validate_email			function used in this class to validate a guest posters email address
 	* @param	string	$email	email from the forum inputs
 	* @return 	string
-	* @access	public
+	* @access	private
 	*/
 	private function validate_email($email)
 	{
@@ -560,7 +560,7 @@ class main_listener implements EventSubscriberInterface
 	* validate_username		function used in this class to validate a guest posters username
 	* @param	string	$username	username from the forum inputs
 	* @return 	array
-	* @access	public
+	* @access	private
 	*/
 	private function validate_username($username)
 	{
@@ -582,8 +582,8 @@ class main_listener implements EventSubscriberInterface
 	/*
 	* validate_ip		function used in this class to validate an ip address
 	* @param	string	$ip		the users ip
-	* @return 	array
-	* @access	public
+	* @return 	string
+	* @access	private
 	*/
 	private function validate_ip($ip)
 	{

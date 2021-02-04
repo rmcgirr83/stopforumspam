@@ -231,7 +231,6 @@ class admin_controller implements admin_interface
 			'NOTICE'	=> $cache_built,
 			'POSTS_REPORTED' => (int) $posts_reported,
 			'PMS_REPORTED'	=> (int) $pms_reported,
-			//'L_SFS_CLEAR_EXPLAIN'	=> $this->language->lang('SFS_CLEAR_EXPLAIN', (int) $posts_reported, (int) $pms_reported),
 
 			'U_BUILD_CACHE'	=> $this->u_action . '&amp;action=build_adminsmods',
 			'U_CLR_REPORTS'	=> $this->u_action . '&amp;action=clr_reports',
