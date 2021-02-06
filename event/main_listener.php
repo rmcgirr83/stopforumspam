@@ -540,9 +540,39 @@ class main_listener implements EventSubscriberInterface
 		}
 		else
 		{
-			$sfs_ip = $this->language->lang('SFS_IP_STOPPED_SCORE', $ip, $ip_score);
-			$sfs_username_ = $this->language->lang('SFS_USERNAME_STOPPED_SCORE', $username, $username_score);
-			$sfs_email = $this->language->lang('SFS_EMAIL_STOPPED_SCORE', $email, $email_score);
+			$sfs_ip = $this->language->lang('SFS_IP_STOPPED_SCORE', $ip);
+			$sfs_username = $this->language->lang('SFS_USERNAME_STOPPED_SCORE', $username);
+			$sfs_email = $this->language->lang('SFS_EMAIL_STOPPED_SCORE', $email);
+
+			if ($this->config['sfs_by_name'] == false)
+			{
+				$username_score = $this->language->lang('SFS_NOT_CHECKED');
+			}
+			else
+			{
+				$username_score = $this->language->lang('SFS_FREQUENCY', $username_score);
+			}
+
+			if ($this->config['sfs_by_email'] == false)
+			{
+				$email_score = $this->language->lang('SFS_NOT_CHECKED');
+			}
+			else
+			{
+				$email_score = $this->language->lang('SFS_FREQUENCY', $email_score);
+			}
+
+			if ($this->config['sfs_by_ip'] == false)
+			{
+				$ip_score = $this->language->lang('SFS_NOT_CHECKED');
+			}
+			else
+			{
+				$ip_score = $this->language->lang('SFS_FREQUENCY', $ip_score);
+			}
+			$sfs_ip .= $ip_score;
+			$sfs_username .= $username_score;
+			$sfs_email .= $email_score;
 
 			$this->log->add('user', $this->user->data['user_id'], $ip, $message, false, ['reportee_id' => $this->user->data['user_id'], $sfs_username, $sfs_ip, $sfs_email]);
 		}

@@ -27,6 +27,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 use phpbb\exception\http_exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class report_pm_to_sfs
 {
@@ -105,7 +106,7 @@ class report_pm_to_sfs
 		$admins_mods = $this->sfsgroups->getadminsmods(0);
 
 		// Check if reporting PMs is enabled
-		if (!$this->config['allow_pm_report'] || in_array($posterid, $admins_mods) || empty($this->config['sfs_report_pm'])
+		if (!$this->config['allow_pm_report'] || in_array($posterid, $admins_mods) || empty($this->config['sfs_report_pm']))
 		{
 			throw new http_exception(403, 'SFS_PM_REPORT_NOT_ALLOWED');
 		}
@@ -149,6 +150,12 @@ class report_pm_to_sfs
 		if ($sfs_reported)
 		{
 			throw new http_exception(403, 'SFS_PM_REPORTED');
+		}
+
+		// fix confirm box non-ajax error (controller must return)
+		if ($this->request->is_set_post('cancel') && !$this->request->is_ajax())
+		{
+			return $this->helper->message('SFS_OPERATION_CANCELED');
 		}
 
 		if (confirm_box(true))
@@ -224,7 +231,10 @@ class report_pm_to_sfs
 						[
 							'postid' => $postid,
 							'posterid' => $posterid,
-						]
+						],
+						true,
+						false,
+						UrlGeneratorInterface::ABSOLUTE_URL
 					),
 				);
 			}
@@ -258,7 +268,7 @@ class report_pm_to_sfs
 			];
 			return new JsonResponse($data);
 		}
-		else (!$report_data)
+		else if (!$report_data)
 		{
 			$this->template->assign_vars([
 				'MESSAGE_TITLE'	=> $this->language->lang('ERROR'),

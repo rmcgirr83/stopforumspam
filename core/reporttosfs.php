@@ -28,6 +28,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 use phpbb\exception\http_exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class reporttosfs
 {
@@ -118,13 +119,6 @@ class reporttosfs
 			throw new http_exception(403, 'POST_NOT_EXIST');
 		}
 
-		$admins_mods = $this->sfsgroups->getadminsmods($forumid);
-
-		if (in_array($posterid, $admins_mods))
-		{
-			throw new http_exception(403, 'CANNOT_REPORT_ADMINS_MODS');
-		}
-
 		$sql = 'SELECT p.sfs_reported, p.poster_ip, p.topic_id, p.forum_id, u.username, u.user_email
 			FROM ' . POSTS_TABLE . ' p
 			LEFT JOIN ' . USERS_TABLE . ' u on p.poster_id = u.user_id
@@ -146,6 +140,13 @@ class reporttosfs
 		$topicid = (int) $row['topic_id'];
 		$sfs_reported = (int) $row['sfs_reported'];
 
+		$admins_mods = $this->sfsgroups->getadminsmods($forumid);
+
+		if (in_array($posterid, $admins_mods))
+		{
+			throw new http_exception(403, 'CANNOT_REPORT_ADMINS_MODS');
+		}
+
 		// ensure the IP is something other than 127.0.0.1 which can happen if the anonymised extension is installed
 		if (filter_var($userip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RANGE) === false)
 		{
@@ -160,6 +161,12 @@ class reporttosfs
 		if (empty($this->config['allow_sfs']) || empty($this->config['sfs_api_key']) || empty($useremail) || empty($userip))
 		{
 			throw new http_exception(403, 'SFS_MISSING_DATA');
+		}
+
+		// fix confirm box non-ajax error (controller must return)
+		if ($this->request->is_set_post('cancel') && !$this->request->is_ajax())
+		{
+			return $this->helper->message('SFS_OPERATION_CANCELED');
 		}
 
 		if (confirm_box(true))
@@ -236,7 +243,10 @@ class reporttosfs
 						[
 							'postid' => $postid,
 							'posterid' => $posterid,
-						]
+						],
+						true,
+						false,
+						UrlGeneratorInterface::ABSOLUTE_URL
 					),
 				);
 			}
@@ -270,7 +280,7 @@ class reporttosfs
 			];
 			return new JsonResponse($data);
 		}
-		else (!$report_data)
+		else if (!$report_data)
 		{
 			$this->template->assign_vars([
 				'MESSAGE_TITLE'	=> $this->language->lang('ERROR'),
