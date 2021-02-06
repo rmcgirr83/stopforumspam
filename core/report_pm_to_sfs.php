@@ -235,7 +235,7 @@ class report_pm_to_sfs
 						true,
 						false,
 						UrlGeneratorInterface::ABSOLUTE_URL
-					),
+					)
 				);
 			}
 			else

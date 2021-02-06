@@ -247,7 +247,7 @@ class reporttosfs
 						true,
 						false,
 						UrlGeneratorInterface::ABSOLUTE_URL
-					),
+					)
 				);
 			}
 			else
