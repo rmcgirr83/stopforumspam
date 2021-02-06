@@ -27,7 +27,6 @@ use rmcgirr83\stopforumspam\core\sfsapi;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 use phpbb\exception\http_exception;
-
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 class reporttosfs
@@ -119,6 +118,13 @@ class reporttosfs
 			throw new http_exception(403, 'POST_NOT_EXIST');
 		}
 
+		$admins_mods = $this->sfsgroups->getadminsmods($forumid);
+
+		if (in_array($posterid, $admins_mods))
+		{
+			throw new http_exception(403, 'CANNOT_REPORT_ADMINS_MODS');
+		}
+
 		$sql = 'SELECT p.sfs_reported, p.poster_ip, p.topic_id, p.forum_id, u.username, u.user_email
 			FROM ' . POSTS_TABLE . ' p
 			LEFT JOIN ' . USERS_TABLE . ' u on p.poster_id = u.user_id
@@ -145,6 +151,7 @@ class reporttosfs
 		{
 			throw new http_exception(403, 'SFS_ANONYMIZED_IP');
 		}
+
 		if ($sfs_reported)
 		{
 			throw new http_exception(403, 'SFS_REPORTED');
@@ -155,74 +162,64 @@ class reporttosfs
 			throw new http_exception(403, 'SFS_MISSING_DATA');
 		}
 
-		$admins_mods = $this->sfsgroups->getadminsmods($forumid);
-
-		if (in_array($posterid, $admins_mods))
-		{
-			throw new http_exception(403, 'CANNOT_REPORT_ADMINS_MODS');
-		}
-
 		if (confirm_box(true))
 		{
-			if (in_array($this->user->data['user_id'], $admins_mods))
+			$response = $this->sfsapi->sfsapi('add', $username, $userip, $useremail, $this->config['sfs_api_key']);
+
+			if (!$response && $this->request->is_ajax())
 			{
-				$response = $this->sfsapi->sfsapi('add', $username, $userip, $useremail, $this->config['sfs_api_key']);
+				$data = [
+					'MESSAGE_TITLE'	=> $this->language->lang('ERROR'),
+					'MESSAGE_TEXT'	=> $this->language->lang('SFS_ERROR_MESSAGE'),
+					'success'	=> false,
+				];
+				return new JsonResponse($data);
+			}
+			else if (!$response)
+			{
+				$this->template->assign_vars([
+					'MESSAGE_TITLE' => $this->language->lang('ERROR'),
+					'MESSAGE_TEXT'	=> $this->language->lang('SFS_ERROR_MESSAGE')
+				]);
 
-				if (!$response && $this->request->is_ajax())
-				{
-					$data = [
-						'MESSAGE_TITLE'	=> $this->language->lang('ERROR'),
-						'MESSAGE_TEXT'	=> $this->language->lang('SFS_ERROR_MESSAGE'),
-						'success'	=> false,
-					];
-					return new JsonResponse($data);
-				}
-				else if (!$response)
-				{
-					$this->template->assign_vars([
-						'MESSAGE_TITLE' => $this->language->lang('ERROR'),
-						'MESSAGE_TEXT'	=> $this->language->lang('SFS_ERROR_MESSAGE')
-					]);
+				return $this->helper->render('message_body.html');
+			}
 
-					return $this->helper->render('message_body.html');
-				}
+			// Report the uhmmm reported?
+			if ($this->config['sfs_notify'])
+			{
+				$this->check_report($postid);
+			}
 
-				// Report the uhmmm reported?
-				if ($this->config['sfs_notify'])
-				{
-					$this->check_report($postid);
-				}
+			$sql = 'UPDATE ' . POSTS_TABLE . '
+				SET sfs_reported = 1
+				WHERE post_id = ' . (int) $postid;
+			$this->db->sql_query($sql);
 
-				$sql = 'UPDATE ' . POSTS_TABLE . '
-					SET sfs_reported = 1
-					WHERE post_id = ' . (int) $postid;
-				$this->db->sql_query($sql);
+			$sfs_username = $this->language->lang('SFS_USERNAME_STOPPED', $username);
 
-				$sfs_username = $this->language->lang('SFS_USERNAME_STOPPED', $username);
+			$this->sfsapi->sfs_ban('user', $username);
 
-				$this->sfsapi->sfs_ban('user', $username);
+			$this->log->add('mod', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_REPORTED', false, [$sfs_username, 'forum_id' => $forumid, 'topic_id' => $topicid, 'post_id'  => $postid]);
 
-				$this->log->add('mod', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_REPORTED', false, [$sfs_username, 'forum_id' => $forumid, 'topic_id' => $topicid, 'post_id'  => $postid]);
+			if ($this->request->is_ajax())
+			{
+				$data = [
+					'MESSAGE_TITLE'	=> $this->language->lang('SFS_SUCCESS'),
+					'MESSAGE_TEXT'	=> $this->language->lang('SFS_SUCCESS_MESSAGE'),
+					'success'	=> true,
+					'postid'	=> $postid,
+				];
+				return new JsonResponse($data);
+			}
+			else
+			{
+				$this->template->assign_vars([
+					'MESSAGE_TITLE' => $this->language->lang('SFS_SUCCESS'),
+					'MESSAGE_TEXT'	=> $this->language->lang('SFS_SUCCESS_MESSAGE')
+				]);
 
-				if ($this->request->is_ajax())
-				{
-					$data = [
-						'MESSAGE_TITLE'	=> $this->language->lang('SFS_SUCCESS'),
-						'MESSAGE_TEXT'	=> $this->language->lang('SFS_SUCCESS_MESSAGE'),
-						'success'	=> true,
-						'postid'	=> $postid,
-					];
-					return new JsonResponse($data);
-				}
-				else
-				{
-					$this->template->assign_vars([
-						'MESSAGE_TITLE' => $this->language->lang('SFS_SUCCESS'),
-						'MESSAGE_TEXT'	=> $this->language->lang('SFS_SUCCESS_MESSAGE')
-					]);
-
-					return $this->helper->render('message_body.html');
-				}
+				return $this->helper->render('message_body.html');
 			}
 		}
 		else
@@ -247,26 +244,24 @@ class reporttosfs
 			{
 				confirm_box(false, $this->language->lang('SFS_CONFIRM'));
 			}
-
 		}
 	}
 
 	/*
 	* check_report			check to see if the post msg has already been reported
 	* @param 	$postid 	postid from the report to sfs
-	* @return 	json response if found
+	* @return 	json|html	response if found
 	*/
 	private function check_report($postid)
 	{
-		$sql = 'SELECT t.*, p.*
-			FROM ' . POSTS_TABLE . ' p, ' . TOPICS_TABLE . ' t
-			WHERE p.post_id = ' . (int) $postid . '
-				AND p.topic_id = t.topic_id';
+		$sql = 'SELECT *
+			FROM ' . POSTS_TABLE . '
+			WHERE post_id = ' . (int) $postid;
 		$result = $this->db->sql_query($sql);
 		$report_data = $this->db->sql_fetchrow($result);
 		$this->db->sql_freeresult($result);
 
-		if (!$report_data)
+		if (!$report_data && $this->request->is_ajax())
 		{
 			$data = [
 				'MESSAGE_TITLE'	=> $this->language->lang('ERROR'),
@@ -274,6 +269,15 @@ class reporttosfs
 				'success'	=> false,
 			];
 			return new JsonResponse($data);
+		}
+		else (!$report_data)
+		{
+			$this->template->assign_vars([
+				'MESSAGE_TITLE'	=> $this->language->lang('ERROR'),
+				'MESSAGE_TEXT'	=> $this->language->lang('POST_NOT_EXIST'),
+			]);
+
+			return $this->helper->render('message_body.html');
 		}
 
 		// if the post isn't reported, then report it

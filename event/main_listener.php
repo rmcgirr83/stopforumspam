@@ -128,7 +128,7 @@ class main_listener implements EventSubscriberInterface
 	 * Check for and create if needed admins and mods cache
 	 *
 	 * @param object $event The event object
-	 * @return null
+	 * @return void
 	 * @access public
 	 */
 	public function user_setup_after($event)
@@ -141,7 +141,7 @@ class main_listener implements EventSubscriberInterface
 	* user_sfs_validate_registration		validate a users registration event
 	*
 	* @param	$event	the event object
-	* @return 	$error
+	* @return 	null
 	* @access	public
 	*/
 	public function user_sfs_validate_registration($event)
@@ -188,7 +188,7 @@ class main_listener implements EventSubscriberInterface
 	* poster_data_email			inject email address into posting if allowed for guests
 	*
 	* @param	$event			the event object
-	* @return 	null
+	* @return 	void
 	* @access	public
 	*/
 	public function poster_data_email($event)
@@ -207,7 +207,7 @@ class main_listener implements EventSubscriberInterface
 	* poster_modify_message_text	inject email address into post data  for validation
 	*
 	* @param	$event			the event object
-	* @return 	null
+	* @return 	void
 	* @access	public
 	*/
 	public function poster_modify_message_text($event)
@@ -221,7 +221,7 @@ class main_listener implements EventSubscriberInterface
 	* user_sfs_validate_posting		validate username and email for guest posting
 	*
 	* @param	$event			the event object
-	* @return 	$error_array
+	* @return 	void
 	* @access	public
 	*/
 	public function user_sfs_validate_posting($event)
@@ -286,7 +286,7 @@ class main_listener implements EventSubscriberInterface
 	/*
 	* update_sfs_admin_mods 			update admin and mods cache when adding|deleting users to|from a group
 	* @param 		$event				event object
-	* @return		null
+	* @return		void
 	* @access		public
 	*/
 	public function update_sfs_admin_mods($event)
@@ -365,9 +365,9 @@ class main_listener implements EventSubscriberInterface
 	}
 
 	/*
-	* ucp_pm_view_message				show a link to report a spammer
-	* @param 	$event					event object
-	* @return	void
+	* ucp_pm_view_message		show a link to report a spammer
+	* @param 	$event			event object
+	* @return	bool
 	* @access	public
 	*/
 	public function ucp_pm_view_message($event)
@@ -378,7 +378,7 @@ class main_listener implements EventSubscriberInterface
 
 		if (!$allowed || $this->user->data['user_id'] == $user_info['user_id'])
 		{
-			return;
+			return false;
 		}
 
 		// get mods and admins
@@ -386,7 +386,7 @@ class main_listener implements EventSubscriberInterface
 
 		if (in_array((int) $user_info['user_id'], $this->sfs_admins_mods))
 		{
-			return;
+			return false;
 		}
 
 		$message_row = $event['message_row'];
@@ -411,9 +411,9 @@ class main_listener implements EventSubscriberInterface
 
 	/*
 	* show_message
-	* @param 		string	$check 		the type of check we are, uhmmm, checking
-	* @return 		string
-	* @access		private
+	* @param 	string	$check 		the type of check we are, uhmmm, checking
+	* @return 	string
+	* @access	private
 	*/
 	private function show_message($check = '')
 	{
@@ -463,9 +463,9 @@ class main_listener implements EventSubscriberInterface
 		// Check if user is a spammer, but only if we successfully got the SFS data
 		if ($json_decode['success'])
 		{
-			$username_freq = $json_decode['username']['frequency'];
-			$email_freq = $json_decode['email']['frequency'];
-			$ip_freq = $json_decode['ip']['frequency'];
+			$username_freq = (int) $json_decode['username']['frequency'];
+			$email_freq = (int) $json_decode['email']['frequency'];
+			$ip_freq = (int) $json_decode['ip']['frequency'];
 
 			// ACP settings in effect
 			if ($this->config['sfs_by_name'] == false)
@@ -490,7 +490,7 @@ class main_listener implements EventSubscriberInterface
 			{
 				if ($sfs_log_message)
 				{
-					$this->log_message('user', $username, $ip, 'LOG_SFS_MESSAGE', $email);
+					$this->log_message('user', $username, $ip, 'LOG_SFS_MESSAGE', $email, $username_freq, $ip_freq, $email_freq);
 				}
 				//user is a spammer
 				return true;
@@ -518,7 +518,7 @@ class main_listener implements EventSubscriberInterface
 	}
 
 	/*
-	* log_message					function used in this class to inject messages into the logs
+	* log_message	function used in this class to inject messages into the logs
 	* @param 	string	$mode 		the mode that we are doing for the log either admin or user
 	* @param	string	$username	the users name
 	* @param	string	$ip			the users ip
@@ -527,24 +527,29 @@ class main_listener implements EventSubscriberInterface
 	* @return 	void
 	* @access	private
 	*/
-	private function log_message($mode, $username, $ip, $message, $email)
+	private function log_message($mode, $username, $ip, $message, $email, $username_score = 0, $ip_score = 0, $email_score = 0)
 	{
-		$sfs_ip_check = $this->language->lang('SFS_IP_STOPPED', $ip);
-		$sfs_username_check = $this->language->lang('SFS_USERNAME_STOPPED', $username);
-		$sfs_email_check = $this->language->lang('SFS_EMAIL_STOPPED', $email);
 
 		if ($mode === 'admin')
 		{
-			$this->log->add('admin', $this->user->data['user_id'], $ip, $message, false, [$sfs_username_check, $sfs_ip_check, $sfs_email_check]);
+			$sfs_ip = $this->language->lang('SFS_IP_STOPPED', $ip);
+			$sfs_username_ = $this->language->lang('SFS_USERNAME_STOPPED', $username);
+			$sfs_email = $this->language->lang('SFS_EMAIL_STOPPED', $email);
+
+			$this->log->add('admin', $this->user->data['user_id'], $ip, $message, false, [$sfs_username, $sfs_ip, $sfs_email]);
 		}
 		else
 		{
-			$this->log->add('user', $this->user->data['user_id'], $ip, $message, false, ['reportee_id' => $this->user->data['user_id'], $sfs_username_check, $sfs_ip_check, $sfs_email_check]);
+			$sfs_ip = $this->language->lang('SFS_IP_STOPPED_SCORE', $ip, $ip_score);
+			$sfs_username_ = $this->language->lang('SFS_USERNAME_STOPPED_SCORE', $username, $username_score);
+			$sfs_email = $this->language->lang('SFS_EMAIL_STOPPED_SCORE', $email, $email_score);
+
+			$this->log->add('user', $this->user->data['user_id'], $ip, $message, false, ['reportee_id' => $this->user->data['user_id'], $sfs_username, $sfs_ip, $sfs_email]);
 		}
 	}
 
 	/*
-	* validate_email			function used in this class to validate a guest posters email address
+	* validate_email	function used in this class to validate a guest posters email address
 	* @param	string	$email	email from the forum inputs
 	* @return 	string
 	* @access	private
@@ -557,7 +562,7 @@ class main_listener implements EventSubscriberInterface
 	}
 
 	/*
-	* validate_username		function used in this class to validate a guest posters username
+	* validate_username	function used in this class to validate a guest posters username
 	* @param	string	$username	username from the forum inputs
 	* @return 	array
 	* @access	private

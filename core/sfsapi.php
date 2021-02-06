@@ -133,7 +133,7 @@ class sfsapi
 	* sfs_ban
 	* @param 	$type 			ban by either IP or username
 	* @param	$user_info		the users info of who we are banning
-	* @return 	null			return either a string on success or false on failure
+	* @return 	null
 	*/
 	public function sfs_ban($type, $user_info)
 	{

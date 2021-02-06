@@ -105,14 +105,14 @@ class report_pm_to_sfs
 		$admins_mods = $this->sfsgroups->getadminsmods(0);
 
 		// Check if reporting PMs is enabled
-		if (!$this->config['allow_pm_report'] || in_array($posterid, $admins_mods))
+		if (!$this->config['allow_pm_report'] || in_array($posterid, $admins_mods) || empty($this->config['sfs_report_pm'])
 		{
 			throw new http_exception(403, 'SFS_PM_REPORT_NOT_ALLOWED');
 		}
 
-		if (empty($this->config['allow_sfs']) || empty($this->config['sfs_api_key'] || empty($this->config['sfs_report_pm'])))
+		if (empty($this->config['allow_sfs']) || empty($this->config['sfs_api_key']))
 		{
-			return false;
+			throw new http_exception(403, 'SFS_MISSING_DATA');
 		}
 
 		// postid must be greater than 0
@@ -139,6 +139,12 @@ class report_pm_to_sfs
 		$userip = $row['author_ip'];
 		$useremail = $row['user_email'];
 		$sfs_reported = (int) $row['sfs_reported'];
+
+		// ensure the IP is something other than 127.0.0.1 which can happen if the anonymised extension is installed
+		if (filter_var($userip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RANGE) === false)
+		{
+			throw new http_exception(403, 'SFS_ANONYMIZED_IP');
+		}
 
 		if ($sfs_reported)
 		{
@@ -243,7 +249,7 @@ class report_pm_to_sfs
 		$report_data = $this->db->sql_fetchrow($result);
 		$this->db->sql_freeresult($result);
 
-		if (!$report_data)
+		if (!$report_data && $this->request->is_ajax())
 		{
 			$data = [
 				'MESSAGE_TITLE'	=> $this->user->lang('ERROR'),
@@ -251,6 +257,15 @@ class report_pm_to_sfs
 				'success'	=> false,
 			];
 			return new JsonResponse($data);
+		}
+		else (!$report_data)
+		{
+			$this->template->assign_vars([
+				'MESSAGE_TITLE'	=> $this->language->lang('ERROR'),
+				'MESSAGE_TEXT'	=> $this->language->lang('PM_NOT_EXIST'),
+			]);
+
+			return $this->helper->render('message_body.html');
 		}
 
 		// if the pm isn't reported, then report it
