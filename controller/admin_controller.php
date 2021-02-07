@@ -152,7 +152,7 @@ class admin_controller implements admin_interface
 
 		switch ($action)
 		{
-			case 'clr_reports':
+			case 'sfsclrreports':
 				//if none have been reported there's nothing to do
 				if (empty($sfs_posts_pms_count))
 				{
@@ -161,7 +161,7 @@ class admin_controller implements admin_interface
 
 				if (confirm_box(true))
 				{
-					$this->clr_reports();
+					$this->sfsclrreports();
 				}
 				else
 				{
@@ -233,7 +233,7 @@ class admin_controller implements admin_interface
 			'PMS_REPORTED'	=> (int) $pms_reported,
 
 			'U_BUILD_CACHE'	=> $this->u_action . '&amp;action=build_adminsmods',
-			'U_CLR_REPORTS'	=> $this->u_action . '&amp;action=clr_reports',
+			'U_CLR_REPORTS'	=> $this->u_action . '&amp;action=sfsclrreports',
 			'U_ACTION'		=> $this->u_action,
 		]);
 	}
@@ -310,7 +310,7 @@ class admin_controller implements admin_interface
 	 * @return json response
 	 * @access protected
 	 */
-	protected function clr_reports()
+	protected function sfsclrreports()
 	{
 		$sql = 'UPDATE ' . POSTS_TABLE . ' SET sfs_reported = 0
 			WHERE sfs_reported = 1';
@@ -325,13 +325,11 @@ class admin_controller implements admin_interface
 		$data = [
 			'MESSAGE_TITLE'	=> $this->language->lang('SUCCESS'),
 			'MESSAGE_TEXT'	=> $this->language->lang('SFS_REPORTED_CLEARED'),
-			'REFRESH_DATA'	=> [
-				'url'	=> '',
-				'time'	=> 3,
-			],
+			'success'	=> true,
 		];
 
-		$this->send_json_response($data);
+		$json_response = new json_response;
+		$json_response->send($data);
 	}
 
 	/**
@@ -354,25 +352,12 @@ class admin_controller implements admin_interface
 		$data = [
 			'MESSAGE_TITLE'	=> $this->language->lang('SUCCESS'),
 			'MESSAGE_TEXT'	=> $this->language->lang('LOG_ADMINSMODS_CACHE_BUILT'),
+			'success'	=> true,
 		];
 
-		$this->send_json_response($data);
+		$json_response = new json_response;
+		$json_response->send($data);
 
-	}
-
-	/**
-	 * Send a JSON response
-	 *
-	 * @param array $data The data of the JSON response (true|false)
-	 * @access protected
-	 */
-	protected function send_json_response($data)
-	{
-		if ($this->request->is_ajax())
-		{
-			$json_response = new json_response;
-			$json_response->send($data);
-		}
 	}
 
 	/**

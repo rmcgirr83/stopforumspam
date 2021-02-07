@@ -97,9 +97,9 @@
 </fieldset>
 <fieldset>
 		{% if SFS_POSTS_PMS_COUNT %}
-		<dl>
+		<dl id="sfsreportcount">
 			<dt><label>{{ lang('SFS_CLEAR') }}</label><br /><span>{{ lang('SFS_CLEAR_EXPLAIN', POSTS_REPORTED, PMS_REPORTED) }}</span></dt>
-			<dd><a class="button1" style="padding: 0px 8px;" href="{{ U_CLR_REPORTS }}" data-ajax="true" data-refresh="true">{{ lang('RUN') }}</a></dd>
+			<dd><a class="button1" style="padding: 0px 8px;" href="{{ U_CLR_REPORTS }}" data-ajax="sfsclrreports">{{ lang('RUN') }}</a></dd>
 		</dl>
 		{% endif %}
 		<dl>
