@@ -68,6 +68,12 @@ class reporttosfs
 	/** @var ContainerInterface */
 	protected $container;
 
+	/** @var string root_path */
+	protected $root_path;
+
+	/** @var string php_ext */
+	protected $php_ext;
+
 	public function __construct(
 			auth $auth,
 			config $config,
@@ -80,7 +86,9 @@ class reporttosfs
 			user $user,
 			sfsgroups $sfsgroups,
 			sfsapi $sfsapi,
-			ContainerInterface $container)
+			ContainerInterface $container,
+			string $root_path,
+			string $php_ext)
 	{
 		$this->auth = $auth;
 		$this->config = $config;
@@ -94,6 +102,8 @@ class reporttosfs
 		$this->sfsgroups = $sfsgroups;
 		$this->sfsapi = $sfsapi;
 		$this->container = $container;
+		$this->root_path = $root_path;
+		$this->php_ext = $php_ext;
 	}
 
 	/*
@@ -166,7 +176,9 @@ class reporttosfs
 		// fix confirm box non-ajax error (controller must return)
 		if ($this->request->is_set_post('cancel') && !$this->request->is_ajax())
 		{
-			return $this->helper->message('SFS_OPERATION_CANCELED');
+			$message = $this->language->lang('SFS_OPERATION_CANCELED') . '<br><br>' . $this->language->lang('RETURN_TOPIC', '<a href="' . append_sid("{$this->root_path}viewtopic.$this->php_ext?t=" . $topicid) . '">', '</a>');
+
+			return $this->helper->message($message);
 		}
 
 		if (confirm_box(true))
