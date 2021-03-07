@@ -169,15 +169,15 @@ class main_listener implements EventSubscriberInterface
 
 			if ($check)
 			{
-				if ($this->config['sfs_down'] && is_string($check))
+				if ($this->config['sfs_down'] && $check === 'sfs_down')
 				{
 					return;
 				}
 				$error_array[] = $this->show_message($check);
 				// now ban the spammer by IP
-				if (!is_string($check))
+				if (is_int($check) && $this->config['sfs_ban_ip'])
 				{
-					$this->sfsapi->sfs_ban('ip', $this->user->ip);
+					$this->sfsapi->sfs_ban('ip', $this->user->ip, (int) $check);
 				}
 			}
 		}
@@ -275,7 +275,7 @@ class main_listener implements EventSubscriberInterface
 					// now ban the spammer by IP
 					if (!is_string($check))
 					{
-						$this->sfsapi->sfs_ban('ip', $this->user->ip);
+						$this->sfsapi->sfs_ban('ip', $this->user->ip, $check);
 					}
 				}
 			}
@@ -293,6 +293,7 @@ class main_listener implements EventSubscriberInterface
 	{
 		// can't determine group id by default so always run this when updating groups
 		// apparently no way to get around this
+		$this->cache->destroy('_sfs_adminsmods');
 		$this->sfsgroups->build_adminsmods_cache();
 	}
 
@@ -483,7 +484,7 @@ class main_listener implements EventSubscriberInterface
 				$ip_freq = 0;
 			}
 			// Return the total score
-			$spam_score = ($username_freq + $email_freq + $ip_freq);
+			$spam_score = (int) ($username_freq + $email_freq + $ip_freq);
 
 			// If we've got a spammer we'll take away their soup!
 			if ($spam_score >= $sfs_threshold)
@@ -493,7 +494,7 @@ class main_listener implements EventSubscriberInterface
 					$this->log_message('user', $username, $ip, 'LOG_SFS_MESSAGE', $email, $username_freq, $ip_freq, $email_freq);
 				}
 				//user is a spammer
-				return true;
+				return $spam_score;
 			}
 			else
 			{
@@ -530,20 +531,16 @@ class main_listener implements EventSubscriberInterface
 	private function log_message($mode, $username, $ip, $message, $email, $username_score = 0, $ip_score = 0, $email_score = 0)
 	{
 
+		$sfs_ip = $this->language->lang('SFS_IP_STOPPED', $ip);
+		$sfs_username = $this->language->lang('SFS_USERNAME_STOPPED', $username);
+		$sfs_email = $this->language->lang('SFS_EMAIL_STOPPED', $email);
+
 		if ($mode === 'admin')
 		{
-			$sfs_ip = $this->language->lang('SFS_IP_STOPPED', $ip);
-			$sfs_username_ = $this->language->lang('SFS_USERNAME_STOPPED', $username);
-			$sfs_email = $this->language->lang('SFS_EMAIL_STOPPED', $email);
-
 			$this->log->add('admin', $this->user->data['user_id'], $ip, $message, false, [$sfs_username, $sfs_ip, $sfs_email]);
 		}
 		else
 		{
-			$sfs_ip = $this->language->lang('SFS_IP_STOPPED_SCORE', $ip);
-			$sfs_username = $this->language->lang('SFS_USERNAME_STOPPED_SCORE', $username);
-			$sfs_email = $this->language->lang('SFS_EMAIL_STOPPED_SCORE', $email);
-
 			if ($this->config['sfs_by_name'] == false)
 			{
 				$username_score = $this->language->lang('SFS_NOT_CHECKED');
