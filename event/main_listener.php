@@ -30,6 +30,11 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 */
 class main_listener implements EventSubscriberInterface
 {
+	/**
+	 * Target user data
+	 */
+	private $data = array();
+
 	/** @var auth */
 	protected $auth;
 
@@ -148,7 +153,12 @@ class main_listener implements EventSubscriberInterface
 	{
 		if ($this->config['allow_sfs'] == false)
 		{
-			return;
+			return false;
+		}
+
+		if ($this->user->page_name == 'app.' . $this->php_ext . '/contactadmin' && !$this->config['sfs_contactadmin'])
+		{
+			return false;
 		}
 
 		$error_array = $event['error'];

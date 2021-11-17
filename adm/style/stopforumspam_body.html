@@ -88,6 +88,11 @@
 			<dd><input type="radio" class="radio" name="sfs_notify" value="1" {% if SFS_NOTIFY %}id="sfs_notify" checked="checked"{% endif %}/> {{ lang('YES') }} &nbsp;
 				<input type="radio" class="radio" name="sfs_notify" value="0" {% if not SFS_NOTIFY %}id="sfs_notify" checked="checked"{% endif %} /> {{ lang('NO') }}</dd>
 		</dl>
+		<dl>
+			<dt><label for="sfs_contactadmin">{{ lang('SFS_CONTACTADMIN_EXT') }}{{ lang('COLON') }}</label><br />{{ lang('SFS_CONTACTADMIN_EXT_EXPLAIN') }}</dt>
+			<dd><input type="radio" class="radio" name="sfs_contactadmin" value="1" {% if SFS_CONTACTADMIN %}id="sfs_contactadmin" checked="checked"{% endif %}/> {{ lang('YES') }} &nbsp;
+				<input type="radio" class="radio" name="sfs_contactadmin" value="0" {% if not SFS_CONTACTADMIN %}id="sfs_contactadmin" checked="checked"{% endif %} /> {{ lang('NO') }}</dd>
+		</dl>
 		<p class="submit-buttons">
 			<input class="button1" type="submit" id="submit" name="submit" value="{{ lang('SUBMIT') }}" />&nbsp;
 			<input class="button2" type="reset" id="reset" name="reset" value="{{ lang('RESET') }}" />
