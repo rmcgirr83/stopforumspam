@@ -156,7 +156,7 @@ class main_listener implements EventSubscriberInterface
 			return false;
 		}
 
-		if ($this->user->page_name == 'app.' . $this->php_ext . '/contactadmin' && !$this->config['sfs_contactadmin'])
+		if ($this->user->page['page_name'] == 'app.' . $this->php_ext . '/contactadmin' && !$this->config['sfs_contactadmin'])
 		{
 			return false;
 		}
