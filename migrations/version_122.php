@@ -4,7 +4,7 @@
 * Stop forum Spam extension for the phpBB Forum Software package.
 *
 * @copyright (c) Stop Forum Spam
-* @author 2017 Rich McGirr (RMcGirr83)
+* @author 2022 Rich McGirr (RMcGirr83)
 * @license GNU General Public License, version 2 (GPL-2.0)
 *
 */
@@ -25,7 +25,8 @@ class version_122 extends \phpbb\db\migration\migration
 	public function update_data()
 	{
 		return [
-			['config.add', ['sfs_contactadmin', 0]],
+			['config.add', ['sfs_contactadmin', 1]],
+			['config.update', ['sfs_log_message', 1]],
 		];
 	}
 }

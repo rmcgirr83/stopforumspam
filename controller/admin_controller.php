@@ -19,6 +19,7 @@ use phpbb\request\request;
 use phpbb\template\template;
 use phpbb\user;
 use rmcgirr83\stopforumspam\core\sfsgroups as sfsgroups;
+use rmcgirr83\contactadmin\controller\main_controller as contactadmin;
 
 /**
 * Admin controller
@@ -59,6 +60,9 @@ class admin_controller implements admin_interface
 	/** @var string phpEx */
 	protected $php_ext;
 
+	/* @var contactadmin $contactadmin */
+	protected $contactadmin;
+
 	/** @var string Custom form action */
 	protected $u_action;
 
@@ -76,6 +80,7 @@ class admin_controller implements admin_interface
 	* @param sfsgroups				$sfsgroups			functions for the controller
 	* @param string                 $root_path      	phpBB root path
 	* @param string                 $php_ext        	phpEx
+	* @param contactadmin			$contactadmin		Contactadmin extension
 	*
 	* @return \rmcgirr83\stopforumspam\controller\admin_controller
 	* @access public
@@ -91,7 +96,8 @@ class admin_controller implements admin_interface
 			user $user,
 			sfsgroups $sfsgroups,
 			$root_path,
-			$php_ext
+			$php_ext,
+			contactadmin $contactadmin = null
 	)
 	{
 		$this->cache = $cache;
@@ -105,6 +111,7 @@ class admin_controller implements admin_interface
 		$this->sfsgroups = $sfsgroups;
 		$this->root_path = $root_path;
 		$this->php_ext = $php_ext;
+		$this->contactadmin = $contactadmin;
 	}
 
 	/**
@@ -232,6 +239,7 @@ class admin_controller implements admin_interface
 			'NOTICE'	=> $cache_built,
 			'POSTS_REPORTED' => (int) $posts_reported,
 			'PMS_REPORTED'	=> (int) $pms_reported,
+			'S_CONTACTADMIN' => ($this->contactadmin) ? true : false,
 
 			'U_BUILD_CACHE'	=> $this->u_action . '&amp;action=build_adminsmods',
 			'U_CLR_REPORTS'	=> $this->u_action . '&amp;action=sfsclrreports',

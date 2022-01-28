@@ -30,11 +30,6 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 */
 class main_listener implements EventSubscriberInterface
 {
-	/**
-	 * Target user data
-	 */
-	private $data = array();
-
 	/** @var auth */
 	protected $auth;
 
