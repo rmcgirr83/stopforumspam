@@ -112,12 +112,14 @@ class sfsapi
 		]);
 
 		$contents = curl_exec($ch);
+		$curl_error = curl_error($ch);
 		$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 		curl_close($ch);
 
 		// if nothing is returned (SFS is down)
 		if ($httpcode != 200)
 		{
+			$this->error_message = $curl_error;
 			return false;
 		}
 
@@ -127,6 +129,17 @@ class sfsapi
 		}
 
 		return $contents;
+	}
+
+/*
+	* sfsapi
+	* @param 	$response		object containing the error message response to be retrieved
+	* @return 	string			return either a string on success or false on failure
+	*/
+
+	public function sfs_get_curl_error($response)
+	{
+		return $this->error_message;
 	}
 
 	/*

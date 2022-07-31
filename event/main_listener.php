@@ -464,6 +464,9 @@ class main_listener implements EventSubscriberInterface
 
 		// Query the SFS database and pull the data into script
 		$json = $this->sfsapi->sfsapi('query', $username, $ip, $email);
+		if (!$json) {
+			$curl_error = $this->sfsapi->sfs_get_curl_error($json);
+		}
 		$json_decode = json_decode($json, true);
 
 		// Check if user is a spammer, but only if we successfully got the SFS data
@@ -510,13 +513,18 @@ class main_listener implements EventSubscriberInterface
 		{
 			if ($sfs_log_message)
 			{
-				if ($this->config['sfs_down'])
-				{
-					$this->log_message('admin', $username, $ip, 'LOG_SFS_DOWN_USER_ALLOWED', $email);
+				if (!$curl_error) {
+					if ($this->config['sfs_down'])
+					{
+						$this->log_message('admin', $username, $ip, 'LOG_SFS_DOWN_USER_ALLOWED', $email);
+					}
+					else
+					{
+						$this->log_message('admin', $username, $ip, 'LOG_SFS_DOWN', $email);
+					}
 				}
-				else
-				{
-					$this->log_message('admin', $username, $ip, 'LOG_SFS_DOWN', $email);
+				else {
+					$this->log_message('admin', $username, $ip, 'Stop Forum Spam was unreachable during a registration or a forum post. <br> <b>CURL Error</b>: ' . $curl_error, $email);
 				}
 			}
 			return 'sfs_down';
