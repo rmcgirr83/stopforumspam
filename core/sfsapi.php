@@ -117,7 +117,7 @@ class sfsapi
 		if ($contents === false)
 		{
 			$contents = curl_error($ch);
-		}		
+		}
 		curl_close($ch);
 
 		if (is_string($contents) && $type != 'add')
