@@ -278,9 +278,9 @@ class main_listener implements EventSubscriberInterface
 					$error_array[] = $this->show_message($check);
 
 					// now ban the spammer by IP
-					if (!is_string($check))
+					if (is_int($check))
 					{
-						$this->sfsapi->sfs_ban('ip', $this->user->ip, $check);
+						$this->sfsapi->sfs_ban('ip', $this->user->ip, (int) $check);
 					}
 				}
 			}
@@ -464,6 +464,14 @@ class main_listener implements EventSubscriberInterface
 
 		// Query the SFS database and pull the data into script
 		$json = $this->sfsapi->sfsapi('query', $username, $ip, $email);
+
+		// the api should return a bool, if a string there is a curl setup error that was returned so we'll log the error in the ACP
+		if (is_string($json))
+		{
+			$this->log->add('admin', $this->user->data['user_id'], $ip, 'LOG_SFS_CURL_ERROR', false, [$json]);
+			return 'sfs_down';
+		}
+
 		$json_decode = json_decode($json, true);
 
 		// Check if user is a spammer, but only if we successfully got the SFS data
