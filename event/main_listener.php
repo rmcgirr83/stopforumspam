@@ -465,17 +465,17 @@ class main_listener implements EventSubscriberInterface
 		// Query the SFS database and pull the data into script
 		$json = $this->sfsapi->sfsapi('query', $username, $ip, $email);
 
-		// the api should return a bool, if a string there is a curl setup error that was returned so we'll log the error in the ACP
-		if (is_string($json))
+		$json_decode = json_decode($json, true);
+
+		// If there is a curl error as set in sfs_api, log the error
+		if (isset($json_decode['curl_error']))
 		{
-			$this->log->add('admin', $this->user->data['user_id'], $ip, 'LOG_SFS_CURL_ERROR', false, [$json]);
+			$this->log->add('admin', $this->user->data['user_id'], $ip, 'LOG_SFS_CURL_ERROR', false, [$json_decode['curl_error']]);
 			return 'sfs_down';
 		}
 
-		$json_decode = json_decode($json, true);
-
 		// Check if user is a spammer, but only if we successfully got the SFS data
-		if ($json_decode['success'])
+		if (isset($json_decode['success']))
 		{
 			$username_freq = (int) $json_decode['username']['frequency'];
 			$email_freq = (int) $json_decode['email']['frequency'];

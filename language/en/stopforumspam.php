@@ -55,7 +55,7 @@ $lang = array_merge($lang, [
 	'SFS_EMAIL_STOPPED'	=> '<a target="_blank" title="Check Email at StopForumSpam.com (opens in a new window)" href="http://www.stopforumspam.com/search/?q=%1$s" rel="noreferrer noopener">%1$s</a>',
 	'SFS_ERROR_MESSAGE'	=> 'Unfortunately we can’t process your request now due to problems with an external party. You can try again later.',
 	'SFS_BANNED'	=> [
-		1 => 'Found in the Stop Forum Spam database %d time',
+		1 => 'Found in the Stop Forum Spam database once',
 		2 => 'Found in the Stop Forum Spam database %d times',
 	],
 	'SFS_USER_BANNED'	=> 'Banned due to a post on the forum',

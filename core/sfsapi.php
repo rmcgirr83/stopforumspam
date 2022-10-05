@@ -109,21 +109,24 @@ class sfsapi
 			CURLOPT_RETURNTRANSFER => true,
 			CURLOPT_TIMEOUT => 5,
 			CURLOPT_CONNECTTIMEOUT => 5,
+			CURLOPT_FAILONERROR => true, //Required for HTTP error codes to be reported via our call to curl_error($ch)//
 		]);
 
 		$contents = curl_exec($ch);
 		$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
 		// if curl isn't set correctly on server
-		if ($contents === false)
+		if (curl_exec($ch) === false)
 		{
-			$contents = curl_error($ch);
+			$error_message = array('curl_error' => curl_error($ch));
 		}
 		curl_close($ch);
 
-		if (is_string($contents) && $type != 'add')
+		if (isset($error_message))
 		{
-			return $contents;
+			return json_encode($error_message);
 		}
+
 		// if nothing is returned (SFS is down)
 		if ($httpcode != 200)
 		{
@@ -132,9 +135,10 @@ class sfsapi
 
 		if ($type == 'add' && $httpcode == 200)
 		{
-			$contents = true;
+			return true;
 		}
 
+		// We made it this far, returns the results of the curl request
 		return $contents;
 	}
 
