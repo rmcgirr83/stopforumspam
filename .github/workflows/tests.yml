@@ -21,11 +21,11 @@ on:
 jobs:
     # START Basic Checks Job (EPV, code sniffer, images check, etc.)
     basic-checks:
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-22.04
         strategy:
             matrix:
                 include:
-                    - php: '7.1'
+                    - php: '7.4'
                       db: "none"
                       NOTESTS: 1
 
@@ -33,14 +33,14 @@ jobs:
 
         steps:
             - name: Checkout phpBB
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
               with:
                   repository: phpbb/phpbb
                   ref: ${{ env.PHPBB_BRANCH }}
                   path: phpBB3
 
             - name: Checkout extension
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
               with:
                   path: phpBB3/phpBB/ext/${{ env.EXTNAME }}
 
