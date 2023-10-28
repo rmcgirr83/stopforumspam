@@ -219,6 +219,8 @@ class main_listener implements EventSubscriberInterface
 	{
 		$event['post_data'] = array_merge($event['post_data'], [
 			'email'	=> strtolower($this->request->variable('email', '')),
+			'username' => strtolower($this->request->variable('username', '')),
+			'user_ip' => $this->user->ip
 		]);
 	}
 
