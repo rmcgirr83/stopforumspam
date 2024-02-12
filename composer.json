@@ -3,8 +3,8 @@
     "type": "phpbb-extension",
     "description": "Queries the stop forum spam database on registration and posting.  Extension settings are found under the extension tab of the forum. This extension requires at least phpBB version 3.3.",
     "homepage": "https://github.com/rmcgirr83/stopforumspam",
-    "version": "1.4.4",
-    "time": "2023-10-27",
+    "version": "1.4.5",
+    "time": "2024-02-11",
 	"license": "GPL-2.0-only",
 	"authors": [
 		{
@@ -14,7 +14,7 @@
 		}
 	],
     "require": {
-        "php": ">=7.1",
+        "php": ">=7.4",
         "phpbb/phpbb": ">=3.3",
         "composer/installers": "~1.0"
     },

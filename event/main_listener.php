@@ -472,7 +472,6 @@ class main_listener implements EventSubscriberInterface
 		// If there is a curl error as set in sfs_api, log the error
 		if (isset($json_decode['curl_error']))
 		{
-			$this->log->add('admin', $this->user->data['user_id'], $ip, 'LOG_SFS_CURL_ERROR', false, [$json_decode['curl_error']]);
 			return 'sfs_down';
 		}
 

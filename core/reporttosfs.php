@@ -185,14 +185,35 @@ class reporttosfs
 		{
 			$response = $this->sfsapi->sfsapi('add', $username, $userip, $useremail, $this->config['sfs_api_key']);
 
-			if (!$response && $this->request->is_ajax())
+			$json_decode = json_decode($response, true);
+			// ajax stuffs
+			if (isset($json_decode['curl_error']) && $this->request->is_ajax())
 			{
 				$data = [
-					'MESSAGE_TITLE'	=> $this->language->lang('ERROR'),
+					'MESSAGE_TITLE'	=> $this->language->lang('AJAX_ERROR_TITLE'),
+					'MESSAGE_TEXT'	=> $json_decode['curl_error'],
+					'success'	=> false,
+				];
+				return new JsonResponse($data);
+			}
+			else if (!$response && $this->request->is_ajax())
+			{
+				$data = [
+					'MESSAGE_TITLE'	=> $this->language->lang('AJAX_ERROR_TITLE'),
 					'MESSAGE_TEXT'	=> $this->language->lang('SFS_ERROR_MESSAGE'),
 					'success'	=> false,
 				];
 				return new JsonResponse($data);
+			}
+			//non-ajax stuffs
+			else if (isset($json_decode['curl_error']))
+			{
+				$this->template->assign_vars([
+					'MESSAGE_TITLE' => $this->language->lang('ERROR'),
+					'MESSAGE_TEXT'	=> $json_decode['curl_error']
+				]);
+
+				return $this->helper->render('message_body.html');
 			}
 			else if (!$response)
 			{

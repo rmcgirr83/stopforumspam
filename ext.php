@@ -28,14 +28,31 @@ class ext extends \phpbb\extension\base
 	public function is_enableable()
 	{
 		$config = $this->container->get('config');
+		$language = $this->container->get('language');
 
 		$enableable = (phpbb_version_compare($config['version'], self::PHPBB_MIN_VERSION, '>='));
 		if (!$enableable)
 		{
-			$language = $this->container->get('language');
 			$language->add_lang('stopforumspam', 'rmcgirr83/stopforumspam');
 
 			trigger_error($language->lang('EXTENSION_REQUIREMENTS', self::PHPBB_MIN_VERSION), E_USER_WARNING);
+		}
+
+		// check for curl being installed
+		$curl_has_ssl = false;
+		$curl_installed = extension_loaded('curl');
+		if ($curl_installed)
+		{
+			$curl_version = curl_version();
+			$curl_has_ssl = $curl_version['features'] & CURL_VERSION_SSL;
+		}
+
+		$enableable = ($curl_installed && $curl_has_ssl) ? true : false;
+		if (!$enableable)
+		{
+			$language->add_lang('stopforumspam', 'rmcgirr83/stopforumspam');
+
+			trigger_error($language->lang('CURL_REQUIREMENTS'), E_USER_WARNING);
 		}
 
 		return $enableable;

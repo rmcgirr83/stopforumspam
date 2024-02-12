@@ -116,9 +116,11 @@ class sfsapi
 		$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
 		// if curl isn't set correctly on server
-		if (curl_exec($ch) === false)
+		if ($contents === false)
 		{
 			$error_message = array('curl_error' => curl_error($ch));
+			// If there is a curl error, log the error
+			$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_CURL_ERROR', false, [$error_message['curl_error']]);
 		}
 		curl_close($ch);
 

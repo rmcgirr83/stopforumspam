@@ -69,6 +69,7 @@ $lang = array_merge($lang, [
 	'SFS_PM_REPORT_NOT_ALLOWED'	=> 'Reporting is not allowed',
 	'SFS_NEED_CURL'	=> 'The extension requires cURL which doesn’t seem to be installed',
 	'EXTENSION_REQUIREMENTS' => 'Extension requires at least phpBB version %1$s. You need to update your version of phpBB to utilize this extension.',
+	'CURL_REQUIREMENTS'	=> 'Extension requires cURL be installed and compiled with a valid ssl certificate on this server',
 	'INVALID_IP_ADDRESS'	=> 'Invalid IP address',
 	'SFS_CONFIRM'	=> 'Report to stop forum database?',
 	'SFS_SUCCESS'	=> 'Stop forum spam successful',
