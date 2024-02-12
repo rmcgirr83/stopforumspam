@@ -470,7 +470,7 @@ class main_listener implements EventSubscriberInterface
 		$json_decode = json_decode($json, true);
 
 		// If there is a curl error as set in sfs_api, log the error
-		if (isset($json_decode['curl_error']))
+		if (isset($json_decode[$this->language->lang('CURL_ERROR')]))
 		{
 			return 'sfs_down';
 		}

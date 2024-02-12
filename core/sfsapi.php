@@ -118,9 +118,9 @@ class sfsapi
 		// if curl isn't set correctly on server
 		if ($contents === false)
 		{
-			$error_message = array('curl_error' => curl_error($ch));
+			$error_message = array($this->language->lang('CURL_ERROR') => curl_error($ch));
 			// If there is a curl error, log the error
-			$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_CURL_ERROR', false, [$error_message['curl_error']]);
+			$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_CURL_ERROR', false, [$error_message[$this->language->lang('CURL_ERROR')]]);
 		}
 		curl_close($ch);
 

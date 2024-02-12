@@ -187,11 +187,11 @@ class reporttosfs
 
 			$json_decode = json_decode($response, true);
 			// ajax stuffs
-			if (isset($json_decode['curl_error']) && $this->request->is_ajax())
+			if (isset($json_decode[$this->language->lang('CURL_ERROR')]) && $this->request->is_ajax())
 			{
 				$data = [
 					'MESSAGE_TITLE'	=> $this->language->lang('AJAX_ERROR_TITLE'),
-					'MESSAGE_TEXT'	=> $json_decode['curl_error'],
+					'MESSAGE_TEXT'	=> $json_decode[$this->language->lang('CURL_ERROR')],
 					'success'	=> false,
 				];
 				return new JsonResponse($data);
@@ -206,11 +206,11 @@ class reporttosfs
 				return new JsonResponse($data);
 			}
 			//non-ajax stuffs
-			else if (isset($json_decode['curl_error']))
+			else if (isset($json_decode[$this->language->lang('CURL_ERROR')]))
 			{
 				$this->template->assign_vars([
 					'MESSAGE_TITLE' => $this->language->lang('ERROR'),
-					'MESSAGE_TEXT'	=> $json_decode['curl_error']
+					'MESSAGE_TEXT'	=> $json_decode[$this->language->lang('CURL_ERROR')]
 				]);
 
 				return $this->helper->render('message_body.html');
