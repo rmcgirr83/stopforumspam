@@ -121,6 +121,8 @@ class main_listener implements EventSubscriberInterface
 			'core.ucp_pm_view_message'				=> 'ucp_pm_view_message',
 			// Custom events for integration with Contact Admin Extension
 			'rmcgirr83.contactadmin.modify_data_and_error'	=> 'user_sfs_validate_registration',
+			// phpBB default contact us page
+			'core.message_admin_form_submit_before'	=> 'message_admin_form_submit_before',
 		];
 	}
 
@@ -418,6 +420,53 @@ class main_listener implements EventSubscriberInterface
 				]);
 			}
 		}
+	}
+
+	/*
+	* message_admin_form_submit_before
+	*
+	* @param	$event	the event object
+	* @return 	null
+	* @access	public
+	*/
+	public function message_admin_form_submit_before($event)
+	{
+		if ($this->config['allow_sfs'] == false)
+		{
+			return false;
+		}
+
+		$errors = $event['errors'];
+
+		// validate the user ip
+		$userip_error = $this->validate_ip($this->user->ip);
+		if ($userip_error)
+		{
+			$errors[] = $userip_error;
+		}
+
+		/* On registration and only when all errors have cleared
+		 * do not want the admin message area to fill up
+		*/
+		if (!sizeof($errors))
+		{
+			$check = $this->stopforumspam_check($this->request->variable('name', '', true), $this->user->ip, $this->request->variable('email', ''));
+
+			if ($check)
+			{
+				if ($this->config['sfs_down'] && $check === 'sfs_down')
+				{
+					return;
+				}
+				$errors[] = $this->show_message($check);
+				// now ban the spammer by IP
+				if (is_int($check) && $this->config['sfs_ban_ip'])
+				{
+					$this->sfsapi->sfs_ban('ip', $this->user->ip, (int) $check);
+				}
+			}
+		}
+		$event['errors'] = $errors;
 	}
 
 	/*

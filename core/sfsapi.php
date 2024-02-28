@@ -63,7 +63,7 @@ class sfsapi
 	* @param	$apikey			the api key of the forum
 	* @return 	bool|string		return true on success or false on failure or string on curl error
 	*/
-	public function sfsapi($type, $username, $userip, $useremail, $apikey = '')
+	public function sfsapi($type, $username, $userip, $useremail, $evidence = '', $apikey = '')
 	{
 		// We'll use curl..most servers have it installed as default
 		if (!function_exists('curl_init'))
@@ -83,6 +83,7 @@ class sfsapi
 				'username' => $username,
 				'ip' => $userip,
 				'email' => $useremail,
+				'evidence' => $evidence,
 				'api_key' => $apikey
 			];
 
