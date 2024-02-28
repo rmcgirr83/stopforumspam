@@ -153,7 +153,7 @@ class reporttosfs
 		$forumid = (int) $row['forum_id'];
 		$topicid = (int) $row['topic_id'];
 		$parse_flags = ($row['bbcode_bitfield'] ? OPTION_FLAG_BBCODE : 0);
-		$parse_flags |= ($row['enable_smilies'] ? OPTION_FLAG_SMILIES : 0);		
+		$parse_flags |= ($row['enable_smilies'] ? OPTION_FLAG_SMILIES : 0);
 		$evidence = generate_text_for_display($row['post_text'], $row['bbcode_uid'], $row['bbcode_bitfield'], $parse_flags, true);
 		$sfs_reported = (int) $row['sfs_reported'];
 
