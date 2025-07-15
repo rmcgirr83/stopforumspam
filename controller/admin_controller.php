@@ -367,7 +367,6 @@ class admin_controller implements admin_interface
 
 		$json_response = new json_response;
 		$json_response->send($data);
-
 	}
 
 	/**
