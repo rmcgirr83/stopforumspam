@@ -74,4 +74,5 @@ $lang = array_merge($lang, [
 	'SFS_SUCCESS'	=> 'Stop forum spam successful',
 	'SFS_OPERATION_CANCELED' => 'Operation canceled',
 	'SFS_NOT_CHECKED' => ' » <em>Parameter wasn’t checked per settings in extension</em>',
+	'LOG_SFS_FAKE_REDIRECT_SPAMMER' => '<strong>Spammer redirected to fake success page</strong><br>» Username: %1$s<br>» IP: %2$s<br>» Email: %3$s',
 ]);

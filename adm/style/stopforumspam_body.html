@@ -70,6 +70,11 @@
 				<input type="radio" class="radio" name="sfs_log_message" value="0" {% if not SFS_LOG_MESSAGE %}id="sfs_log_message" checked="checked"{% endif %} /> {{ lang('NO') }}</dd>
 		</dl>
 		<dl>
+			<dt><label for="sfs_fake_redirect_spammers">{{ lang('SFS_FAKE_REDIRECT_SPAMMERS') }}{{ lang('COLON') }}</label><br>{{ lang('SFS_FAKE_REDIRECT_SPAMMERS_EXPLAIN') }}</dt>
+			<dd><input type="radio" class="radio" name="sfs_fake_redirect_spammers" value="1" {% if SFS_FAKE_REDIRECT_SPAMMERS %}id="sfs_fake_redirect_spammers" checked="checked"{% endif %}/> {{ lang('YES') }} &nbsp;
+				<input type="radio" class="radio" name="sfs_fake_redirect_spammers" value="0" {% if not SFS_FAKE_REDIRECT_SPAMMERS %}id="sfs_fake_redirect_spammers" checked="checked"{% endif %} /> {{ lang('NO') }}</dd>
+		</dl>
+		<dl>
 			<dt><label for="sfs_down">{{ lang('SFS_DOWN') }}{{ lang('COLON') }}</label><br>{{ lang('SFS_DOWN_EXPLAIN') }}</dt>
 			<dd><input type="radio" class="radio" name="sfs_down" value="1" {% if SFS_DOWN %}id="sfs_down" checked="checked"{% endif %}/> {{ lang('YES') }} &nbsp;
 				<input type="radio" class="radio" name="sfs_down" value="0" {% if not SFS_DOWN %}id="sfs_down" checked="checked"{% endif %} /> {{ lang('NO') }}</dd>

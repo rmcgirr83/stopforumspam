@@ -234,6 +234,7 @@ class admin_controller implements admin_interface
 			'SFS_REPORT_PM'	=> ($this->config['sfs_report_pm']) ? true : false,
 			'SFS_BAN_TIME'	=> $this->display_ban_time($this->config['sfs_ban_time']),
 			'SFS_NOTIFY'	=> ($this->config['sfs_notify']) ? true : false,
+			'SFS_FAKE_REDIRECT_SPAMMERS'	=> ($this->config['sfs_fake_redirect_spammers']) ? true : false,
 			'SFS_POSTS_PMS_COUNT'	=> $sfs_posts_pms_count,
 			'SFS_CONTACTADMIN'	=> ($this->config['sfs_contactadmin']) ? true : false,
 			'NOTICE'	=> $cache_built,
@@ -269,6 +270,7 @@ class admin_controller implements admin_interface
 		$this->config->set('sfs_notify', $this->request->variable('sfs_notify', 0));
 		$this->config->set('sfs_report_pm', $this->request->variable('sfs_report_pm', 0));
 		$this->config->set('sfs_contactadmin', $this->request->variable('sfs_contactadmin', 0));
+		$this->config->set('sfs_fake_redirect_spammers', $this->request->variable('sfs_fake_redirect_spammers', 0));
 	}
 
 	/**

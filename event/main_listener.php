@@ -180,18 +180,60 @@ class main_listener implements EventSubscriberInterface
 				{
 					return;
 				}
-				$error_array[] = $this->show_message($check);
+
 				// now ban the spammer by IP
 				if (is_int($check) && $this->config['sfs_ban_ip'])
 				{
 					$this->sfsapi->sfs_ban('ip', $this->user->ip, (int) $check);
+				}
+
+				// Option to redirect spammers to fake success page instead of showing errors
+				if (!empty($this->config['sfs_fake_redirect_spammers']))
+				{
+					// Log the blocked attempt
+					if (!empty($this->config['sfs_log_message']))
+					{
+						$this->log->add('user', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_FAKE_REDIRECT_SPAMMER', false, ['reportee_id' => $this->user->data['user_id'],$event['data']['username'], $this->user->ip, $event['data']['email']]);
+					}
+
+					// Redirect to make them think registration succeeded
+					$this->trigger_fake_redirect();
+				}
+				else
+				{
+					// Normal behavior: show error message
+					$error_array[] = $this->show_message($check);
 				}
 			}
 		}
 		$event['error'] = $error_array;
 	}
 
-	/*
+	public function trigger_fake_redirect()
+	{
+
+		// Build the success message based on your board's activation settings
+		if ($this->config['require_activation'] == USER_ACTIVATION_SELF && $this->config['email_enable'])
+		{
+			$message = $this->language->lang('ACCOUNT_INACTIVE');
+		}
+		else if ($this->config['require_activation'] == USER_ACTIVATION_ADMIN && $this->config['email_enable'])
+		{
+			$message = $this->language->lang('ACCOUNT_INACTIVE_ADMIN');
+		}
+		else
+		{
+			$message = $this->language->lang('ACCOUNT_ADDED');
+		}
+
+		// Add the "return to index" link (same format as the real registration)
+		$message = $message . '<br /><br />' . sprintf($this->language->lang('RETURN_INDEX'), '<a href="' . append_sid("{$this->root_path}index.{$this->php_ext}"). '">', '</a>');
+
+		// Display the fake success message
+		trigger_error($message);
+	}
+
+		/*
 	* poster_data_email			inject email address into posting if allowed for guests
 	*
 	* @param	$event			the event object
