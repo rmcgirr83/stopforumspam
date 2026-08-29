@@ -127,7 +127,12 @@ class main_listener implements EventSubscriberInterface
 	}
 
 	/**
-	 * Check for and create if needed admins and mods cache
+	 * Load the extension language files
+	 *
+	 * The admins/mods cache is NOT built here: doing it on every page load means that
+	 * whenever the cache is missing, every concurrent request runs the expensive
+	 * board-wide ACL queries. It is now built lazily by sfsgroups::getadminsmods()
+	 * at the few places that actually consume it.
 	 *
 	 * @param object $event The event object
 	 * @return void
@@ -136,7 +141,6 @@ class main_listener implements EventSubscriberInterface
 	public function user_setup_after($event)
 	{
 		$this->language->add_lang(['sfs_mcp', 'stopforumspam'], 'rmcgirr83/stopforumspam');
-		$this->sfsgroups->build_adminsmods_cache();
 	}
 
 	/*
@@ -345,10 +349,10 @@ class main_listener implements EventSubscriberInterface
 	*/
 	public function update_sfs_admin_mods($event)
 	{
-		// can't determine group id by default so always run this when updating groups
-		// apparently no way to get around this
-		$this->cache->destroy('_sfs_adminsmods');
-		$this->sfsgroups->build_adminsmods_cache();
+		// group_id is provided by core.group_add_user_after/core.group_delete_user_after since phpBB 3.1.7-RC1;
+		// only groups carrying admin/mod permissions can change the cached lists, so joining a regular group
+		// (e.g. REGISTERED on every registration) no longer wipes the cache
+		$this->sfsgroups->refresh_adminsmods_cache((int) $event['group_id']);
 	}
 
 	/*

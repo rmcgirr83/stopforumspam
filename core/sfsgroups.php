@@ -39,31 +39,40 @@ class sfsgroups
 	}
 
 	/*
-	* getadminsmods		generate a cache of users who are mods of forums and merge with the already existing cache of admins and mods
+	* getadminsmods		get the users who are admins and global mods, merged with the moderators of the given forum
 	*					this is used in the listener as well as reporttosfs files
 	* @param	$forum_id	the id of a forum
-	* @return 	null
+	* @return 	array
 	* @access	public
 	*/
 	public function getadminsmods($forum_id)
 	{
-		$admins_mods = $this->cache->get('_sfs_adminsmods');
+		// build the global admins/mods cache if it does not exist yet
+		$admins_mods = $this->build_adminsmods_cache();
 
-		// ensure the cache was built in the ACP
-		if (!$admins_mods)
-		{
-			$admins_mods = [];
-		}
+		$forum_id = (int) $forum_id;
 
 		if ($forum_id)
 		{
-			// now get just the moderators of the forum
-			$forum_mods = $this->auth->acl_get_list(false, 'm_', $forum_id);
-			$forum_mods = (!empty($forum_mods[$forum_id]['m_'])) ? $forum_mods[$forum_id]['m_'] : [];
+			$forums_mods = $this->cache->get('_sfs_forums_mods');
+
+			if ($forums_mods === false)
+			{
+				$forums_mods = [];
+			}
+
+			if (!isset($forums_mods[$forum_id]))
+			{
+				// now get just the moderators of the forum
+				$forum_mods = $this->auth->acl_get_list(false, 'm_', $forum_id);
+				$forums_mods[$forum_id] = (!empty($forum_mods[$forum_id]['m_'])) ? $forum_mods[$forum_id]['m_'] : [];
+
+				// cache for an hour so permission changes made in the ACP are picked up
+				$this->cache->put('_sfs_forums_mods', $forums_mods, 3600);
+			}
 
 			// merge the arrays
-			$admins_mods = array_unique(array_merge($admins_mods, $forum_mods));
-
+			$admins_mods = array_unique(array_merge($admins_mods, $forums_mods[$forum_id]));
 		}
 
 		return $admins_mods;
@@ -72,12 +81,14 @@ class sfsgroups
 	/*
 	* build_adminsmods_cache		generate a cache of users who are admins and global mods
 	*								this is used in the listener as well as reporttosfs/reportpms files
-	* @return 	null
+	* @return 	array
 	* @access	public
 	*/
 	public function build_adminsmods_cache()
 	{
-		if ($this->cache->get('_sfs_adminsmods') === false && !empty($this->config['sfs_api_key']))
+		$admins_mods = $this->cache->get('_sfs_adminsmods');
+
+		if ($admins_mods === false && !empty($this->config['sfs_api_key']))
 		{
 			// Grab an array of user_id's with admin permissions
 			$admin_ary = $this->auth->acl_get_list(false, 'a_', false);
@@ -92,5 +103,38 @@ class sfsgroups
 			// cache this data for ever
 			$this->cache->put('_sfs_adminsmods', $admins_mods);
 		}
+
+		return ($admins_mods !== false) ? $admins_mods : [];
+	}
+
+	/*
+	* refresh_adminsmods_cache		rebuild the admins/mods caches after a group change, but only if the group can affect them
+	* @param	$group_id	the id of the group users were added to or removed from
+	* @return 	void
+	* @access	public
+	*/
+	public function refresh_adminsmods_cache($group_id)
+	{
+		if ($this->group_has_adminmod_permissions($group_id))
+		{
+			$this->cache->destroy('_sfs_adminsmods');
+			$this->cache->destroy('_sfs_forums_mods');
+			$this->build_adminsmods_cache();
+		}
+	}
+
+	/*
+	* group_has_adminmod_permissions	check if a group is assigned the base admin or moderator permission, on any forum
+	*									groups without them can never change the admins/mods lists, so e.g. joining
+	*									the REGISTERED group on registration does not need a cache rebuild
+	* @param	$group_id	the id of a group
+	* @return 	bool
+	* @access	public
+	*/
+	public function group_has_adminmod_permissions($group_id)
+	{
+		$group_auth = $this->auth->acl_group_raw_data((int) $group_id, ['a_', 'm_'], false);
+
+		return !empty($group_auth);
 	}
 }
