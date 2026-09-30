@@ -5,6 +5,7 @@ services:
             $auth: '@auth'
             $cache: '@cache'
             $config: '@config'
+            $content_visibility: '@content.visibility'
             $container: '@service_container'
             $db: '@dbal.conn'
             $helper: '@controller.helper'

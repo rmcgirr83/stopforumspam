@@ -15,6 +15,7 @@ namespace rmcgirr83\stopforumspam\core;
 **/
 use phpbb\auth\auth;
 use phpbb\config\config;
+use phpbb\content_visibility;
 use phpbb\db\driver\driver_interface as db;
 use phpbb\controller\helper;
 use phpbb\language\language;
@@ -37,6 +38,9 @@ class reporttosfs
 
 	/** @var config $config */
 	protected $config;
+
+	/** @var content_visibility $content_visibility */
+	protected $content_visibility;
 
 	/** @var db $db */
 	protected $db;
@@ -77,6 +81,7 @@ class reporttosfs
 	public function __construct(
 			auth $auth,
 			config $config,
+			content_visibility $content_visibility,
 			db $db,
 			helper $helper,
 			language $language,
@@ -92,6 +97,7 @@ class reporttosfs
 	{
 		$this->auth = $auth;
 		$this->config = $config;
+		$this->content_visibility = $content_visibility;
 		$this->helper = $helper;
 		$this->db = $db;
 		$this->language = $language;
@@ -129,8 +135,9 @@ class reporttosfs
 			throw new http_exception(403, 'POST_NOT_EXIST');
 		}
 
-		$sql = 'SELECT p.*, u.username, u.user_email
+		$sql = 'SELECT p.*, t.topic_visibility, t.topic_poster, u.username, u.user_email
 			FROM ' . POSTS_TABLE . ' p
+			INNER JOIN ' . TOPICS_TABLE . ' t ON t.topic_id = p.topic_id AND t.forum_id = p.forum_id
 			LEFT JOIN ' . USERS_TABLE . ' u on p.poster_id = u.user_id
 			WHERE p.post_id = ' . (int) $postid . ' AND p.poster_id = ' . (int) $posterid;
 		$result = $this->db->sql_query($sql);
@@ -143,6 +150,15 @@ class reporttosfs
 			throw new http_exception(403, 'INFO_NOT_FOUND');
 		}
 
+		$forumid = (int) $row['forum_id'];
+		if (!$forumid || !$this->auth->acl_get('f_read', $forumid) ||
+			(!$this->auth->acl_get('a_') && !$this->auth->acl_get('m_', $forumid)) ||
+			!$this->content_visibility->is_visible('topic', $forumid, $row) ||
+			!$this->content_visibility->is_visible('post', $forumid, $row))
+		{
+			throw new http_exception(403, 'NOT_AUTHORISED');
+		}
+
 		if (!function_exists('generate_text_for_display'))
 		{
 			include($this->root_path . 'includes/functions_privmsgs.' . $this->php_ext);
@@ -150,7 +166,6 @@ class reporttosfs
 		$username = $row['username'];
 		$userip = $row['poster_ip'];
 		$useremail = $row['user_email'];
-		$forumid = (int) $row['forum_id'];
 		$topicid = (int) $row['topic_id'];
 		$parse_flags = ($row['bbcode_bitfield'] ? OPTION_FLAG_BBCODE : 0);
 		$parse_flags |= ($row['enable_smilies'] ? OPTION_FLAG_SMILIES : 0);
