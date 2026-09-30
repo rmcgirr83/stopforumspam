@@ -13,6 +13,7 @@ namespace rmcgirr83\stopforumspam\core;
 /**
 * ignore
 */
+use phpbb\auth\auth;
 use phpbb\config\config;
 use phpbb\db\driver\driver_interface as db;
 use phpbb\controller\helper;
@@ -31,6 +32,9 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class report_pm_to_sfs
 {
+	/** @var auth $auth */
+	protected $auth;
+
 	/** @var config $config */
 	protected $config;
 
@@ -65,6 +69,7 @@ class report_pm_to_sfs
 	protected $container;
 
 	public function __construct(
+			auth $auth,
 			config $config,
 			db $db,
 			helper $helper,
@@ -77,6 +82,7 @@ class report_pm_to_sfs
 			sfsapi $sfsapi,
 			ContainerInterface $container)
 	{
+		$this->auth = $auth;
 		$this->config = $config;
 		$this->db = $db;
 		$this->helper = $helper;
@@ -102,6 +108,11 @@ class report_pm_to_sfs
 		$posterid = (int) $posterid;
 
 		$this->language->add_lang('stopforumspam', 'rmcgirr83/stopforumspam');
+		if (!$this->user->data['is_registered'] || !$this->config['allow_privmsg'] || !$this->auth->acl_get('u_readpm') ||
+			$this->user->data['user_id'] == $posterid)
+		{
+			throw new http_exception(403, 'SFS_PM_REPORT_NOT_ALLOWED');
+		}
 
 		$admins_mods = $this->sfsgroups->getadminsmods(0);
 
@@ -124,8 +135,12 @@ class report_pm_to_sfs
 
 		$sql = 'SELECT pm.sfs_reported, pm.author_id, pm.author_ip, u.username, u.user_email
 			FROM ' . PRIVMSGS_TABLE . ' pm
+			INNER JOIN ' . PRIVMSGS_TO_TABLE . ' pt ON pt.msg_id = pm.msg_id
 			LEFT JOIN ' . USERS_TABLE . ' u on pm.author_id = u.user_id
-			WHERE pm.msg_id = ' . (int) $postid . ' AND pm.author_id = ' . (int) $posterid;
+			WHERE pm.msg_id = ' . (int) $postid . ' AND pm.author_id = ' . (int) $posterid . '
+				AND pt.user_id = ' . (int) $this->user->data['user_id'] . '
+				AND pt.pm_deleted = 0
+				AND pt.folder_id NOT IN (' . PRIVMSGS_NO_BOX . ', ' . PRIVMSGS_HOLD_BOX . ')';
 		$result = $this->db->sql_query($sql);
 		$row = $this->db->sql_fetchrow($result);
 		$this->db->sql_freeresult($result);
