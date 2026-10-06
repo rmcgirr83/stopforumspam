@@ -439,7 +439,9 @@ class main_listener implements EventSubscriberInterface
 	{
 		$user_info = $event['user_info'];
 
-		$allowed = ($this->config['allow_sfs'] && $this->config['allow_pm_report'] && !empty($this->config['sfs_api_key']) && $this->config['sfs_report_pm']) ? true : false;
+		$allowed = ($this->user->data['is_registered'] && $this->config['allow_privmsg'] && $this->auth->acl_get('u_readpm') &&
+			$this->config['allow_sfs'] && $this->config['allow_pm_report'] && !empty($this->config['sfs_api_key']) &&
+			$this->config['sfs_report_pm']);
 
 		if (!$allowed || $this->user->data['user_id'] == $user_info['user_id'])
 		{
