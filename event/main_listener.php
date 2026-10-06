@@ -405,6 +405,12 @@ class main_listener implements EventSubscriberInterface
 		}
 
 		$row = $event['row'];
+		$forum_id = (int) $row['forum_id'];
+		if (!$this->auth->acl_get('f_read', $forum_id) ||
+			(!$this->auth->acl_get('a_') && !$this->auth->acl_get('m_', $forum_id)))
+		{
+			return;
+		}
 
 		// ensure we have an IP and email address..this may happen if users have "post" bots on the forum
 		// also ensure the IP is something other than 127.0.0.1 which can happen if the anonymised extension is installed
@@ -412,7 +418,7 @@ class main_listener implements EventSubscriberInterface
 		{
 			$sfs_report_allowed = (!empty($row['user_email']) && $event['poster_id'] != ANONYMOUS && !$row['sfs_reported']) ? true : false;
 
-			if ($sfs_report_allowed && in_array($this->user->data['user_id'], $this->sfs_admins_mods) && !in_array((int) $event['poster_id'], $this->sfs_admins_mods))
+			if ($sfs_report_allowed && !in_array((int) $event['poster_id'], $this->sfs_admins_mods))
 			{
 				$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_reporttosfs', ['postid' => (int) $row['post_id'], 'posterid' => (int) $event['poster_id']]);
 				$event['post_row'] = array_merge($event['post_row'], [
