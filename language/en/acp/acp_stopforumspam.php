@@ -74,13 +74,6 @@ $lang = array_merge($lang, [
 	'SFS_SETTINGS_ERROR'		=> 'There was an error saving your settings. Please submit the back trace with your error report.',
 	'SFS_SETTINGS_SUCCESS'		=> 'The settings were successfully saved.',
 	'SFS_REPORTED_CLEARED' => 'Posts and private messages reported to stop forum spam were reset.',
-	//Donation
-	'PAYPAL_IMAGE_URL'          => 'https://www.paypalobjects.com/webstatic/en_US/i/btn/png/silver-pill-paypal-26px.png',
-	'PAYPAL_ALT'                => 'Donate using PayPal',
-	'BUY_ME_A_BEER_URL'         => 'https://paypal.me/RMcGirr83',
-	'BUY_ME_A_BEER'				=> 'Buy me a beer for creating this extension',
-	'BUY_ME_A_BEER_SHORT'		=> 'Make a donation for this extension',
-	'BUY_ME_A_BEER_EXPLAIN'		=> 'This extension is completely free. It is a project that I spend my time on for the enjoyment and use of the phpBB community. If you enjoy using this extension, or if it has benefited your forum, please consider <a href="https://paypal.me/RMcGirr83" target="_blank" rel="noreferrer noopener">buying me a beer</a>. It would be greatly appreciated. <i class="fa fa-smile-o" style="color:green;font-size:1.5em;" aria-hidden="true"></i>',
 	'SFS_CONTACTADMIN_EXT'	=> 'Allow on Contactadmin Extension',
 	'SFS_CONTACTADMIN_EXT_EXPLAIN'	=> 'If set yes and the contact admin extension is installed, this extension will integrate with the contact admin extension.'
 ]);
