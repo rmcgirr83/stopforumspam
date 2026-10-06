@@ -3,7 +3,7 @@
     "type": "phpbb-extension",
     "description": "Checks registrations and guest posts against the Stop Forum Spam database and lets staff report spammers to it.",
     "homepage": "https://www.phpbbmodders.com/",
-    "version": "1.5.2",
+    "version": "1.6.0",
     "time": "2026-10-06",
     "keywords": [
         "phpbb",
