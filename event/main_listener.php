@@ -1,15 +1,16 @@
 <?php
 
 /**
-*
-* Stop forum Spam extension for the phpBB Forum Software package.
-*
-* @copyright (c) 2015 Rich McGirr (RMcGirr83)
-* @license GNU General Public License, version 2 (GPL-2.0)
-*
-*/
+ *
+ * Stop Forum Spam extension for the phpBB Forum Software package
+ *
+ * @copyright (c) 2015 Rich McGirr (RMcGirr83)
+ * @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
+ * @license GNU General Public License, version 2 (GPL-2.0)
+ *
+ */
 
-namespace rmcgirr83\stopforumspam\event;
+namespace phpbbmodders\stopforumspam\event;
 
 use phpbb\auth\auth;
 use phpbb\cache\service as cache;
@@ -20,9 +21,9 @@ use phpbb\log\log;
 use phpbb\request\request;
 use phpbb\template\template;
 use phpbb\user;
-use rmcgirr83\stopforumspam\core\sfsgroups as sfsgroups;
-use rmcgirr83\stopforumspam\core\sfsapi as sfsapi;
-use rmcgirr83\contactadmin\controller\main_controller as contactadmin;
+use phpbbmodders\stopforumspam\core\sfsgroups as sfsgroups;
+use phpbbmodders\stopforumspam\core\sfsapi as sfsapi;
+use phpbbmodders\contactadmin\controller\main_controller as contactadmin;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -120,7 +121,7 @@ class main_listener implements EventSubscriberInterface
 			'core.viewtopic_modify_post_row'		=> 'viewtopic_modify_post_row',
 			'core.ucp_pm_view_message'				=> 'ucp_pm_view_message',
 			// Custom events for integration with Contact Admin Extension
-			'rmcgirr83.contactadmin.modify_data_and_error'	=> 'user_sfs_validate_registration',
+			'phpbbmodders.contactadmin.modify_data_and_error'	=> 'user_sfs_validate_registration',
 			// phpBB default contact us page
 			'core.message_admin_form_submit_before'	=> 'message_admin_form_submit_before',
 		];
@@ -140,7 +141,7 @@ class main_listener implements EventSubscriberInterface
 	 */
 	public function user_setup_after($event)
 	{
-		$this->language->add_lang(['sfs_mcp', 'stopforumspam'], 'rmcgirr83/stopforumspam');
+		$this->language->add_lang(['sfs_mcp', 'stopforumspam'], 'phpbbmodders/stopforumspam');
 	}
 
 	/*
@@ -420,7 +421,7 @@ class main_listener implements EventSubscriberInterface
 
 			if ($sfs_report_allowed && !in_array((int) $event['poster_id'], $this->sfs_admins_mods))
 			{
-				$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_reporttosfs', ['postid' => (int) $row['post_id'], 'posterid' => (int) $event['poster_id']]);
+				$reporttosfs_url = $this->helper->route('phpbbmodders_stopforumspam_core_reporttosfs', ['postid' => (int) $row['post_id'], 'posterid' => (int) $event['poster_id']]);
 				$event['post_row'] = array_merge($event['post_row'], [
 					'S_SFS'	=> true,
 					'U_SFS'	=> $reporttosfs_url,
@@ -466,7 +467,7 @@ class main_listener implements EventSubscriberInterface
 
 			if ($sfs_report_allowed && !$message_row['sfs_reported'] )
 			{
-				$reporttosfs_url = $this->helper->route('rmcgirr83_stopforumspam_core_report_pm_to_sfs', ['postid' => (int) $message_row['msg_id'], 'posterid' => (int) $user_info['user_id']]);
+				$reporttosfs_url = $this->helper->route('phpbbmodders_stopforumspam_core_report_pm_to_sfs', ['postid' => (int) $message_row['msg_id'], 'posterid' => (int) $user_info['user_id']]);
 
 				$event['msg_data'] = array_merge($event['msg_data'], [
 					'S_SFS'		=> true,
@@ -539,7 +540,7 @@ class main_listener implements EventSubscriberInterface
 		{
 			if ($this->contactadmin !== null && !empty($this->config['contactadmin_enable']))
 			{
-				$message = $this->language->lang('NO_SOUP_FOR_YOU', '<a href="' . $this->helper->route('rmcgirr83_contactadmin_displayform') . '">', '</a>');
+				$message = $this->language->lang('NO_SOUP_FOR_YOU', '<a href="' . $this->helper->route('phpbbmodders_contactadmin_displayform') . '">', '</a>');
 			}
 			else if ($this->config['contact_admin_form_enable'])
 			{

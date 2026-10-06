@@ -1,15 +1,16 @@
 <?php
 /**
-*
-* Stop forum Spam extension for the phpBB Forum Software package.
-*
-* @copyright (c) Stop Forum Spam
-* @author 2015 Rich McGirr (RMcGirr83)
-* @license GNU General Public License, version 2 (GPL-2.0)
-*
-*/
+ *
+ * Stop Forum Spam extension for the phpBB Forum Software package
+ *
+ * @copyright (c) Stop Forum Spam
+ * @author 2015 Rich McGirr (RMcGirr83)
+ * @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
+ * @license GNU General Public License, version 2 (GPL-2.0)
+ *
+ */
 
-namespace rmcgirr83\stopforumspam\migrations;
+namespace phpbbmodders\stopforumspam\migrations;
 
 /**
 * Primary migration
@@ -19,7 +20,7 @@ class version_103 extends \phpbb\db\migration\container_aware_migration
 {
 	static public function depends_on()
 	{
-		return array('\rmcgirr83\stopforumspam\migrations\version_102');
+		return array('\phpbbmodders\stopforumspam\migrations\version_102');
 	}
 
 	protected $settings;

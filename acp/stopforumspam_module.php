@@ -1,15 +1,16 @@
 <?php
 /**
-*
-* Stop forum Spam extension for the phpBB Forum Software package.
-*
-* @copyright (c) Stop Forum Spam
-* @author 2015 Rich McGirr (RMcGirr83)
-* @license GNU General Public License, version 2 (GPL-2.0)
-*
-*/
+ *
+ * Stop Forum Spam extension for the phpBB Forum Software package
+ *
+ * @copyright (c) Stop Forum Spam
+ * @author 2015 Rich McGirr (RMcGirr83)
+ * @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
+ * @license GNU General Public License, version 2 (GPL-2.0)
+ *
+ */
 
-namespace rmcgirr83\stopforumspam\acp;
+namespace phpbbmodders\stopforumspam\acp;
 
 class stopforumspam_module
 {
@@ -23,7 +24,7 @@ class stopforumspam_module
 		$this->page_title	= $phpbb_container->get('language')->lang('SFS_CONTROL');
 
 		// Get an instance of the admin controller
-		$admin_controller = $phpbb_container->get('rmcgirr83.stopforumspam.admin.controller');
+		$admin_controller = $phpbb_container->get('phpbbmodders.stopforumspam.admin.controller');
 
 		// Make the $u_action url available in the admin controller
 		$admin_controller->set_page_url($this->u_action);

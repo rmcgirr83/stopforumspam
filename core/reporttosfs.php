@@ -1,14 +1,15 @@
 <?php
 /**
-*
-* Stop forum Spam extension for the phpBB Forum Software package.
-*
-* @copyright (c) 2015 Rich McGirr (RMcGirr83)
-* @license GNU General Public License, version 2 (GPL-2.0)
-*
-*/
+ *
+ * Stop Forum Spam extension for the phpBB Forum Software package
+ *
+ * @copyright (c) 2015 Rich McGirr (RMcGirr83)
+ * @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
+ * @license GNU General Public License, version 2 (GPL-2.0)
+ *
+ */
 
-namespace rmcgirr83\stopforumspam\core;
+namespace phpbbmodders\stopforumspam\core;
 
 /**
 * ignore
@@ -23,8 +24,8 @@ use phpbb\log\log;
 use phpbb\request\request;
 use phpbb\template\template;
 use phpbb\user;
-use rmcgirr83\stopforumspam\core\sfsgroups;
-use rmcgirr83\stopforumspam\core\sfsapi;
+use phpbbmodders\stopforumspam\core\sfsgroups;
+use phpbbmodders\stopforumspam\core\sfsapi;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 use phpbb\exception\http_exception;
@@ -294,7 +295,7 @@ class reporttosfs
 					'',
 					'confirm_body.html',
 					$this->helper->route(
-						'rmcgirr83_stopforumspam_core_reporttosfs',
+						'phpbbmodders_stopforumspam_core_reporttosfs',
 						[
 							'postid' => $postid,
 							'posterid' => $posterid,

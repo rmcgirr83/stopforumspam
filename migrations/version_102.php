@@ -1,15 +1,16 @@
 <?php
 /**
-*
-* Stop forum Spam extension for the phpBB Forum Software package.
-*
-* @copyright (c) Stop Forum Spam
-* @author 2015 Rich McGirr (RMcGirr83)
-* @license GNU General Public License, version 2 (GPL-2.0)
-*
-*/
+ *
+ * Stop Forum Spam extension for the phpBB Forum Software package
+ *
+ * @copyright (c) Stop Forum Spam
+ * @author 2015 Rich McGirr (RMcGirr83)
+ * @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
+ * @license GNU General Public License, version 2 (GPL-2.0)
+ *
+ */
 
-namespace rmcgirr83\stopforumspam\migrations;
+namespace phpbbmodders\stopforumspam\migrations;
 
 /**
 * Primary migration
@@ -24,7 +25,7 @@ class version_102 extends \phpbb\db\migration\migration
 
 	static public function depends_on()
 	{
-		return array('\rmcgirr83\stopforumspam\migrations\version_101');
+		return array('\phpbbmodders\stopforumspam\migrations\version_101');
 	}
 
 	public function update_data()
@@ -61,7 +62,7 @@ class version_102 extends \phpbb\db\migration\migration
 				'acp',
 				'ACP_SFS_TITLE',
 				array(
-					'module_basename'	=> '\rmcgirr83\stopforumspam\acp\stopforumspam_module',
+					'module_basename'	=> '\phpbbmodders\stopforumspam\acp\stopforumspam_module',
 					'modes'				=> array('settings'),
 				),
 			)),

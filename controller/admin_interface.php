@@ -1,13 +1,15 @@
 <?php
 /**
-*
-* @package Stop forum Spam extension
-* @copyright (c) 2015 Rich McGirr (RMcGirr83)
-* @license GNU General Public License, version 2 (GPL-2.0)
-*
-*/
+ *
+ * Stop Forum Spam extension for the phpBB Forum Software package
+ *
+ * @copyright (c) 2015 Rich McGirr (RMcGirr83)
+ * @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
+ * @license GNU General Public License, version 2 (GPL-2.0)
+ *
+ */
 
-namespace rmcgirr83\stopforumspam\controller;
+namespace phpbbmodders\stopforumspam\controller;
 
 /**
 * Interface for our admin controller
