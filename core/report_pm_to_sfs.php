@@ -175,9 +175,10 @@ class report_pm_to_sfs
 
 		if (confirm_box(true))
 		{
-			$response = $this->sfsapi->sfsapi('add', $username, $userip, $useremail, $this->config['sfs_api_key']);
+			$response = $this->sfsapi->sfsapi('add', $username, $userip, $useremail, '', $this->config['sfs_api_key']);
 
-			if (!$response && $this->request->is_ajax())
+			// An add request returns true only on success; cURL errors return a non-empty string.
+			if ($response !== true && $this->request->is_ajax())
 			{
 				$data = [
 					'MESSAGE_TITLE'	=> $this->user->lang('ERROR'),
@@ -186,7 +187,7 @@ class report_pm_to_sfs
 				];
 				return new JsonResponse($data);
 			}
-			else if (!$response)
+			else if ($response !== true)
 			{
 				$this->template->assign_vars([
 					'MESSAGE_TITLE' => $this->language->lang('ERROR'),
