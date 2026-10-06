@@ -1,13 +1,15 @@
 <?php
 /**
-*
-* @package Stop forum Spam extension
-* @copyright (c) 2015 Rich McGirr (RMcGirr83)
-* @license GNU General Public License, version 2 (GPL-2.0)
-*
-*/
+ *
+ * Stop Forum Spam extension for the phpBB Forum Software package
+ *
+ * @copyright (c) 2015 Rich McGirr (RMcGirr83)
+ * @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
+ * @license GNU General Public License, version 2 (GPL-2.0)
+ *
+ */
 
-namespace rmcgirr83\stopforumspam\controller;
+namespace phpbbmodders\stopforumspam\controller;
 
 use phpbb\cache\service as cache;
 use phpbb\config\config;
@@ -18,8 +20,8 @@ use phpbb\log\log;
 use phpbb\request\request;
 use phpbb\template\template;
 use phpbb\user;
-use rmcgirr83\stopforumspam\core\sfsgroups as sfsgroups;
-use rmcgirr83\contactadmin\controller\main_controller as contactadmin;
+use phpbbmodders\stopforumspam\core\sfsgroups as sfsgroups;
+use phpbbmodders\contactadmin\controller\main_controller as contactadmin;
 
 /**
 * Admin controller
@@ -82,7 +84,7 @@ class admin_controller implements admin_interface
 	* @param string                 $php_ext        	phpEx
 	* @param contactadmin			$contactadmin		Contactadmin extension
 	*
-	* @return \rmcgirr83\stopforumspam\controller\admin_controller
+	* @return \phpbbmodders\stopforumspam\controller\admin_controller
 	* @access public
 	*/
 	public function __construct(
@@ -123,7 +125,7 @@ class admin_controller implements admin_interface
 	public function display_options()
 	{
 		// Add the language files
-		$this->language->add_lang('acp/acp_stopforumspam', 'rmcgirr83/stopforumspam');
+		$this->language->add_lang('acp/acp_stopforumspam', 'phpbbmodders/stopforumspam');
 		$this->language->add_lang('acp/ban');
 
 		$action = $this->request->variable('action', '');

@@ -1,0 +1,38 @@
+name: Lint
+
+# PHP syntax check on the lowest PHP version this extension supports and the
+# newest one phpBB 3.3 supports. tests.yml covers PHP 8.2 with phpBB's own
+# checks (code sniffer, EPV).
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: PHP ${{ matrix.php }} lint
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['7.4', '8.4']
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: composer:v2
+
+      - name: PHP syntax check
+        run: find . -name '*.php' -not -path './.git/*' -not -path './vendor/*' -print0 | xargs -0 -n1 php -l
+
+      - name: Validate composer.json
+        run: composer validate --no-check-all --no-check-publish
