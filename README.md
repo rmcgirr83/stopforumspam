@@ -22,7 +22,7 @@ Checks registrations and guest posts against the Stop Forum Spam database and le
   </tr>
 </table>
 
-Click a screenshot for the full size.
+Click a screenshot for the full size. They are also on the [Screenshots wiki page](https://github.com/phpbbmodders/stopforumspam/wiki/Screenshots).
 
 ## Requirements
 
