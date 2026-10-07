@@ -1,4 +1,4 @@
-{% INCLUDE 'overall_header.html' %}
+{% include 'overall_header.html' %}
 
 <h1>{{ lang('SFS_CONTROL') }}</h1>
 {% if CURL_ACTIVE %}
@@ -20,7 +20,7 @@
 <fieldset>
 	<form id="acp_stopforumspam" method="post" action="{{ U_ACTION }}">
 		<dl>
-			<dt><label for="sfs_enabled">{{ lang('SFS_ENABLED') }}{{ lang('COLON') }}</label></dt>
+			<dt><label for="sfs_enabled">{{ lang('SFS_ENABLED') }}{{ lang('COLON') }}</label><br />{{ lang('SFS_ENABLED_EXPLAIN') }}</dt>
 			<dd><input type="radio" class="radio" name="allow_sfs" value="1" {% if ALLOW_SFS %}id="sfs_enabled" checked="checked"{% endif %}/> {{ lang('YES') }} &nbsp;
 				<input type="radio" class="radio" name="allow_sfs" value="0" {% if not ALLOW_SFS %}id="sfs_enabled"  checked="checked"{% endif %} /> {{ lang('NO') }}</dd>
 		</dl>
@@ -50,7 +50,11 @@
 		</dl>
 		<dl>
 			<dt><label for="sfs_ban_time">{{ lang('BAN_LENGTH') }}{{ lang('COLON') }}</label></dt>
-			<dd><select name="sfs_ban_time" id="sfs_ban_time">{{ SFS_BAN_TIME }}</select></dd>
+			<dd><select name="sfs_ban_time" id="sfs_ban_time">
+				{% for ban_length in loops.sfs_ban_lengths %}
+					<option value="{{ ban_length.VALUE }}"{% if ban_length.S_SELECTED %} selected="selected"{% endif %}>{{ ban_length.TEXT }}</option>
+				{% endfor %}
+			</select></dd>
 		</dl>
 		<dl>
 			<dt><label for="sfs_ban_reason">{{ lang('SFS_BAN_REASON') }}{{ lang('COLON') }}</label><br>{{ lang('SFS_BAN_REASON_EXPLAIN') }}</dt>
@@ -94,8 +98,8 @@
 		</dl>
 		{% endif %}
 		<p class="submit-buttons">
-			<input class="button1" type="submit" id="submit" name="submit" value="{{ lang('SUBMIT') }}" />&nbsp;
-			<input class="button2" type="reset" id="reset" name="reset" value="{{ lang('RESET') }}" />
+			<input class="button1" type="submit" id="submit" name="submit" value="{{ lang('SUBMIT')|e('html_attr') }}" />&nbsp;
+			<input class="button2" type="reset" id="reset" name="reset" value="{{ lang('RESET')|e('html_attr') }}" />
 		</p>
 		{{ S_FORM_TOKEN }}
 	</form>
@@ -104,12 +108,12 @@
 		{% if SFS_POSTS_PMS_COUNT %}
 		<dl id="sfsreportcount">
 			<dt><label>{{ lang('SFS_CLEAR') }}</label><br /><span>{{ lang('SFS_CLEAR_EXPLAIN', POSTS_REPORTED, PMS_REPORTED) }}</span></dt>
-			<dd><a class="button1" style="padding: 0px 8px;" href="{{ U_CLR_REPORTS }}" data-ajax="sfsclrreports">{{ lang('RUN') }}</a></dd>
+			<dd><a class="button1" href="{{ U_CLR_REPORTS }}" data-ajax="sfsclrreports">{{ lang('RUN') }}</a></dd>
 		</dl>
 		{% endif %}
 		<dl>
 			<dt><label>{{ lang('SFS_BUILD') }}</label><br /><span>{{ lang('SFS_BUILD_EXPLAIN') }}</span></dt>
-			<dd><a class="button1" style="padding: 0px 8px;" href="{{ U_BUILD_CACHE }}" data-ajax="true">{{ lang('RUN') }}</a></dd>
+			<dd><a class="button1" href="{{ U_BUILD_CACHE }}" data-ajax="true">{{ lang('RUN') }}</a></dd>
 		</dl>
 </fieldset>
-{% INCLUDE 'overall_footer.html' %}
+{% include 'overall_footer.html' %}

@@ -44,11 +44,10 @@ class ext extends \phpbb\extension\base
 	public function is_enableable()
 	{
 		$language = $this->container->get('language');
+		$language->add_lang('install_stopforumspam', 'phpbbmodders/stopforumspam');
 
 		if (!$this->check_phpbb_version() || !$this->check_php_version())
 		{
-			$language->add_lang('install_stopforumspam', 'phpbbmodders/stopforumspam');
-
 			return $language->lang('STOPFORUMSPAM_NOT_ENABLEABLE');
 		}
 
@@ -61,7 +60,7 @@ class ext extends \phpbb\extension\base
 
 		if ($this->container->get('ext.manager')->is_enabled(self::OLD_EXT_NAME))
 		{
-			return ['Disable the old "' . self::OLD_EXT_NAME . '" extension first (keep its data, do not delete it).'];
+			return $language->lang('STOPFORUMSPAM_DISABLE_OLD', self::OLD_EXT_NAME);
 		}
 
 		return true;

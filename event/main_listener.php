@@ -31,10 +31,13 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 */
 class main_listener implements EventSubscriberInterface
 {
+	/** Email frequency Stop Forum Spam returns for a domain it lists as toxic */
+	const TOXIC_EMAIL_FREQUENCY = 255;
+
 	/** @var auth */
 	protected $auth;
 
-	/** @var service */
+	/** @var cache */
 	protected $cache;
 
 	/** @var config */
@@ -58,10 +61,10 @@ class main_listener implements EventSubscriberInterface
 	/** @var user */
 	protected $user;
 
-	/* @var sfsgroups */
+	/** @var sfsgroups */
 	protected $sfsgroups;
 
-	/* @var sfsapi */
+	/** @var sfsapi */
 	protected $sfsapi;
 
 	/** @var string root_path */
@@ -70,8 +73,11 @@ class main_listener implements EventSubscriberInterface
 	/** @var string php_ext */
 	protected $php_ext;
 
-	/* @var contactadmin $contactadmin */
+	/** @var contactadmin|null Contact Admin's controller, when that extension is enabled */
 	protected $contactadmin;
+
+	/** @var array User ids of the admins and moderators who must not be reported */
+	protected $sfs_admins_mods = [];
 
 	public function __construct(
 		auth $auth,
@@ -87,7 +93,7 @@ class main_listener implements EventSubscriberInterface
 		sfsapi $sfsapi,
 		string $root_path,
 		string $php_ext,
-		contactadmin $contactadmin = null)
+		?contactadmin $contactadmin = null)
 	{
 		$this->auth = $auth;
 		$this->cache = $cache;
@@ -144,7 +150,7 @@ class main_listener implements EventSubscriberInterface
 		$this->language->add_lang(['sfs_mcp', 'stopforumspam'], 'phpbbmodders/stopforumspam');
 	}
 
-	/*
+	/**
 	* user_sfs_validate_registration		validate a users registration event
 	*
 	* @param	$event	the event object
@@ -175,7 +181,7 @@ class main_listener implements EventSubscriberInterface
 		/* On registration and only when all errors have cleared
 		 * do not want the admin message area to fill up
 		*/
-		if (!sizeof($error_array))
+		if (!count($error_array))
 		{
 			$check = $this->stopforumspam_check($event['data']['username'], $this->user->ip, $event['data']['email']);
 
@@ -232,13 +238,13 @@ class main_listener implements EventSubscriberInterface
 		}
 
 		// Add the "return to index" link (same format as the real registration)
-		$message = $message . '<br /><br />' . sprintf($this->language->lang('RETURN_INDEX'), '<a href="' . append_sid("{$this->root_path}index.{$this->php_ext}"). '">', '</a>');
+		$message = $message . '<br /><br />' . $this->language->lang('RETURN_INDEX', '<a href="' . append_sid("{$this->root_path}index.{$this->php_ext}") . '">', '</a>');
 
 		// Display the fake success message
 		trigger_error($message);
 	}
 
-	/*
+	/**
 	* poster_data_email			inject email address into posting if allowed for guests
 	*
 	* @param	$event			the event object
@@ -257,7 +263,7 @@ class main_listener implements EventSubscriberInterface
 		}
 	}
 
-	/*
+	/**
 	* poster_modify_message_text	inject email address into post data  for validation
 	*
 	* @param	$event			the event object
@@ -276,7 +282,7 @@ class main_listener implements EventSubscriberInterface
 		}
 	}
 
-	/*
+	/**
 	* user_sfs_validate_posting		validate username and email for guest posting
 	*
 	* @param	$event			the event object
@@ -305,11 +311,8 @@ class main_listener implements EventSubscriberInterface
 			// I just hate empty usernames for guest posting
 			if (empty($event['post_data']['username']))
 			{
-				$username_error = $this->validate_username($event['post_data']['username']);
-				if ($username_error)
-				{
-					$error_array[] = $username_error;
-				}
+				// validate_username() returns a list of messages
+				$error_array = array_merge($error_array, $this->validate_username($event['post_data']['username']));
 			}
 
 			// validate the user ip
@@ -319,7 +322,7 @@ class main_listener implements EventSubscriberInterface
 				$error_array[] = $userip_error;
 			}
 
-			if (!sizeof($error_array))
+			if (!count($error_array))
 			{
 				$check = $this->stopforumspam_check($event['post_data']['username'], $this->user->ip, $event['post_data']['email']);
 
@@ -342,7 +345,7 @@ class main_listener implements EventSubscriberInterface
 		$event['error'] = $error_array;
 	}
 
-	/*
+	/**
 	* update_sfs_admin_mods 			update admin and mods cache when adding|deleting users to|from a group
 	* @param 		$event				event object
 	* @return		void
@@ -356,7 +359,7 @@ class main_listener implements EventSubscriberInterface
 		$this->sfsgroups->refresh_adminsmods_cache((int) $event['group_id']);
 	}
 
-	/*
+	/**
 	* viewtopic_before_f_read_check() 	inject lang vars and grab admins and mods
 	* @param 		$event				event object
 	* @return		void
@@ -374,7 +377,7 @@ class main_listener implements EventSubscriberInterface
 		}
 	}
 
-	/*
+	/**
 	* viewtopic_post_rowset_data	add the posters ip into the rowset
 	* @param	$event				event object
 	* @return	void
@@ -392,7 +395,7 @@ class main_listener implements EventSubscriberInterface
 		$event['rowset_data'] = $rowset;
 	}
 
-	/*
+	/**
 	* viewtopic_modify_post_row		show a link to admins and mods to report the spammer
 	* @param 		$event			event object
 	* @return		void
@@ -430,7 +433,7 @@ class main_listener implements EventSubscriberInterface
 		}
 	}
 
-	/*
+	/**
 	* ucp_pm_view_message		show a link to report a spammer
 	* @param 	$event			event object
 	* @return	bool
@@ -477,7 +480,7 @@ class main_listener implements EventSubscriberInterface
 		}
 	}
 
-	/*
+	/**
 	* message_admin_form_submit_before
 	*
 	* @param	$event	the event object
@@ -503,7 +506,7 @@ class main_listener implements EventSubscriberInterface
 		/* On registration and only when all errors have cleared
 		 * do not want the admin message area to fill up
 		*/
-		if (!sizeof($errors))
+		if (!count($errors))
 		{
 			$check = $this->stopforumspam_check($this->request->variable('name', '', true), $this->user->ip, $this->request->variable('email', ''));
 
@@ -524,7 +527,7 @@ class main_listener implements EventSubscriberInterface
 		$event['errors'] = $errors;
 	}
 
-	/*
+	/**
 	* show_message
 	* @param 	string	$check 		the type of check we are, uhmmm, checking
 	* @return 	string
@@ -555,7 +558,7 @@ class main_listener implements EventSubscriberInterface
 		}
 	}
 
-	/*
+	/**
 	* stopforumspam_check
 	* @param 	string	$username 		username from the forum inputs
 	* @param	string	$ip				the users ip
@@ -574,10 +577,10 @@ class main_listener implements EventSubscriberInterface
 		// Query the SFS database and pull the data into script
 		$json = $this->sfsapi->sfsapi('query', $username, $ip, $email);
 
-		$json_decode = json_decode($json, true);
+		$json_decode = is_string($json) ? json_decode($json, true) : null;
 
 		// If there is a curl error as set in sfs_api, log the error
-		if (isset($json_decode[$this->language->lang('CURL_ERROR')]))
+		if (isset($json_decode[sfsapi::CURL_ERROR_KEY]))
 		{
 			return 'sfs_down';
 		}
@@ -628,18 +631,18 @@ class main_listener implements EventSubscriberInterface
 			{
 				if ($this->config['sfs_down'])
 				{
-					$this->log->add('admin', $username, $ip, 'LOG_SFS_DOWN_USER_ALLOWED', $email);
+					$this->log->add('admin', $this->user->data['user_id'], $ip, 'LOG_SFS_DOWN_USER_ALLOWED', false, [$username, $ip, $email]);
 				}
 				else
 				{
-					$this->log->add('admin', $username, $ip, 'LOG_SFS_DOWN', $email);
+					$this->log->add('admin', $this->user->data['user_id'], $ip, 'LOG_SFS_DOWN');
 				}
 			}
 			return 'sfs_down';
 		}
 	}
 
-	/*
+	/**
 	* log_message	function used in this class to inject messages into the logs
 	* @param	string	$username	the users name
 	* @param	string	$ip			the users ip
@@ -670,7 +673,7 @@ class main_listener implements EventSubscriberInterface
 		}
 		else
 		{
-			if ($email_score == (int) 255)
+			if ($email_score == self::TOXIC_EMAIL_FREQUENCY)
 			{
 				$email_score = $this->language->lang('SFS_MARKED_TOXIC');
 			}
@@ -695,7 +698,7 @@ class main_listener implements EventSubscriberInterface
 		$this->log->add('user', $this->user->data['user_id'], $ip, $message, false, ['reportee_id' => $this->user->data['user_id'], $sfs_username, $sfs_ip, $sfs_email]);
 	}
 
-	/*
+	/**
 	* validate_email	function used in this class to validate a guest posters email address
 	* @param	string	$email	email from the forum inputs
 	* @return 	string
@@ -708,7 +711,7 @@ class main_listener implements EventSubscriberInterface
 		return $error;
 	}
 
-	/*
+	/**
 	* validate_username	function used in this class to validate a guest posters username
 	* @param	string	$username	username from the forum inputs
 	* @return 	array
@@ -731,7 +734,7 @@ class main_listener implements EventSubscriberInterface
 		return $error;
 	}
 
-	/*
+	/**
 	* validate_ip		function used in this class to validate an ip address
 	* @param	string	$ip		the users ip
 	* @return 	string
@@ -743,7 +746,7 @@ class main_listener implements EventSubscriberInterface
 
 		if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6) === false)
 		{
-			$error = $this->language->lang('INVALID_IP_ADDRESS');
+			$error = $this->language->lang('SFS_INVALID_IP_ADDRESS');
 		}
 
 		return $error;

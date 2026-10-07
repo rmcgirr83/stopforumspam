@@ -36,7 +36,6 @@ if (empty($lang) || !is_array($lang))
 $lang = array_merge($lang, [
 
 	// ACP entries
-	'SFS_SETTINGS'			=> 'Settings',
 	'SFS_ENABLED'			=> 'Enable Stop Forum Spam',
 	'SFS_ENABLED_EXPLAIN'	=> 'Enable or disable the extension. This applies to both user registration and guest posts.',
 	'SFS_THRESHOLD_SCORE'	=> 'Stop Forum Spam threshold',
@@ -71,7 +70,6 @@ $lang = array_merge($lang, [
 	'SFS_PM_REPORT_EXPLAIN'	=> 'If you have an API key and allow this then any user can report a PM to stop forum spam. Your users maybe “indiscriminate” so it might be best if you leave this set to no.',
 	'TOO_SMALL_SFS_THRESHOLD'	=> 'The threshold value is too small.',
 	'TOO_LARGE_SFS_THRESHOLD'	=> 'The threshold value is too large.',
-	'SFS_SETTINGS_ERROR'		=> 'There was an error saving your settings. Please submit the back trace with your error report.',
 	'SFS_SETTINGS_SUCCESS'		=> 'The settings were successfully saved.',
 	'SFS_REPORTED_CLEARED' => 'Posts and private messages reported to stop forum spam were reset.',
 	'SFS_CONTACTADMIN_EXT'	=> 'Allow on Contactadmin Extension',

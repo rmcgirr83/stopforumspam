@@ -1,46 +1,46 @@
 {
-    "name": "phpbbmodders/stopforumspam",
-    "type": "phpbb-extension",
-    "description": "Checks registrations and guest posts against the Stop Forum Spam database and lets staff report spammers to it.",
-    "homepage": "https://www.phpbbmodders.com/",
-    "version": "1.6.0",
-    "time": "2026-10-06",
-    "keywords": [
-        "phpbb",
-        "extension",
-        "stopforumspam",
-        "anti-spam",
-        "spam"
-    ],
-    "license": "GPL-2.0-only",
-    "authors": [
-        {
-            "name": "phpBB Modders",
-            "email": "board@phpbbmodders.com",
-            "homepage": "https://www.phpbbmodders.com/",
-            "role": "Extension Developer"
-        },
-        {
-            "name": "Rich McGirr",
-            "homepage": "https://www.phpbb.com/customise/db/author/rmcgirr83/contributions",
-            "role": "Past Developer"
-        }
-    ],
-    "require": {
-        "php": ">=7.4",
-        "phpbb/phpbb": ">=3.3.19",
-        "composer/installers": "~1.0"
-    },
-    "extra": {
-        "display-name": "Stop Forum Spam",
-        "soft-require": {
-            "phpbb/phpbb": ">=3.3.19,<4.0.0@dev"
-        },
-        "version-check": {
-            "host": "www.phpbb.com",
-            "directory": "/customise/db/extension/phpbb_3.1_stop_forum_spam",
-            "filename": "version_check",
-            "ssl": true
-        }
-    }
+	"name": "phpbbmodders/stopforumspam",
+	"type": "phpbb-extension",
+	"description": "Checks registrations and guest posts against the Stop Forum Spam database and lets staff report spammers to it.",
+	"homepage": "https://www.phpbbmodders.com/",
+	"version": "1.6.0",
+	"time": "2026-10-06",
+	"keywords": [
+		"phpbb",
+		"extension",
+		"stopforumspam",
+		"anti-spam",
+		"spam"
+	],
+	"license": "GPL-2.0-only",
+	"authors": [
+		{
+			"name": "phpBB Modders",
+			"email": "board@phpbbmodders.com",
+			"homepage": "https://www.phpbbmodders.com/",
+			"role": "Extension Developer"
+		},
+		{
+			"name": "Rich McGirr",
+			"homepage": "https://www.phpbb.com/customise/db/author/rmcgirr83/contributions",
+			"role": "Past Developer"
+		}
+	],
+	"require": {
+		"php": ">=7.4",
+		"phpbb/phpbb": ">=3.3.19,<4.0.0@dev",
+		"composer/installers": "~1.0"
+	},
+	"extra": {
+		"display-name": "Stop Forum Spam",
+		"soft-require": {
+			"phpbb/phpbb": ">=3.3.19,<4.0.0@dev"
+		},
+		"version-check": {
+			"host": "www.phpbb.com",
+			"directory": "/customise/db/extension/phpbb_3.1_stop_forum_spam",
+			"filename": "version_check",
+			"ssl": true
+		}
+	}
 }

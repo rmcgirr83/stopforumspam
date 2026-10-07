@@ -28,14 +28,32 @@ use phpbbmodders\contactadmin\controller\main_controller as contactadmin;
 */
 class admin_controller implements admin_interface
 {
+	/** Lowest accepted Stop Forum Spam threshold */
+	const THRESHOLD_MIN = 1;
 
-	/** @var cache_service */
+	/** Highest accepted Stop Forum Spam threshold */
+	const THRESHOLD_MAX = 99;
+
+	/** Ban lengths offered in the settings, in minutes, with their core language keys */
+	const BAN_LENGTHS = [
+		0		=> 'PERMANENT',
+		30		=> '30_MINS',
+		60		=> '1_HOUR',
+		360		=> '6_HOURS',
+		1440	=> '1_DAY',
+		10080	=> '7_DAYS',
+		20160	=> '2_WEEKS',
+		40320	=> '1_MONTH',
+		524160	=> '1_YEAR',
+	];
+
+	/** @var cache */
 	protected $cache;
 
 	/** @var config */
 	protected $config;
 
-	/** @var driver_interface */
+	/** @var db */
 	protected $db;
 
 	/** @var language */
@@ -62,7 +80,7 @@ class admin_controller implements admin_interface
 	/** @var string phpEx */
 	protected $php_ext;
 
-	/* @var contactadmin $contactadmin */
+	/** @var contactadmin|null Contact Admin's controller, when that extension is enabled */
 	protected $contactadmin;
 
 	/** @var string Custom form action */
@@ -82,9 +100,8 @@ class admin_controller implements admin_interface
 	* @param sfsgroups				$sfsgroups			functions for the controller
 	* @param string                 $root_path      	phpBB root path
 	* @param string                 $php_ext        	phpEx
-	* @param contactadmin			$contactadmin		Contactadmin extension
+	* @param contactadmin|null		$contactadmin		Contactadmin extension
 	*
-	* @return \phpbbmodders\stopforumspam\controller\admin_controller
 	* @access public
 	*/
 	public function __construct(
@@ -99,7 +116,7 @@ class admin_controller implements admin_interface
 			sfsgroups $sfsgroups,
 			$root_path,
 			$php_ext,
-			contactadmin $contactadmin = null
+			?contactadmin $contactadmin = null
 	)
 	{
 		$this->cache = $cache;
@@ -170,7 +187,7 @@ class admin_controller implements admin_interface
 
 				if (confirm_box(true))
 				{
-					$this->sfsclrreports();
+					return $this->sfsclrreports();
 				}
 				else
 				{
@@ -180,7 +197,12 @@ class admin_controller implements admin_interface
 
 			case 'build_adminsmods':
 
-				$this->build_adminsmods();
+				if (!check_link_hash($this->request->variable('hash', ''), 'sfs_build_adminsmods'))
+				{
+					trigger_error($this->language->lang('FORM_INVALID') . adm_back_link($this->u_action), E_USER_WARNING);
+				}
+
+				return $this->build_adminsmods();
 
 			break;
 		}
@@ -201,10 +223,11 @@ class admin_controller implements admin_interface
 			$has_api_key = $this->request->variable('sfs_api_key', '', true);
 
 			$check_row = ['sfs_threshold' => $this->request->variable('sfs_threshold', 0)];
-			$validate_row = ['sfs_threshold' => ['num', false, 1, 99]];
-			$error = validate_data($check_row, $validate_row);
+			$validate_row = ['sfs_threshold' => ['num', false, self::THRESHOLD_MIN, self::THRESHOLD_MAX]];
+			// validate_data() returns language keys; translate them for display
+			$error = array_map([$this->language, 'lang'], validate_data($check_row, $validate_row));
 
-			if (!sizeof($error))
+			if (!count($error))
 			{
 				if (!empty($has_api_key))
 				{
@@ -221,7 +244,7 @@ class admin_controller implements admin_interface
 		}
 
 		$this->template->assign_vars([
-			'ERROR'			=> isset($error) ? ((sizeof($error)) ? implode('<br />', $error) : '') : '',
+			'ERROR'			=> !empty($error) ? implode('<br />', $error) : '',
 			'SFS_API_KEY'	=> $this->config['sfs_api_key'],
 			'ALLOW_SFS'		=> ($this->config['allow_sfs'] && $curl_active) ? true : false,
 			'CURL_ACTIVE'	=> (!$curl_active) ? $this->language->lang('LOG_SFS_NEED_CURL') : false,
@@ -234,7 +257,6 @@ class admin_controller implements admin_interface
 			'SFS_BY_IP'		=> ($this->config['sfs_by_ip']) ? true : false,
 			'SFS_BAN_REASON'	=> ($this->config['sfs_ban_reason']) ? true : false,
 			'SFS_REPORT_PM'	=> ($this->config['sfs_report_pm']) ? true : false,
-			'SFS_BAN_TIME'	=> $this->display_ban_time($this->config['sfs_ban_time']),
 			'SFS_NOTIFY'	=> ($this->config['sfs_notify']) ? true : false,
 			'SFS_FAKE_REDIRECT_SPAMMERS'	=> ($this->config['sfs_fake_redirect_spammers']) ? true : false,
 			'SFS_POSTS_PMS_COUNT'	=> $sfs_posts_pms_count,
@@ -244,10 +266,12 @@ class admin_controller implements admin_interface
 			'PMS_REPORTED'	=> (int) $pms_reported,
 			'S_CONTACTADMIN' => ($this->contactadmin) ? true : false,
 
-			'U_BUILD_CACHE'	=> $this->u_action . '&amp;action=build_adminsmods',
+			'U_BUILD_CACHE'	=> $this->u_action . '&amp;action=build_adminsmods&amp;hash=' . generate_link_hash('sfs_build_adminsmods'),
 			'U_CLR_REPORTS'	=> $this->u_action . '&amp;action=sfsclrreports',
 			'U_ACTION'		=> $this->u_action,
 		]);
+
+		$this->assign_ban_lengths((int) $this->config['sfs_ban_time']);
 	}
 
 	/**
@@ -268,7 +292,8 @@ class admin_controller implements admin_interface
 		$this->config->set('sfs_by_ip', $this->request->variable('sfs_by_ip', 0));
 		$this->config->set('sfs_ban_reason', $this->request->variable('sfs_ban_reason', 0));
 		$this->config->set('sfs_api_key', $this->request->variable('sfs_api_key', '', true));
-		$this->config->set('sfs_ban_time', $this->request->variable('sfs_ban_time', 0));
+		$ban_time = $this->request->variable('sfs_ban_time', 0);
+		$this->config->set('sfs_ban_time', isset(self::BAN_LENGTHS[$ban_time]) ? $ban_time : 0);
 		$this->config->set('sfs_notify', $this->request->variable('sfs_notify', 0));
 		$this->config->set('sfs_report_pm', $this->request->variable('sfs_report_pm', 0));
 		$this->config->set('sfs_contactadmin', $this->request->variable('sfs_contactadmin', 0));
@@ -297,31 +322,30 @@ class admin_controller implements admin_interface
 
 		return $curl;
 	}
+
 	/**
-	 * Generate a select of ban time options
+	 * Assign the ban length options for the settings page
 	 *
-	 * @return string
+	 * @param int $ban_time Currently selected ban length, in minutes
+	 * @return void
 	 * @access protected
 	 */
-	protected function display_ban_time($ban_time = 0)
+	protected function assign_ban_lengths($ban_time)
 	{
-		// Ban length options
-		$ban_text = [0 => $this->language->lang('PERMANENT'), 30 => $this->language->lang('30_MINS'), 60 => $this->language->lang('1_HOUR'), 360 => $this->language->lang('6_HOURS'), 1440 => $this->language->lang('1_DAY'), 10080 => $this->language->lang('7_DAYS'), 20160 => $this->language->lang('2_WEEKS'), 40320 => $this->language->lang('1_MONTH'), 524160 => $this->language->lang('1_YEAR')];
-
-		$ban_options = '';
-		foreach ($ban_text as $length => $text)
+		foreach (self::BAN_LENGTHS as $length => $lang_key)
 		{
-			$selected = ($length == $ban_time) ? ' selected="selected"' : '';
-			$ban_options .= "<option value='{$length}'$selected>$text</option>";
+			$this->template->assign_block_vars('sfs_ban_lengths', [
+				'VALUE'			=> $length,
+				'TEXT'			=> $this->language->lang($lang_key),
+				'S_SELECTED'	=> ($length === $ban_time),
+			]);
 		}
-
-		return $ban_options;
 	}
 
 	/**
 	 * Clear reported posts and pms
 	 *
-	 * @return json response
+	 * @return void Sends a JSON response for AJAX requests, otherwise shows a message
 	 * @access protected
 	 */
 	protected function sfsclrreports()
@@ -336,41 +360,50 @@ class admin_controller implements admin_interface
 
 		$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_REPORTED_CLEARED');
 
-		$data = [
-			'MESSAGE_TITLE'	=> $this->language->lang('SUCCESS'),
-			'MESSAGE_TEXT'	=> $this->language->lang('SFS_REPORTED_CLEARED'),
-			'success'	=> true,
-		];
-
-		$json_response = new json_response;
-		$json_response->send($data);
+		$this->send_result('SFS_REPORTED_CLEARED');
 	}
 
 	/**
-	 * Generate admin and mods cache
+	 * Rebuild the admin and mods cache
 	 *
-	 * @return json response
+	 * @return void Sends a JSON response for AJAX requests, otherwise shows a message
 	 * @access protected
 	 */
 	protected function build_adminsmods()
 	{
 		if (empty($this->config['sfs_api_key']))
 		{
-			trigger_error('SFS_NEEDS_API');
+			trigger_error($this->language->lang('SFS_NEEDS_API') . adm_back_link($this->u_action), E_USER_WARNING);
 		}
 
-		$this->sfsgroups->build_adminsmods_cache();
+		// Rebuild even if a cache exists, so permission changes made outside groups are picked up
+		$this->sfsgroups->rebuild_adminsmods_cache();
 
 		$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_ADMINSMODS_CACHE_BUILT');
 
-		$data = [
-			'MESSAGE_TITLE'	=> $this->language->lang('SUCCESS'),
-			'MESSAGE_TEXT'	=> $this->language->lang('LOG_ADMINSMODS_CACHE_BUILT'),
-			'success'	=> true,
-		];
+		$this->send_result('LOG_ADMINSMODS_CACHE_BUILT');
+	}
 
-		$json_response = new json_response;
-		$json_response->send($data);
+	/**
+	 * Report a successful action, as JSON for AJAX requests or as a message page
+	 *
+	 * @param string $lang_key Language key of the success message
+	 * @return void
+	 * @access protected
+	 */
+	protected function send_result($lang_key)
+	{
+		if ($this->request->is_ajax())
+		{
+			$json_response = new json_response;
+			$json_response->send([
+				'MESSAGE_TITLE'	=> $this->language->lang('SUCCESS'),
+				'MESSAGE_TEXT'	=> $this->language->lang($lang_key),
+				'success'		=> true,
+			]);
+		}
+
+		trigger_error($this->language->lang($lang_key) . adm_back_link($this->u_action));
 	}
 
 	/**
