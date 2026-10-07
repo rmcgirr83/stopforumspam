@@ -541,7 +541,8 @@ class main_listener implements EventSubscriberInterface
 		}
 		else
 		{
-			if ($this->contactadmin !== null && !empty($this->config['contactadmin_enable']))
+			// Contact Admin's controller is only available while that extension is enabled
+			if ($this->contactadmin !== null)
 			{
 				$message = $this->language->lang('NO_SOUP_FOR_YOU', '<a href="' . $this->helper->route('phpbbmodders_contactadmin_displayform') . '">', '</a>');
 			}
