@@ -13,6 +13,17 @@ Checks registrations and guest posts against the Stop Forum Spam database and le
 - Works with [Contact Admin](https://github.com/phpbbmodders/contactadmin): its contact form is checked too.
 - Settings under **ACP → Extensions → Stop Forum Spam**.
 
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center"><a href="docs/images/stopforumspam-acp-settings.png"><img src="docs/images/stopforumspam-acp-settings.png" width="280" alt="The Stop Forum Spam settings page in the ACP"></a><br>ACP settings</td>
+    <td align="center"><a href="docs/images/stopforumspam-report-button.png"><img src="docs/images/stopforumspam-report-button.png" width="420" alt="The Report to Stop Forum Spam button on a post, outlined"></a><br>The report button moderators see on posts (outlined)</td>
+  </tr>
+</table>
+
+Click a screenshot for the full size.
+
 ## Requirements
 
 - phpBB 3.3.19 or later
