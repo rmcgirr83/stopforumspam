@@ -11,9 +11,6 @@
 
 namespace phpbbmodders\stopforumspam\core;
 
-/**
-* ignore
-*/
 use phpbb\auth\auth;
 use phpbb\config\config;
 use phpbb\db\driver\driver_interface as db;
@@ -28,9 +25,13 @@ use phpbbmodders\stopforumspam\core\sfsapi;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 use phpbb\exception\http_exception;
+use phpbb\report\exception\invalid_report_exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
+/**
+* Reports the author of a private message to Stop Forum Spam
+*/
 class report_pm_to_sfs
 {
 	/** @var auth $auth */
@@ -60,10 +61,10 @@ class report_pm_to_sfs
 	/** @var user $user */
 	protected $user;
 
-	/* @var sfsgroups $sfsgroups */
+	/** @var sfsgroups $sfsgroups */
 	protected $sfsgroups;
 
-	/* @var sfsapi $sfsapi */
+	/** @var sfsapi $sfsapi */
 	protected $sfsapi;
 
 	/** @var ContainerInterface */
@@ -97,7 +98,7 @@ class report_pm_to_sfs
 		$this->container = $container;
 	}
 
-	/*
+	/**
 	* report_pm_to_sfs
 	* @param	int		$postid			the pm msgid
 	* @param	int		$posterid		the author id of the pm
@@ -131,17 +132,28 @@ class report_pm_to_sfs
 		// postid must be greater than 0
 		if ($postid <= 0)
 		{
-			throw new http_exception(403, 'PM_NOT_EXIST');
+			throw new http_exception(403, 'SFS_PM_NOT_EXIST');
 		}
 
-		$sql = 'SELECT pm.sfs_reported, pm.author_id, pm.author_ip, u.username, u.user_email
-			FROM ' . PRIVMSGS_TABLE . ' pm
-			INNER JOIN ' . PRIVMSGS_TO_TABLE . ' pt ON pt.msg_id = pm.msg_id
-			LEFT JOIN ' . USERS_TABLE . ' u on pm.author_id = u.user_id
-			WHERE pm.msg_id = ' . (int) $postid . ' AND pm.author_id = ' . (int) $posterid . '
+		$sql = $this->db->sql_build_query('SELECT', [
+			'SELECT'	=> 'pm.sfs_reported, pm.author_id, pm.author_ip, u.username, u.user_email',
+			'FROM'		=> [
+				PRIVMSGS_TABLE		=> 'pm',
+				PRIVMSGS_TO_TABLE	=> 'pt',
+			],
+			'LEFT_JOIN'	=> [
+				[
+					'FROM'	=> [USERS_TABLE => 'u'],
+					'ON'	=> 'u.user_id = pm.author_id',
+				],
+			],
+			'WHERE'		=> 'pm.msg_id = ' . (int) $postid . '
+				AND pm.author_id = ' . (int) $posterid . '
+				AND pt.msg_id = pm.msg_id
 				AND pt.user_id = ' . (int) $this->user->data['user_id'] . '
 				AND pt.pm_deleted = 0
-				AND pt.folder_id NOT IN (' . PRIVMSGS_NO_BOX . ', ' . PRIVMSGS_HOLD_BOX . ')';
+				AND ' . $this->db->sql_in_set('pt.folder_id', [PRIVMSGS_NO_BOX, PRIVMSGS_HOLD_BOX], true),
+		]);
 		$result = $this->db->sql_query($sql);
 		$row = $this->db->sql_fetchrow($result);
 		$this->db->sql_freeresult($result);
@@ -149,7 +161,7 @@ class report_pm_to_sfs
 		// info must exist
 		if (!$row)
 		{
-			throw new http_exception(403, 'INFO_NOT_FOUND');
+			throw new http_exception(403, 'SFS_INFO_NOT_FOUND');
 		}
 
 		$username = $row['username'];
@@ -182,8 +194,8 @@ class report_pm_to_sfs
 			if ($response !== true && $this->request->is_ajax())
 			{
 				$data = [
-					'MESSAGE_TITLE'	=> $this->user->lang('ERROR'),
-					'MESSAGE_TEXT'	=> $this->user->lang('SFS_ERROR_MESSAGE'),
+					'MESSAGE_TITLE'	=> $this->language->lang('ERROR'),
+					'MESSAGE_TEXT'	=> $this->language->lang('SFS_ERROR_MESSAGE'),
 					'success'	=> false,
 				];
 				return new JsonResponse($data);
@@ -262,54 +274,38 @@ class report_pm_to_sfs
 		}
 	}
 
-	/*
-	 * check_report					check to see if the PM msg has already been reported
-	 * @param 	int	$msg_id 		msg_id from the report to sfs
-	 * @return 	json response if found
+	/**
+	* check_report			add a board report for the PM, unless it is already reported
+	*
+	* Failures are ignored: the PM has already been reported to Stop Forum Spam
+	* by the time this runs, so a missing report reason or a report the board refuses
+	* must not stop the PM being marked.
+	*
+	* @param 	int	$msg_id 	msg_id from the report to sfs
+	* @return 	void
 	*/
 	private function check_report($msg_id)
 	{
-		$sql = 'SELECT *
-			FROM ' . PRIVMSGS_TABLE . '
-			WHERE msg_id = ' . (int) $msg_id;
+		$sql = 'SELECT reason_id
+			FROM ' . REPORTS_REASONS_TABLE . "
+			WHERE reason_title = 'other'";
 		$result = $this->db->sql_query($sql);
-		$report_data = $this->db->sql_fetchrow($result);
+		$reason_id = (int) $this->db->sql_fetchfield('reason_id');
 		$this->db->sql_freeresult($result);
 
-		if (!$report_data && $this->request->is_ajax())
+		if (!$reason_id)
 		{
-			$data = [
-				'MESSAGE_TITLE'	=> $this->user->lang('ERROR'),
-				'MESSAGE_TEXT'	=> $this->user->lang('PM_NOT_EXIST'),
-				'success'	=> false,
-			];
-			return new JsonResponse($data);
-		}
-		else if (!$report_data)
-		{
-			$this->template->assign_vars([
-				'MESSAGE_TITLE'	=> $this->language->lang('ERROR'),
-				'MESSAGE_TEXT'	=> $this->language->lang('PM_NOT_EXIST'),
-			]);
-
-			return $this->helper->render('message_body.html');
+			return;
 		}
 
-		// if the pm isn't reported, then report it
-		if (!$report_data['message_reported'])
+		try
 		{
-			$report_name = 'other';
-			$report_text = $this->user->lang('SFS_PM_WAS_REPORTED');
-
-			$sql = 'SELECT *
-				FROM ' . REPORTS_REASONS_TABLE . "
-				WHERE reason_title = '" . $this->db->sql_escape($report_name). "'";
-			$result = $this->db->sql_query($sql);
-			$row = $this->db->sql_fetchrow($result);
-			$this->db->sql_freeresult($result);
-
-			$phpbb_notifications = $this->container->get('phpbb.report.handlers.report_handler_pm');
-			$phpbb_notifications->add_report($msg_id, $row['reason_id'], $report_text, 0);
+			$report_handler = $this->container->get('phpbb.report.handlers.report_handler_pm');
+			$report_handler->add_report($msg_id, $reason_id, $this->language->lang('SFS_PM_WAS_REPORTED'), 0);
+		}
+		catch (invalid_report_exception $e)
+		{
+			// Already reported, or the board does not allow this user to report it
 		}
 	}
 }

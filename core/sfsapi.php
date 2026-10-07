@@ -11,16 +11,19 @@
 
 namespace phpbbmodders\stopforumspam\core;
 
-/**
-* ignore
-**/
 use phpbb\config\config;
 use phpbb\language\language;
 use phpbb\log\log;
 use phpbb\user;
 
+/**
+* Talks to the Stop Forum Spam API and bans users it flags
+*/
 class sfsapi
 {
+	/** Key of the cURL error message in the JSON string sfsapi() returns when a request fails */
+	const CURL_ERROR_KEY = 'curl_error';
+
 	/** @var config $config */
 	protected $config;
 
@@ -55,14 +58,16 @@ class sfsapi
 		$this->php_ext = $php_ext;
 	}
 
-	/*
+	/**
 	* sfsapi
-	* @param 	$type 			whether we are adding or querying
-	* @param	$username		the users name
-	* @param	$userip			the users ip
-	* @param	$useremail		the users email addy
-	* @param	$apikey			the api key of the forum
-	* @return 	bool|string		return true on success or false on failure or string on curl error
+	* @param 	string	$type 		'add' to report a spammer, anything else to query the database
+	* @param	string	$username	the users name
+	* @param	string	$userip		the users ip
+	* @param	string	$useremail	the users email addy
+	* @param	string	$evidence	evidence sent with an 'add' request
+	* @param	string	$apikey		the api key of the forum
+	* @return 	bool|string			'add': true on success; query: the JSON response; false when
+	*								SFS can't be reached; a JSON string keyed by CURL_ERROR_KEY on a cURL error
 	*/
 	public function sfsapi($type, $username, $userip, $useremail, $evidence = '', $apikey = '')
 	{
@@ -120,9 +125,9 @@ class sfsapi
 		// if curl isn't set correctly on server
 		if ($contents === false)
 		{
-			$error_message = array($this->language->lang('CURL_ERROR') => curl_error($ch));
+			$error_message = [self::CURL_ERROR_KEY => curl_error($ch)];
 			// If there is a curl error, log the error
-			$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_CURL_ERROR', false, [$error_message[$this->language->lang('CURL_ERROR')]]);
+			$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_SFS_CURL_ERROR', false, [$error_message[self::CURL_ERROR_KEY]]);
 		}
 		curl_close($ch);
 
@@ -146,11 +151,12 @@ class sfsapi
 		return $contents;
 	}
 
-	/*
+	/**
 	* sfs_ban
-	* @param 	$type 			ban by either IP or username
-	* @param	$user_info		the users info of who we are banning
-	* @return 	null
+	* @param 	string	$type 		ban by either 'ip' or 'user'
+	* @param	string	$user_info	the IP address or username to ban
+	* @param	int		$check		the spam score, shown in the ban reason for IP bans
+	* @return 	void
 	*/
 	public function sfs_ban($type, $user_info, $check = 0)
 	{

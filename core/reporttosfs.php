@@ -11,9 +11,6 @@
 
 namespace phpbbmodders\stopforumspam\core;
 
-/**
-* ignore
-**/
 use phpbb\auth\auth;
 use phpbb\config\config;
 use phpbb\content_visibility;
@@ -29,9 +26,13 @@ use phpbbmodders\stopforumspam\core\sfsapi;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 use phpbb\exception\http_exception;
+use phpbb\report\exception\invalid_report_exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
+/**
+* Reports a post's author to Stop Forum Spam
+*/
 class reporttosfs
 {
 	/** @var auth $auth */
@@ -64,10 +65,10 @@ class reporttosfs
 	/** @var user $user */
 	protected $user;
 
-	/* @var sfsgroups $sfsgroups */
+	/** @var sfsgroups $sfsgroups */
 	protected $sfsgroups;
 
-	/* @var sfsapi $sfsapi */
+	/** @var sfsapi $sfsapi */
 	protected $sfsapi;
 
 	/** @var ContainerInterface */
@@ -113,7 +114,7 @@ class reporttosfs
 		$this->php_ext = $php_ext;
 	}
 
-	/*
+	/**
 	* reporttosfs				reporting of post to stopforum database
 	* @param	int	$postid		postid of the post
 	* @param	int	$posterid	posterid that made the post
@@ -127,20 +128,32 @@ class reporttosfs
 		// don't allow banning of anonymous user
 		if ($posterid == ANONYMOUS)
 		{
-			throw new http_exception(403, 'CANNOT_REPORT_ANONYMOUS');
+			throw new http_exception(403, 'SFS_CANNOT_REPORT_ANONYMOUS');
 		}
 
 		// post id must be greater than 0
 		if ($postid <= 0)
 		{
-			throw new http_exception(403, 'POST_NOT_EXIST');
+			throw new http_exception(403, 'SFS_POST_NOT_EXIST');
 		}
 
-		$sql = 'SELECT p.*, t.topic_visibility, t.topic_poster, u.username, u.user_email
-			FROM ' . POSTS_TABLE . ' p
-			INNER JOIN ' . TOPICS_TABLE . ' t ON t.topic_id = p.topic_id AND t.forum_id = p.forum_id
-			LEFT JOIN ' . USERS_TABLE . ' u on p.poster_id = u.user_id
-			WHERE p.post_id = ' . (int) $postid . ' AND p.poster_id = ' . (int) $posterid;
+		$sql = $this->db->sql_build_query('SELECT', [
+			'SELECT'	=> 'p.*, t.topic_visibility, t.topic_poster, u.username, u.user_email',
+			'FROM'		=> [
+				POSTS_TABLE		=> 'p',
+				TOPICS_TABLE	=> 't',
+			],
+			'LEFT_JOIN'	=> [
+				[
+					'FROM'	=> [USERS_TABLE => 'u'],
+					'ON'	=> 'u.user_id = p.poster_id',
+				],
+			],
+			'WHERE'		=> 'p.post_id = ' . (int) $postid . '
+				AND p.poster_id = ' . (int) $posterid . '
+				AND t.topic_id = p.topic_id
+				AND t.forum_id = p.forum_id',
+		]);
 		$result = $this->db->sql_query($sql);
 		$row = $this->db->sql_fetchrow($result);
 		$this->db->sql_freeresult($result);
@@ -148,7 +161,7 @@ class reporttosfs
 		// info must exist
 		if (!$row)
 		{
-			throw new http_exception(403, 'INFO_NOT_FOUND');
+			throw new http_exception(403, 'SFS_INFO_NOT_FOUND');
 		}
 
 		$forumid = (int) $row['forum_id'];
@@ -177,7 +190,7 @@ class reporttosfs
 
 		if (in_array($posterid, $admins_mods))
 		{
-			throw new http_exception(403, 'CANNOT_REPORT_ADMINS_MODS');
+			throw new http_exception(403, 'SFS_CANNOT_REPORT_ADMINS_MODS');
 		}
 
 		// ensure the IP is something other than 127.0.0.1 which can happen if the anonymised extension is installed
@@ -208,13 +221,13 @@ class reporttosfs
 		{
 			$response = $this->sfsapi->sfsapi('add', $username, $userip, $useremail, $evidence, $this->config['sfs_api_key']);
 
-			$json_decode = json_decode($response, true);
+			$json_decode = is_string($response) ? json_decode($response, true) : null;
 			// ajax stuffs
-			if (isset($json_decode[$this->language->lang('CURL_ERROR')]) && $this->request->is_ajax())
+			if (isset($json_decode[sfsapi::CURL_ERROR_KEY]) && $this->request->is_ajax())
 			{
 				$data = [
 					'MESSAGE_TITLE'	=> $this->language->lang('AJAX_ERROR_TITLE'),
-					'MESSAGE_TEXT'	=> $json_decode[$this->language->lang('CURL_ERROR')],
+					'MESSAGE_TEXT'	=> $json_decode[sfsapi::CURL_ERROR_KEY],
 					'success'	=> false,
 				];
 				return new JsonResponse($data);
@@ -229,11 +242,11 @@ class reporttosfs
 				return new JsonResponse($data);
 			}
 			//non-ajax stuffs
-			else if (isset($json_decode[$this->language->lang('CURL_ERROR')]))
+			else if (isset($json_decode[sfsapi::CURL_ERROR_KEY]))
 			{
 				$this->template->assign_vars([
 					'MESSAGE_TITLE' => $this->language->lang('ERROR'),
-					'MESSAGE_TEXT'	=> $json_decode[$this->language->lang('CURL_ERROR')]
+					'MESSAGE_TEXT'	=> $json_decode[sfsapi::CURL_ERROR_KEY]
 				]);
 
 				return $this->helper->render('message_body.html');
@@ -313,54 +326,38 @@ class reporttosfs
 		}
 	}
 
-	/*
-	* check_report			check to see if the post msg has already been reported
-	* @param 	$postid 	postid from the report to sfs
-	* @return 	json|html	response if found
+	/**
+	* check_report			add a board report for the post, unless it is already reported
+	*
+	* Failures are ignored: the post has already been reported to Stop Forum Spam
+	* by the time this runs, so a missing report reason or a report the board refuses
+	* (for example, no f_report permission) must not stop the post being marked.
+	*
+	* @param 	int	$postid 	postid from the report to sfs
+	* @return 	void
 	*/
 	private function check_report($postid)
 	{
-		$sql = 'SELECT *
-			FROM ' . POSTS_TABLE . '
-			WHERE post_id = ' . (int) $postid;
+		$sql = 'SELECT reason_id
+			FROM ' . REPORTS_REASONS_TABLE . "
+			WHERE reason_title = 'other'";
 		$result = $this->db->sql_query($sql);
-		$report_data = $this->db->sql_fetchrow($result);
+		$reason_id = (int) $this->db->sql_fetchfield('reason_id');
 		$this->db->sql_freeresult($result);
 
-		if (!$report_data && $this->request->is_ajax())
+		if (!$reason_id)
 		{
-			$data = [
-				'MESSAGE_TITLE'	=> $this->language->lang('ERROR'),
-				'MESSAGE_TEXT'	=> $this->language->lang('POST_NOT_EXIST'),
-				'success'	=> false,
-			];
-			return new JsonResponse($data);
-		}
-		else if (!$report_data)
-		{
-			$this->template->assign_vars([
-				'MESSAGE_TITLE'	=> $this->language->lang('ERROR'),
-				'MESSAGE_TEXT'	=> $this->language->lang('POST_NOT_EXIST'),
-			]);
-
-			return $this->helper->render('message_body.html');
+			return;
 		}
 
-		// if the post isn't reported, then report it
-		if (!$report_data['post_reported'])
+		try
 		{
-			$report_name = 'other';
-			$report_text = $this->language->lang('SFS_WAS_REPORTED');
-
-			$sql = 'SELECT *
-				FROM ' . REPORTS_REASONS_TABLE . "
-				WHERE reason_title = '" . $this->db->sql_escape($report_name). "'";
-			$result = $this->db->sql_query($sql);
-			$row = $this->db->sql_fetchrow($result);
-			$this->db->sql_freeresult($result);
-
-			$phpbb_notifications = $this->container->get('phpbb.report.handlers.report_handler_post');
-			$phpbb_notifications->add_report($postid, $row['reason_id'], $report_text, 0);
+			$report_handler = $this->container->get('phpbb.report.handlers.report_handler_post');
+			$report_handler->add_report($postid, $reason_id, $this->language->lang('SFS_WAS_REPORTED'), 0);
+		}
+		catch (invalid_report_exception $e)
+		{
+			// Already reported, or the board does not allow this user to report it
 		}
 	}
 }

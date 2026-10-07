@@ -14,7 +14,7 @@ namespace phpbbmodders\stopforumspam\acp;
 
 class stopforumspam_info
 {
-	function module()
+	public function module()
 	{
 		return [
 			'filename'	=> '\phpbbmodders\stopforumspam\acp\stopforumspam_module',

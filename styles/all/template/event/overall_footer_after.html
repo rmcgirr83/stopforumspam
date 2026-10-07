@@ -1,14 +1,3 @@
-<script>
-(function($) {  // Avoid conflicts with other libraries
-
-'use strict';
-
-	phpbb.addAjaxCallback('reporttosfs', function(data) {
-		if (data.postid !== "undefined") {
-			$('#sfs' + data.postid).hide();
-			phpbb.closeDarkenWrapper(5000);
-		}
-	});
-
-})(jQuery);
-</script>
+{% if definition.SFS_REPORT_BUTTON %}
+	{% INCLUDEJS '@phpbbmodders_stopforumspam/js/stopforumspam.js' %}
+{% endif %}
