@@ -43,6 +43,7 @@ $lang = array_merge($lang, [
 	'SFS_POST_NOT_EXIST'	=> 'The post you requested does not exist.',
 	'NO_SOUP_FOR_YOU'	=> 'No soup for you! It looks like you have been flagged as a spammer.<br>If you feel this decision was made in error %scontact the board admin%s.',
 	'NO_SOUP_FOR_YOU_NO_CONTACT'	=> 'No soup for you! It looks like you have been flagged as a spammer.',
+	'SFS_REMOVAL_REQUEST'	=> 'If your details were listed by mistake, you can %sask Stop Forum Spam to remove them%s.',
 	'SFS_PM_NOT_EXIST'	=> 'PM doesn’t exist',
 	'SFS_ANONYMIZED_IP'	=> 'The IP of the user has been anonymized, set to 127.0.0.1, probably due to an extension.',
 	'SFS_MISSING_DATA'	=> 'Not all information is provided to report to Stop Forum Spam.',
