@@ -546,7 +546,10 @@ class main_listener implements EventSubscriberInterface
 			{
 				$message = $this->language->lang('NO_SOUP_FOR_YOU', '<a href="' . $this->helper->route('phpbbmodders_contactadmin_displayform') . '">', '</a>');
 			}
-			else if ($this->config['contact_admin_form_enable'])
+			// With email off, phpBB's contact form can't be used, so the only way
+			// to reach the admin is a mailto: link that reveals the board's
+			// contact address; the board decides whether to show it
+			else if ($this->config['contact_admin_form_enable'] && ($this->config['email_enable'] || $this->config['sfs_show_board_email']))
 			{
 				$link = ($this->config['email_enable']) ? append_sid("{$this->root_path}memberlist.$this->php_ext", 'mode=contactadmin') : 'mailto:' . phpbb_get_board_contact($this->config, $this->php_ext);
 				$message = $this->language->lang('NO_SOUP_FOR_YOU', '<a href="'. $link .'">','</a>');
