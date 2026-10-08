@@ -62,6 +62,14 @@ $('form', '#phpbb_confirm').serialize() along with the hidden fields, so a
 field an extension adds through mcp_approve_ajax_reason_after reaches
 core.disapprove_posts_after with no JavaScript changes.
 
+phpBB 4.0
+---------
+master's mcp_approve.html differs from 3.3.x only in the CSS classes on the
+Yes/No buttons; the lines around both event spots are identical, and
+core.disapprove_posts_after and the core.js serialize() call are unchanged.
+Adding the events on 3.3.x and merging up into master applies cleanly (checked
+with git merge-file on 10/07/2026), so one PR against 3.3.x covers both.
+
 Open question
 -------------
 - Whether phpBB prefers one event name used in both branches over two names.
