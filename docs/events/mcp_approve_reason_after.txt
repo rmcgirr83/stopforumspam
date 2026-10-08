@@ -2,6 +2,7 @@ Template event request: mcp_approve_reason_after / mcp_approve_ajax_reason_after
 ================================================================================
 
 Target: phpBB 3.3.x (and master / 4.0, which has the same template)
+Filed:  https://tracker.phpbb.com/browse/PHPBB-17737 (10/07/2026)
 File:   phpBB/styles/prosilver/template/mcp_approve.html
 
 Why
@@ -60,6 +61,14 @@ The AJAX confirm pop-up sends its whole form: core.js posts
 $('form', '#phpbb_confirm').serialize() along with the hidden fields, so a
 field an extension adds through mcp_approve_ajax_reason_after reaches
 core.disapprove_posts_after with no JavaScript changes.
+
+phpBB 4.0
+---------
+master's mcp_approve.html differs from 3.3.x only in the CSS classes on the
+Yes/No buttons; the lines around both event spots are identical, and
+core.disapprove_posts_after and the core.js serialize() call are unchanged.
+Adding the events on 3.3.x and merging up into master applies cleanly (checked
+with git merge-file on 10/07/2026), so one PR against 3.3.x covers both.
 
 Open question
 -------------

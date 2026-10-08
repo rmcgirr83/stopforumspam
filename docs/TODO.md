@@ -27,7 +27,9 @@ Blocked on phpBB: `mcp_approve.html`, the template for that screen, has no
 template events in phpBB 3.3 or `master`, so an extension can't add the
 checkbox. The PHP side already works: the confirm form, including its AJAX
 pop-up, posts every field back. The event request is written up in
-[`docs/events/mcp_approve_reason_after.txt`](events/mcp_approve_reason_after.txt).
+[`docs/events/mcp_approve_reason_after.txt`](events/mcp_approve_reason_after.txt)
+and was filed with phpBB as
+[PHPBB-17737](https://tracker.phpbb.com/browse/PHPBB-17737) on 10/07/2026.
 
 Still needs deciding:
 
