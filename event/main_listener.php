@@ -558,6 +558,10 @@ class main_listener implements EventSubscriberInterface
 			{
 				$message = $this->language->lang('NO_SOUP_FOR_YOU_NO_CONTACT');
 			}
+
+			// Always point real people who were flagged by mistake to Stop Forum Spam's removal request
+			$message .= '<br>' . $this->language->lang('SFS_REMOVAL_REQUEST', '<a href="https://www.stopforumspam.com/removal" rel="noopener">', '</a>');
+
 			return $message;
 		}
 	}
