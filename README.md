@@ -49,6 +49,10 @@ Update SFS Companion and Contact Admin as well. SFS Companion needs the new name
 
 If you disable the old extension from the command line (`bin/phpbbcli.php`) instead of the ACP, run `bin/phpbbcli.php cache:purge` before enabling the new one; the command-line disable doesn't clear the cache.
 
+## TODO
+
+Ideas not yet built, practical and speculative alike: [`docs/TODO.md`](docs/TODO.md).
+
 ## Contributing
 
 Contributions are welcome!

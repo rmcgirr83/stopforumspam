@@ -1,0 +1,66 @@
+Template event request: mcp_approve_reason_after / mcp_approve_ajax_reason_after
+================================================================================
+
+Target: phpBB 3.3.x (and master / 4.0, which has the same template)
+File:   phpBB/styles/prosilver/template/mcp_approve.html
+
+Why
+---
+Moderators asked for a "Report to Stop Forum Spam" checkbox on the screen
+shown when disapproving a post in the moderation queue, so a spam post can be
+disapproved and its poster reported in one step:
+https://www.phpbb.com/customise/db/extension/phpbb_3.1_stop_forum_spam/support/topic/250564
+
+The PHP side already has what an extension needs: the confirm form posts back
+to mcp_queue.php, and core.disapprove_posts_after (since 3.1.4-RC1) runs after
+the posts are disapproved, where an extension can read its own field from the
+request. What's missing is a template event inside the form, so an extension
+can add a field next to the disapproval reason. mcp_approve.html currently has
+no template events at all.
+
+The template has two copies of the form: an AJAX one (the confirm pop-up) and
+a full-page one. Both need an event, so an extension field works whichever
+way the moderator gets there.
+
+Proposed events
+---------------
+1. mcp_approve_ajax_reason_after
+   In the S_AJAX_REQUEST branch, after the disapproval reason block
+   (after the <!-- ENDIF --> that closes
+   <!-- IF not S_APPROVE and not S_RESTORE and .reason -->), before
+   <fieldset class="submit-buttons">.
+
+2. mcp_approve_reason_after
+   In the full-page branch, inside the first <fieldset>, after the same
+   reason block and before the <dl> that shows {MESSAGE_TEXT}.
+
+Placing them after the reason block's ENDIF (not inside it) lets extensions
+add fields when approving as well as disapproving; an extension checks
+S_APPROVE itself if it only wants one of them.
+
+Suggested docs/events.md entries
+--------------------------------
+mcp_approve_ajax_reason_after
+===
+* Locations:
+    + styles/prosilver/template/mcp_approve.html
+* Since: 3.3.x
+* Purpose: Add content after the disapproval reason in the AJAX approve/disapprove confirm box
+
+mcp_approve_reason_after
+===
+* Locations:
+    + styles/prosilver/template/mcp_approve.html
+* Since: 3.3.x
+* Purpose: Add content after the disapproval reason on the approve/disapprove confirm page
+
+AJAX path
+---------
+The AJAX confirm pop-up sends its whole form: core.js posts
+$('form', '#phpbb_confirm').serialize() along with the hidden fields, so a
+field an extension adds through mcp_approve_ajax_reason_after reaches
+core.disapprove_posts_after with no JavaScript changes.
+
+Open question
+-------------
+- Whether phpBB prefers one event name used in both branches over two names.
