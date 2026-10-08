@@ -42,6 +42,22 @@ Reporting users who never posted, asked for in the same topic, is already
 possible with phpbbmodders/sfscompanion (*Scan users*, and the *Check SFS*
 link on profiles) and phpbbmodders/ban-hammer (report from the profile).
 
+Reply to post in the phpBB.com topic (250564) **only once phpBB has added
+the template event** and this feature is built. Fill in the version first:
+
+```
+Thanks for the suggestions, and sorry for the slow reply.
+
+Reporting users who never posted: this is possible with two companion extensions.
+[list]
+[*][url=https://github.com/phpbbmodders/sfscompanion]SFS Companion[/url] has a "Scan users" page in the ACP that checks recent registrations against Stop Forum Spam, with a one-click report and remove. It also adds a "Check SFS" link to member profiles.
+[*][url=https://github.com/phpbbmodders/ban-hammer]Ban Hammer[/url] adds a form to member profiles (and to the post approval queue) that can ban the user, remove their content and report them to Stop Forum Spam.
+[/list]
+Disapprove and report in one step: Stop Forum Spam VERSION adds a "Report to Stop Forum Spam" checkbox to the disapprove screen in the moderation queue, so you can disapprove a post and report its poster at the same time.
+
+William Jacoby (bonelifer)
+```
+
 ## Choice of Stop Forum Spam server
 
 Requested on phpBB.com:
